@@ -22,46 +22,46 @@ export function AppSidebar() {
   const { state } = useSidebar();
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-slate-200 bg-white">
-      <SidebarHeader className="p-6 border-b border-slate-200 bg-white">
+    <Sidebar collapsible="icon" className="bg-white border-r border-gray-200">
+      <SidebarHeader className="p-4 bg-white">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center border border-blue-200">
-            <Sparkles className="h-5 w-5 text-blue-600" />
+          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+            <Sparkles className="h-4 w-4 text-white" />
           </div>
           {state !== "collapsed" && (
             <div>
-              <h2 className="text-xl font-bold text-slate-800">
+              <h2 className="text-lg font-semibold text-gray-900">
                 AI Agents
               </h2>
-              <p className="text-xs text-slate-600 font-medium">Intelligent automation platform</p>
+              <p className="text-xs text-gray-500">Automation platform</p>
             </div>
           )}
         </div>
       </SidebarHeader>
       
-      <SidebarContent className="bg-white p-4">
+      <SidebarContent className="bg-white p-2">
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-3">
+            <SidebarMenu className="space-y-1">
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="h-14 rounded-lg">
+                  <SidebarMenuButton asChild className="h-10 rounded-md">
                     <NavLink 
                       to={item.url} 
                       end
                       className={({ isActive }) =>
-                        `flex items-center gap-4 px-4 py-4 rounded-lg transition-all duration-200 relative ${
+                        `flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
                           isActive 
-                            ? "bg-blue-600 text-white border-l-4 border-blue-800 shadow-sm" 
-                            : "text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                            ? "bg-blue-600 text-white" 
+                            : "text-gray-700 hover:bg-gray-100"
                         }`
                       }
                     >
                       {({ isActive }) => (
                         <>
-                          <item.icon className={`h-5 w-5 ${isActive ? 'text-white' : 'text-slate-600'} transition-colors duration-200`} />
+                          <item.icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-gray-500'}`} />
                           {state !== "collapsed" && (
-                            <span className={`font-semibold text-base ${isActive ? 'text-white' : 'text-slate-700'} transition-colors duration-200`}>
+                            <span className="font-medium text-sm">
                               {item.title}
                             </span>
                           )}
