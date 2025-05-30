@@ -1,14 +1,13 @@
 import { useState } from "react";
-import { ArrowLeft, ArrowRight, Check, Sparkles, Bot, Brain, Wrench, Network, Users, FileOutput, Rocket } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Sparkles, Bot, Brain, Wrench, Users, FileOutput, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 
-// Import all step components
+// Import all step components (removed CanvasStep)
 import { AgentStep } from "@/components/steps/AgentStep";
 import { ModelStep } from "@/components/steps/ModelStep";
 import { ToolsStep } from "@/components/steps/ToolsStep";
-import { CanvasStep } from "@/components/steps/CanvasStep";
 import { TeamStep } from "@/components/steps/TeamStep";
 import { OutputStep } from "@/components/steps/OutputStep";
 import { DeployStep } from "@/components/steps/DeployStep";
@@ -18,9 +17,8 @@ const steps = [
   { id: 2, title: "Agent Type", component: AgentStep, icon: Bot },
   { id: 3, title: "Model", component: ModelStep, icon: Brain },
   { id: 4, title: "Tools", component: ToolsStep, icon: Wrench },
-  { id: 5, title: "Canvas", component: CanvasStep, icon: Network },
-  { id: 6, title: "Output", component: OutputStep, icon: FileOutput },
-  { id: 7, title: "Deploy", component: DeployStep, icon: Rocket },
+  { id: 5, title: "Output", component: OutputStep, icon: FileOutput },
+  { id: 6, title: "Deploy", component: DeployStep, icon: Rocket },
 ];
 
 const CreateAgent = () => {
