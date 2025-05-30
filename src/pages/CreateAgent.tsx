@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, Check, Sparkles, Bot, Brain, Wrench, Network, Users, FileOutput, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,11 +14,11 @@ import { OutputStep } from "@/components/steps/OutputStep";
 import { DeployStep } from "@/components/steps/DeployStep";
 
 const steps = [
-  { id: 1, title: "Agent Type", component: AgentStep, icon: Bot },
-  { id: 2, title: "Model", component: ModelStep, icon: Brain },
-  { id: 3, title: "Tools", component: ToolsStep, icon: Wrench },
-  { id: 4, title: "Canvas", component: CanvasStep, icon: Network },
-  { id: 5, title: "Team", component: TeamStep, icon: Users },
+  { id: 1, title: "Team", component: TeamStep, icon: Users },
+  { id: 2, title: "Agent Type", component: AgentStep, icon: Bot },
+  { id: 3, title: "Model", component: ModelStep, icon: Brain },
+  { id: 4, title: "Tools", component: ToolsStep, icon: Wrench },
+  { id: 5, title: "Canvas", component: CanvasStep, icon: Network },
   { id: 6, title: "Output", component: OutputStep, icon: FileOutput },
   { id: 7, title: "Deploy", component: DeployStep, icon: Rocket },
 ];
