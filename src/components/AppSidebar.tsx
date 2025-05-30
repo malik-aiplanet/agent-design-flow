@@ -8,7 +8,6 @@ import {
   SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
@@ -45,30 +44,28 @@ export function AppSidebar() {
             <SidebarMenu className="space-y-1">
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="h-10 rounded-md">
-                    <NavLink 
-                      to={item.url} 
-                      end
-                      className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
-                          isActive 
-                            ? "bg-blue-600 text-white" 
-                            : "text-gray-700 hover:bg-gray-100"
-                        }`
-                      }
-                    >
-                      {({ isActive }) => (
-                        <>
-                          <item.icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-gray-500'}`} />
-                          {state !== "collapsed" && (
-                            <span className="font-medium text-sm">
-                              {item.title}
-                            </span>
-                          )}
-                        </>
-                      )}
-                    </NavLink>
-                  </SidebarMenuButton>
+                  <NavLink 
+                    to={item.url} 
+                    end
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3 py-2 h-10 rounded-md transition-colors relative ${
+                        isActive 
+                          ? "bg-blue-600 text-white border-l-4 border-blue-800" 
+                          : "text-gray-700 hover:bg-gray-100"
+                      }`
+                    }
+                  >
+                    {({ isActive }) => (
+                      <>
+                        <item.icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-gray-500'}`} />
+                        {state !== "collapsed" && (
+                          <span className="font-medium text-sm">
+                            {item.title}
+                          </span>
+                        )}
+                      </>
+                    )}
+                  </NavLink>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>

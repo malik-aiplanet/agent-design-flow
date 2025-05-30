@@ -47,7 +47,7 @@ const CreateAgent = () => {
   const CurrentStepComponent = steps[currentStep - 1].component;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 flex pb-20">
       {/* Vertical Step Sidebar */}
       <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
         {/* Header */}
@@ -122,38 +122,6 @@ const CreateAgent = () => {
             })}
           </div>
         </div>
-
-        {/* Navigation Controls */}
-        <div className="p-4 border-t border-gray-200">
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              onClick={prevStep}
-              disabled={currentStep === 1}
-              className="flex-1 h-10 text-sm disabled:opacity-50"
-            >
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              Previous
-            </Button>
-            
-            {currentStep === steps.length ? (
-              <Button 
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-10 text-sm"
-              >
-                <Check className="h-4 w-4 mr-1" />
-                Complete
-              </Button>
-            ) : (
-              <Button 
-                onClick={nextStep}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-10 text-sm"
-              >
-                Next
-                <ArrowRight className="h-4 w-4 ml-1" />
-              </Button>
-            )}
-          </div>
-        </div>
       </div>
 
       {/* Main Content */}
@@ -169,6 +137,40 @@ const CreateAgent = () => {
               />
             </CardContent>
           </Card>
+        </div>
+      </div>
+
+      {/* Fixed Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50">
+        <div className="max-w-7xl mx-auto flex justify-center">
+          <div className="flex gap-4">
+            <Button 
+              variant="outline" 
+              onClick={prevStep}
+              disabled={currentStep === 1}
+              className="flex items-center gap-2 px-6 py-2 h-10 text-sm disabled:opacity-50 border-gray-300"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Previous
+            </Button>
+            
+            {currentStep === steps.length ? (
+              <Button 
+                className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white h-10 text-sm"
+              >
+                <Check className="h-4 w-4" />
+                Complete
+              </Button>
+            ) : (
+              <Button 
+                onClick={nextStep}
+                className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white h-10 text-sm"
+              >
+                Next
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </div>
