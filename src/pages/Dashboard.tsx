@@ -69,7 +69,7 @@ const Dashboard = () => {
             <p className="text-slate-600 text-lg">Manage and deploy your intelligent automation</p>
           </div>
           <Link to="/create">
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 h-auto flex items-center gap-3 text-base font-semibold transition-colors rounded-md">
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white h-auto flex items-center gap-3 font-semibold transition-colors rounded-lg py-[10px] px-[16px] text-sm">
               <Plus className="h-5 w-5" />
               Create New Agent
             </Button>
