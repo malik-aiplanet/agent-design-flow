@@ -27,6 +27,7 @@ const CreateAgent = () => {
   const [agentData, setAgentData] = useState({});
 
   const CurrentStepComponent = steps[currentStep - 1]?.component;
+  const CurrentStepIcon = steps[currentStep - 1]?.icon;
 
   const handleNext = () => {
     if (currentStep < steps.length) {
@@ -73,8 +74,8 @@ const CreateAgent = () => {
             <Card className="bg-white shadow-sm">
               <CardHeader className="border-b">
                 <CardTitle className="flex items-center gap-3">
-                  {steps[currentStep - 1]?.icon && (
-                    <steps[currentStep - 1].icon className="h-6 w-6 text-blue-600" />
+                  {CurrentStepIcon && (
+                    <CurrentStepIcon className="h-6 w-6 text-blue-600" />
                   )}
                   Step {currentStep}: {steps[currentStep - 1]?.title}
                 </CardTitle>
