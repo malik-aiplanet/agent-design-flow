@@ -1,107 +1,123 @@
 
 import { useState } from "react";
-import { Eye, EyeOff, Copy } from "lucide-react";
+import { Eye, EyeOff, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
+import { Card, CardContent } from "@/components/ui/card";
 
 export const ModelStep = ({ data, onUpdate }: any) => {
   const [provider, setProvider] = useState("openai");
   const [showApiKey, setShowApiKey] = useState(false);
   const [apiKey, setApiKey] = useState("");
   const [deploymentName, setDeploymentName] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(apiKey);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-medium mb-2">Model Configuration</h3>
-        <p className="text-gray-600">Configure your AI model provider and credentials.</p>
+    <div className="space-y-8 max-w-2xl">
+      <div className="space-y-3">
+        <h3 className="text-xl font-semibold text-gray-900">Model Configuration</h3>
+        <p className="text-gray-600 leading-relaxed">Configure your AI model provider and credentials.</p>
       </div>
 
-      {/* Provider Toggle */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Provider Selection</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center gap-8">
-            <div className={`p-6 border-2 rounded-lg cursor-pointer transition-colors ${
-              provider === "azure" ? "border-blue-500 bg-blue-50" : "border-gray-200"
-            }`} onClick={() => setProvider("azure")}>
-              <div className="text-center">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-                  <span className="text-blue-600 font-semibold text-sm">AZ</span>
-                </div>
-                <h4 className="font-medium">Azure OpenAI</h4>
+      {/* Provider Selection */}
+      <div className="space-y-4">
+        <h4 className="text-base font-medium text-gray-900">Choose Provider</h4>
+        <div className="grid grid-cols-2 gap-4">
+          <Card 
+            className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+              provider === "azure" 
+                ? "ring-2 ring-blue-500 bg-blue-50 border-blue-200" 
+                : "border-gray-200 hover:border-gray-300"
+            }`} 
+            onClick={() => setProvider("azure")}
+          >
+            <CardContent className="p-6 text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <span className="text-white font-bold text-lg">Az</span>
               </div>
-            </div>
+              <h4 className="font-semibold text-gray-900 mb-1">Azure OpenAI</h4>
+              <p className="text-sm text-gray-500">Enterprise-grade API</p>
+            </CardContent>
+          </Card>
 
-            <div className={`p-6 border-2 rounded-lg cursor-pointer transition-colors ${
-              provider === "openai" ? "border-blue-500 bg-blue-50" : "border-gray-200"
-            }`} onClick={() => setProvider("openai")}>
-              <div className="text-center">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-                  <span className="text-green-600 font-semibold text-sm">AI</span>
-                </div>
-                <h4 className="font-medium">OpenAI</h4>
+          <Card 
+            className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+              provider === "openai" 
+                ? "ring-2 ring-blue-500 bg-blue-50 border-blue-200" 
+                : "border-gray-200 hover:border-gray-300"
+            }`} 
+            onClick={() => setProvider("openai")}
+          >
+            <CardContent className="p-6 text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <span className="text-white font-bold text-lg">AI</span>
               </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+              <h4 className="font-semibold text-gray-900 mb-1">OpenAI</h4>
+              <p className="text-sm text-gray-500">Direct API access</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
       {/* API Configuration */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">API Configuration</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>API Key</Label>
-            <div className="relative mt-1">
+      <div className="space-y-6">
+        <h4 className="text-base font-medium text-gray-900">API Configuration</h4>
+        
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label className="text-sm font-medium text-gray-700">API Key</Label>
+            <div className="relative">
               <Input
                 type={showApiKey ? "text" : "password"}
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 placeholder="Enter your API key"
-                className="pr-20"
+                className="pr-24 h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
               />
-              <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex gap-2">
+              <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex gap-1">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowApiKey(!showApiKey)}
-                  className="h-8 w-8 p-0"
+                  className="h-8 w-8 p-0 hover:bg-gray-100"
                 >
-                  {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showApiKey ? <EyeOff className="h-4 w-4 text-gray-500" /> : <Eye className="h-4 w-4 text-gray-500" />}
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => navigator.clipboard.writeText(apiKey)}
-                  className="h-8 w-8 p-0"
+                  onClick={handleCopy}
+                  className="h-8 w-8 p-0 hover:bg-gray-100"
+                  disabled={!apiKey}
                 >
-                  <Copy className="h-4 w-4" />
+                  {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4 text-gray-500" />}
                 </Button>
               </div>
             </div>
+            <p className="text-xs text-gray-500">Your API key is stored securely and never shared.</p>
           </div>
 
           {provider === "azure" && (
-            <div>
-              <Label>Deployment Name</Label>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-gray-700">Deployment Name</Label>
               <Input
                 value={deploymentName}
                 onChange={(e) => setDeploymentName(e.target.value)}
-                placeholder="Enter deployment name (optional)"
-                className="mt-1"
+                placeholder="e.g., gpt-4-deployment"
+                className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
               />
+              <p className="text-xs text-gray-500">Optional: Specify your Azure deployment name.</p>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };

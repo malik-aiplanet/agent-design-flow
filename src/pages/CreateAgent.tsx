@@ -48,13 +48,13 @@ const CreateAgent = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Left Sidebar - Steps */}
-      <div className="w-80 bg-white border-r min-h-screen p-6">
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Create Agent</h2>
-          <p className="text-gray-600 text-sm">Follow the steps to build your AI agent</p>
+      <div className="w-80 bg-white border-r min-h-screen p-8">
+        <div className="mb-10">
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Create Agent</h2>
+          <p className="text-gray-600 text-sm leading-relaxed">Follow the steps to build your AI agent</p>
         </div>
         
-        <div className="space-y-2">
+        <div className="space-y-3">
           {steps.map((step, index) => (
             <StepIndicator
               key={step.id}
@@ -69,18 +69,27 @@ const CreateAgent = () => {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        <div className="flex-1 p-8 pb-24">
-          <div className="max-w-4xl mx-auto">
-            <Card className="bg-white shadow-sm">
-              <CardHeader className="border-b">
-                <CardTitle className="flex items-center gap-3">
+        <div className="flex-1 p-12 pb-32">
+          <div className="max-w-5xl mx-auto">
+            <Card className="bg-white shadow-sm border-gray-200">
+              <CardHeader className="border-b border-gray-100 pb-6">
+                <CardTitle className="flex items-center gap-4 text-xl">
                   {CurrentStepIcon && (
-                    <CurrentStepIcon className="h-6 w-6 text-blue-600" />
+                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <CurrentStepIcon className="h-5 w-5 text-blue-600" />
+                    </div>
                   )}
-                  Step {currentStep}: {steps[currentStep - 1]?.title}
+                  <div>
+                    <div className="text-xl font-semibold text-gray-900">
+                      Step {currentStep}: {steps[currentStep - 1]?.title}
+                    </div>
+                    <div className="text-sm text-gray-500 font-normal mt-1">
+                      {currentStep} of {steps.length}
+                    </div>
+                  </div>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-8">
+              <CardContent className="p-12">
                 {CurrentStepComponent && (
                   <CurrentStepComponent
                     data={agentData}
@@ -96,13 +105,13 @@ const CreateAgent = () => {
         </div>
 
         {/* Sticky Navigation Footer */}
-        <div className="sticky bottom-0 bg-white border-t p-6">
-          <div className="max-w-4xl mx-auto flex justify-between">
+        <div className="sticky bottom-0 bg-white border-t border-gray-200 p-8">
+          <div className="max-w-5xl mx-auto flex justify-between">
             <Button
               variant="outline"
               onClick={handlePrevious}
               disabled={currentStep === 1}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 h-11 px-6 border-gray-300"
             >
               ← Previous
             </Button>
@@ -110,9 +119,9 @@ const CreateAgent = () => {
             <Button
               onClick={handleNext}
               disabled={currentStep === steps.length}
-              className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2"
+              className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2 h-11 px-6"
             >
-              {currentStep === steps.length ? "Complete" : "Next →"}
+              {currentStep === steps.length ? "Complete" : "Next"}
               {currentStep < steps.length && <ChevronRight className="h-4 w-4" />}
             </Button>
           </div>
