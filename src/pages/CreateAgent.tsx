@@ -24,7 +24,7 @@ const steps = [
 ];
 
 const CreateAgent = () => {
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(6); // Start on Canvas step to show the new workflow
   const [agentData, setAgentData] = useState({});
 
   const CurrentStepComponent = steps[currentStep - 1]?.component;
@@ -48,17 +48,17 @@ const CreateAgent = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex">
+    <div className="min-h-screen bg-slate-50 flex">
       {/* Left Sidebar - Steps */}
-      <div className="w-80 bg-white border-r border-gray-200 min-h-screen p-8 shadow-sm">
+      <div className="w-80 bg-white border-r border-slate-200 min-h-screen p-8">
         {/* Header with back button */}
         <div className="mb-8">
-          <Link to="/" className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-4">
+          <Link to="/" className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors mb-4">
             <ArrowLeft className="h-4 w-4" />
             <span className="text-sm font-medium">Back to Dashboard</span>
           </Link>
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">Create Agent</h2>
-          <p className="text-gray-600 text-sm leading-relaxed">Follow the steps to build your intelligent AI agent</p>
+          <h2 className="text-2xl font-bold text-slate-900 mb-3">Create Agent</h2>
+          <p className="text-slate-600 text-sm leading-relaxed">Follow the steps to build your intelligent AI agent</p>
         </div>
         
         <div className="space-y-2">
@@ -74,14 +74,14 @@ const CreateAgent = () => {
         </div>
 
         {/* Progress indicator */}
-        <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-          <div className="flex justify-between text-sm text-gray-600 mb-2">
+        <div className="mt-8 p-4 bg-slate-50 rounded-lg border border-slate-200">
+          <div className="flex justify-between text-sm text-slate-600 mb-2">
             <span>Progress</span>
             <span>{Math.round((currentStep / steps.length) * 100)}%</span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className="w-full bg-slate-200 rounded-full h-2">
             <div 
-              className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-300"
+              className="bg-blue-500 h-2 rounded-full transition-all duration-300"
               style={{ width: `${(currentStep / steps.length) * 100}%` }}
             ></div>
           </div>
@@ -90,35 +90,37 @@ const CreateAgent = () => {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        <div className="flex-1 p-12 pb-32">
-          <div className="max-w-6xl mx-auto">
-            <Card className="bg-white shadow-lg border-0 overflow-hidden">
-              <CardHeader className="border-b border-gray-100 pb-6 bg-gradient-to-r from-blue-50 to-indigo-50">
+        <div className="flex-1 p-8">
+          <div className="max-w-none mx-auto h-full">
+            <Card className="bg-white border-slate-200 overflow-hidden h-full">
+              <CardHeader className="border-b border-slate-200 pb-6 bg-blue-50">
                 <CardTitle className="flex items-center gap-4">
                   {CurrentStepIcon && (
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
-                      <CurrentStepIcon className="h-6 w-6 text-white" />
+                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center border border-blue-200">
+                      <CurrentStepIcon className="h-6 w-6 text-blue-700" />
                     </div>
                   )}
                   <div>
-                    <div className="text-2xl font-bold text-gray-900">
+                    <div className="text-2xl font-bold text-slate-900">
                       Step {currentStep}: {currentStepInfo?.title}
                     </div>
-                    <div className="text-sm text-gray-600 font-normal mt-1">
+                    <div className="text-sm text-slate-600 font-normal mt-1">
                       {currentStepInfo?.description} • {currentStep} of {steps.length}
                     </div>
                   </div>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-12">
+              <CardContent className="p-0 flex-1">
                 {CurrentStepComponent && (
-                  <CurrentStepComponent
-                    data={agentData}
-                    onUpdate={updateAgentData}
-                    onNext={handleNext}
-                    onPrevious={handlePrevious}
-                    isLastStep={currentStep === steps.length}
-                  />
+                  <div className="h-full">
+                    <CurrentStepComponent
+                      data={agentData}
+                      onUpdate={updateAgentData}
+                      onNext={handleNext}
+                      onPrevious={handlePrevious}
+                      isLastStep={currentStep === steps.length}
+                    />
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -126,21 +128,21 @@ const CreateAgent = () => {
         </div>
 
         {/* Enhanced Navigation Footer */}
-        <div className="sticky bottom-0 bg-white border-t border-gray-200 p-8 shadow-lg">
-          <div className="max-w-6xl mx-auto flex justify-between">
+        <div className="sticky bottom-0 bg-white border-t border-slate-200 p-6">
+          <div className="max-w-none mx-auto flex justify-between">
             <div className="flex gap-3">
               <Button
                 variant="outline"
                 onClick={handlePrevious}
                 disabled={currentStep === 1}
-                className="flex items-center gap-2 h-11 px-6 border-gray-300 hover:bg-gray-50"
+                className="flex items-center gap-2 h-11 px-6 border-slate-300 hover:bg-slate-50"
               >
                 ← Previous
               </Button>
               
               <Button
                 variant="outline"
-                className="flex items-center gap-2 h-11 px-4 border-gray-300 hover:bg-gray-50"
+                className="flex items-center gap-2 h-11 px-4 border-slate-300 hover:bg-slate-50"
               >
                 <Save className="h-4 w-4" />
                 Save Draft
@@ -150,7 +152,7 @@ const CreateAgent = () => {
             <Button
               onClick={handleNext}
               disabled={currentStep === steps.length}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 flex items-center gap-2 h-11 px-8 shadow-md"
+              className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2 h-11 px-8"
             >
               {currentStep === steps.length ? "Deploy Agent" : "Continue"}
               {currentStep < steps.length && <ChevronRight className="h-4 w-4" />}
