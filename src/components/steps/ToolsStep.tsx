@@ -14,17 +14,17 @@ interface Tool {
 
 const availableTools: Tool[] = [
   {
-    id: "taskade-actions",
-    name: "Taskade Actions",
+    id: "task-actions",
+    name: "Task Actions",
     description: "Use your agent to manage tasks in your projects, update due dates, assignments, and more.",
     icon: "🧑‍🤝‍🧑",
     actions: 5,
     enabled: true
   },
   {
-    id: "taskade-ai",
-    name: "Taskade AI",
-    description: "Access Taskade's AI capabilities for content generation and analysis.",
+    id: "ai-assistant",
+    name: "AI Assistant",
+    description: "Access AI capabilities for content generation and analysis.",
     icon: "🤖",
     actions: 2,
     enabled: false
