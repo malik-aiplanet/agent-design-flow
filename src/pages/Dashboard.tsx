@@ -78,7 +78,7 @@ const Dashboard = () => {
             <p className="text-slate-600 text-lg">Manage and deploy your intelligent automation</p>
           </div>
           <Link to="/create">
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg flex items-center gap-2">
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 h-auto rounded-lg flex items-center gap-3 text-base font-semibold transition-colors">
               <Plus className="h-5 w-5" />
               Create New Agent
             </Button>
@@ -87,29 +87,29 @@ const Dashboard = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <Card className="bg-blue-50 border-blue-200">
-            <CardContent className="p-6">
+          <Card className="bg-blue-50 border-blue-200 border-2">
+            <CardContent className="p-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-blue-700 text-sm font-medium">Total Agents</p>
-                  <p className="text-3xl font-bold text-blue-900">{totalAgents}</p>
+                  <p className="text-blue-700 text-sm font-semibold mb-2">Total Agents</p>
+                  <p className="text-4xl font-bold text-blue-900">{totalAgents}</p>
                 </div>
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center border border-blue-200">
-                  <Plus className="h-6 w-6 text-blue-700" />
+                <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center border-2 border-blue-200">
+                  <Plus className="h-7 w-7 text-blue-700" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-green-50 border-green-200">
-            <CardContent className="p-6">
+          <Card className="bg-green-50 border-green-200 border-2">
+            <CardContent className="p-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-green-700 text-sm font-medium">Active Agents</p>
-                  <p className="text-3xl font-bold text-green-900">{activeAgents}</p>
+                  <p className="text-green-700 text-sm font-semibold mb-2">Active Agents</p>
+                  <p className="text-4xl font-bold text-green-900">{activeAgents}</p>
                 </div>
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center border border-green-200">
-                  <Play className="h-6 w-6 text-green-700" />
+                <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center border-2 border-green-200">
+                  <Play className="h-7 w-7 text-green-700" />
                 </div>
               </div>
             </CardContent>
@@ -120,17 +120,17 @@ const Dashboard = () => {
       {/* Enhanced Filters */}
       <div className="flex gap-4 mb-8">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5" />
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5" />
           <Input
             placeholder="Search agents by name or description..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-12 h-12 border-slate-300 focus:border-blue-500 focus:ring-blue-500"
+            className="pl-12 h-14 border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-base"
           />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-48 h-12 border-slate-300">
-            <Filter className="h-4 w-4 mr-2" />
+          <SelectTrigger className="w-48 h-14 border-slate-300 text-base">
+            <Filter className="h-5 w-5 mr-2" />
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
@@ -147,36 +147,36 @@ const Dashboard = () => {
         {filteredAgents.map((agent) => (
           <Card 
             key={agent.id} 
-            className="hover:shadow-lg transition-all duration-300 bg-white border-slate-200 overflow-hidden cursor-pointer hover:border-blue-300"
+            className="hover:shadow-lg transition-all duration-300 bg-white border-slate-200 border-2 overflow-hidden cursor-pointer hover:border-blue-300"
           >
             <CardContent className="p-0">
               <Link to={`/create`} className="block">
-                <div className="p-6">
+                <div className="p-8">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-3">
-                        <h3 className="text-xl font-semibold text-slate-900 hover:text-blue-600 transition-colors">
+                      <div className="flex items-center gap-4 mb-4">
+                        <h3 className="text-xl font-bold text-slate-900 hover:text-blue-600 transition-colors">
                           {agent.name}
                         </h3>
-                        <Badge className={`${getStatusColor(agent.status)} border font-medium`}>
+                        <Badge className={`${getStatusColor(agent.status)} border-2 font-semibold px-3 py-1`}>
                           {agent.status}
                         </Badge>
                       </div>
-                      <p className="text-slate-600 text-sm mb-4 leading-relaxed">{agent.description}</p>
+                      <p className="text-slate-600 text-base mb-6 leading-relaxed">{agent.description}</p>
                       
                       <div className="flex items-center gap-6 text-sm text-slate-500">
                         <span className="flex items-center gap-1">
-                          <span className="font-medium">Model:</span> {agent.model}
+                          <span className="font-semibold">Model:</span> {agent.model}
                         </span>
                         <span>•</span>
                         <span>Last edited {agent.lastEdited}</span>
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-2" onClick={(e) => e.preventDefault()}>
+                    <div className="flex items-center gap-3" onClick={(e) => e.preventDefault()}>
                       {agent.status === "Deployed" && (
                         <Link to={`/chat/${agent.id}`}>
-                          <Button variant="outline" size="sm" className="h-10 px-4 border-slate-300 hover:bg-slate-50">
+                          <Button variant="outline" size="sm" className="h-12 px-6 border-2 border-slate-300 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 font-semibold">
                             <Play className="h-4 w-4 mr-2" />
                             Chat
                           </Button>
@@ -185,8 +185,8 @@ const Dashboard = () => {
                       
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-10 w-10 p-0">
-                            <MoreVertical className="h-4 w-4" />
+                          <Button variant="ghost" size="sm" className="h-12 w-12 p-0 hover:bg-slate-100">
+                            <MoreVertical className="h-5 w-5" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -215,15 +215,15 @@ const Dashboard = () => {
 
       {/* Enhanced Empty State */}
       {filteredAgents.length === 0 && (
-        <div className="text-center py-16">
-          <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6 border border-slate-200">
+        <div className="text-center py-20">
+          <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-8 border-2 border-slate-200">
             <Search className="h-12 w-12 text-slate-400" />
           </div>
-          <div className="text-slate-500 text-xl font-medium mb-2">No agents found</div>
-          <p className="text-slate-400 mb-6">Try adjusting your search terms or create your first agent</p>
+          <div className="text-slate-500 text-xl font-semibold mb-3">No agents found</div>
+          <p className="text-slate-400 mb-8 text-base">Try adjusting your search terms or create your first agent</p>
           <Link to="/create">
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3">
-              <Plus className="h-4 w-4 mr-2" />
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 h-auto rounded-lg font-semibold text-base">
+              <Plus className="h-5 w-5 mr-2" />
               Create Your First Agent
             </Button>
           </Link>
