@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Plus, Search, Filter, Edit, Copy, Trash2, MoreVertical, Play, Pause, TrendingUp } from "lucide-react";
+import { Plus, Search, Filter, Edit, Copy, Trash2, MoreVertical, Play, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -16,8 +16,6 @@ interface Agent {
   status: "Draft" | "Active" | "Deployed";
   lastEdited: string;
   description?: string;
-  interactions?: number;
-  successRate?: number;
 }
 
 const mockAgents: Agent[] = [
@@ -27,9 +25,7 @@ const mockAgents: Agent[] = [
     model: "GPT-4",
     status: "Active",
     lastEdited: "2 hours ago",
-    description: "Handles customer inquiries and support tickets with intelligent routing and escalation",
-    interactions: 1247,
-    successRate: 94
+    description: "Handles customer inquiries and support tickets with intelligent routing and escalation"
   },
   {
     id: "2", 
@@ -37,9 +33,7 @@ const mockAgents: Agent[] = [
     model: "GPT-4",
     status: "Draft",
     lastEdited: "1 day ago",
-    description: "Creates engaging blog posts, marketing content, and social media copy",
-    interactions: 0,
-    successRate: 0
+    description: "Creates engaging blog posts, marketing content, and social media copy"
   },
   {
     id: "3",
@@ -47,9 +41,7 @@ const mockAgents: Agent[] = [
     model: "Claude-3",
     status: "Deployed",
     lastEdited: "3 days ago",
-    description: "Analyzes complex datasets and generates actionable business insights",
-    interactions: 856,
-    successRate: 98
+    description: "Analyzes complex datasets and generates actionable business insights"
   }
 ];
 
@@ -75,7 +67,6 @@ const Dashboard = () => {
 
   const totalAgents = agents.length;
   const activeAgents = agents.filter(a => a.status === "Active" || a.status === "Deployed").length;
-  const totalInteractions = agents.reduce((sum, agent) => sum + (agent.interactions || 0), 0);
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
@@ -94,8 +85,8 @@ const Dashboard = () => {
           </Link>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* Stats Cards - Removed Total Interactions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -119,20 +110,6 @@ const Dashboard = () => {
                 </div>
                 <div className="w-12 h-12 bg-green-200 rounded-lg flex items-center justify-center">
                   <Play className="h-6 w-6 text-green-700" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-purple-700 text-sm font-medium">Total Interactions</p>
-                  <p className="text-3xl font-bold text-purple-900">{totalInteractions.toLocaleString()}</p>
-                </div>
-                <div className="w-12 h-12 bg-purple-200 rounded-lg flex items-center justify-center">
-                  <TrendingUp className="h-6 w-6 text-purple-700" />
                 </div>
               </div>
             </CardContent>
@@ -165,79 +142,72 @@ const Dashboard = () => {
         </Select>
       </div>
 
-      {/* Enhanced Agent Cards */}
+      {/* Enhanced Agent Cards - Made clickable and removed stats */}
       <div className="grid gap-6">
         {filteredAgents.map((agent) => (
-          <Card key={agent.id} className="hover:shadow-xl transition-all duration-300 bg-white border-gray-200 overflow-hidden">
+          <Card 
+            key={agent.id} 
+            className="hover:shadow-xl transition-all duration-300 bg-white border-gray-200 overflow-hidden cursor-pointer hover:scale-[1.02] hover:border-blue-300"
+          >
             <CardContent className="p-0">
-              <div className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
-                      <h3 className="text-xl font-semibold text-gray-900">{agent.name}</h3>
-                      <Badge className={`${getStatusColor(agent.status)} border font-medium`}>
-                        {agent.status}
-                      </Badge>
-                    </div>
-                    <p className="text-gray-600 text-sm mb-4 leading-relaxed">{agent.description}</p>
-                    
-                    <div className="flex items-center gap-6 text-sm text-gray-500 mb-4">
-                      <span className="flex items-center gap-1">
-                        <span className="font-medium">Model:</span> {agent.model}
-                      </span>
-                      <span>•</span>
-                      <span>Last edited {agent.lastEdited}</span>
-                    </div>
-
-                    {/* Performance Metrics */}
-                    {agent.interactions > 0 && (
-                      <div className="flex items-center gap-6 text-sm">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                          <span className="text-gray-600">{agent.interactions?.toLocaleString()} interactions</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span className="text-gray-600">{agent.successRate}% success rate</span>
-                        </div>
+              <Link to={`/create`} className="block">
+                <div className="p-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-3">
+                        <h3 className="text-xl font-semibold text-gray-900 hover:text-blue-600 transition-colors">
+                          {agent.name}
+                        </h3>
+                        <Badge className={`${getStatusColor(agent.status)} border font-medium`}>
+                          {agent.status}
+                        </Badge>
                       </div>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    {agent.status === "Deployed" && (
-                      <Link to={`/chat/${agent.id}`}>
-                        <Button variant="outline" size="sm" className="h-10 px-4 border-gray-300 hover:bg-gray-50">
-                          <Play className="h-4 w-4 mr-2" />
-                          Chat
-                        </Button>
-                      </Link>
-                    )}
+                      <p className="text-gray-600 text-sm mb-4 leading-relaxed">{agent.description}</p>
+                      
+                      <div className="flex items-center gap-6 text-sm text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <span className="font-medium">Model:</span> {agent.model}
+                        </span>
+                        <span>•</span>
+                        <span>Last edited {agent.lastEdited}</span>
+                      </div>
+                    </div>
                     
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-10 w-10 p-0">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Copy className="h-4 w-4 mr-2" />
-                          Duplicate
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600">
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className="flex items-center gap-2" onClick={(e) => e.preventDefault()}>
+                      {agent.status === "Deployed" && (
+                        <Link to={`/chat/${agent.id}`}>
+                          <Button variant="outline" size="sm" className="h-10 px-4 border-gray-300 hover:bg-gray-50">
+                            <Play className="h-4 w-4 mr-2" />
+                            Chat
+                          </Button>
+                        </Link>
+                      )}
+                      
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-10 w-10 p-0">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Copy className="h-4 w-4 mr-2" />
+                            Duplicate
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="text-red-600">
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             </CardContent>
           </Card>
         ))}
