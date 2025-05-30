@@ -42,6 +42,8 @@ interface CustomNodeProps {
     description?: string;
     type?: string;
     icon?: string;
+    provider?: string;
+    model?: string;
   };
   selected?: boolean;
 }

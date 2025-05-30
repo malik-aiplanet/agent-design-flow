@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, Check, Sparkles, Bot, Brain, Wrench, Network, Users, FileOutput, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -47,8 +48,8 @@ const CreateAgent = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex pb-20">
-      {/* Vertical Step Sidebar */}
-      <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+      {/* Vertical Step Sidebar - Made Sticky */}
+      <div className="w-80 bg-white border-r border-gray-200 flex flex-col sticky top-0 h-screen">
         {/* Header */}
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center gap-3 mb-4">
@@ -70,7 +71,7 @@ const CreateAgent = () => {
         </div>
 
         {/* Steps Navigation */}
-        <div className="flex-1 p-4">
+        <div className="flex-1 p-4 overflow-y-auto">
           <div className="space-y-2">
             {steps.map((step, index) => {
               const isActive = currentStep === step.id;
@@ -123,8 +124,8 @@ const CreateAgent = () => {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 p-8">
+      {/* Main Content - Scrollable */}
+      <div className="flex-1 p-8 overflow-y-auto">
         <div className="max-w-4xl mx-auto">
           <Card className="bg-white border border-gray-200 shadow-sm">
             <CardContent className="p-8">

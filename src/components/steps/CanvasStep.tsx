@@ -11,6 +11,7 @@ import {
   Connection,
   Edge,
   Node,
+  BackgroundVariant,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { Plus } from "lucide-react";
@@ -153,7 +154,7 @@ export const CanvasStep = ({ data, onUpdate }: any) => {
               color="#e5e7eb" 
               gap={20} 
               size={1}
-              variant="dots"
+              variant={BackgroundVariant.Dots}
             />
             <Controls 
               className="bg-white border border-gray-200 rounded-lg shadow-sm"
