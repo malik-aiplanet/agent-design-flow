@@ -1,4 +1,5 @@
 
+import { AgentBasicsCard } from "./team/AgentBasicsCard";
 import { InputComponentCard } from "./team/InputComponentCard";
 import { ModelSelectionCard } from "./team/ModelSelectionCard";
 import { TerminationConditionCard } from "./team/TerminationConditionCard";
@@ -14,15 +15,18 @@ export const TeamStep = ({
   return (
     <div className="space-y-8">
       <div>
-        <h3 className="text-xl font-semibold mb-3">Team Configuration</h3>
-        <p className="text-gray-600">Configure your agent team's model, behavior, and capabilities.</p>
+        <h3 className="text-2xl font-bold mb-3 text-gray-900">Team Configuration</h3>
+        <p className="text-gray-600 text-lg">Configure your agent team's basic details, model, and capabilities.</p>
       </div>
 
-      {/* Input Components - First position */}
+      {/* Agent Basics - First position */}
+      <AgentBasicsCard data={data} onUpdate={onUpdate} />
+
+      {/* Input Components */}
       <InputComponentCard />
 
       {/* Model & Termination */}
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ModelSelectionCard />
         <TerminationConditionCard />
       </div>

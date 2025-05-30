@@ -1,6 +1,8 @@
 
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { FileType } from "lucide-react";
 
 export const OutputFormatCard = () => {
   const [outputFormat, setOutputFormat] = useState<string[]>(["json"]);
@@ -14,23 +16,35 @@ export const OutputFormatCard = () => {
   };
 
   return (
-    <Card>
+    <Card className="border-gray-200 shadow-sm">
       <CardHeader>
-        <CardTitle className="text-base">Output Format</CardTitle>
+        <CardTitle className="flex items-center gap-3 text-lg">
+          <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+            <FileType className="h-4 w-4 text-green-600" />
+          </div>
+          Output Format
+        </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-3">
+        <Label className="text-sm font-medium text-gray-700">
+          Select preferred response formats
+        </Label>
         <div className="flex gap-3">
-          {["json", "markdown"].map(format => (
+          {[
+            { key: "json", label: "JSON", desc: "Structured data format" },
+            { key: "markdown", label: "Markdown", desc: "Rich text format" }
+          ].map(format => (
             <button
-              key={format}
-              onClick={() => toggleOutputFormat(format)}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                outputFormat.includes(format)
-                  ? "bg-blue-100 text-blue-700 border border-blue-200"
-                  : "bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200"
+              key={format.key}
+              onClick={() => toggleOutputFormat(format.key)}
+              className={`p-4 rounded-lg font-medium transition-all border-2 text-left ${
+                outputFormat.includes(format.key)
+                  ? "bg-green-50 text-green-700 border-green-200 shadow-sm"
+                  : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100 hover:border-gray-300"
               }`}
             >
-              {format.toUpperCase()}
+              <div className="font-semibold">{format.label}</div>
+              <div className="text-xs opacity-75 mt-1">{format.desc}</div>
             </button>
           ))}
         </div>
