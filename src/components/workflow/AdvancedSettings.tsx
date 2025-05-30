@@ -16,7 +16,7 @@ interface AdvancedSettingsProps {
 }
 
 export const AdvancedSettings = ({ selectedNode, onClose, onUpdateNode }: AdvancedSettingsProps) => {
-  const [expandedSections, setExpandedSections] = useState<string[]>(["basic", "model"]);
+  const [expandedSections, setExpandedSections] = useState<string[]>(["basic"]);
 
   if (!selectedNode) return null;
 
@@ -36,12 +36,12 @@ export const AdvancedSettings = ({ selectedNode, onClose, onUpdateNode }: Advanc
   };
 
   const renderBasicSettings = () => (
-    <Card className="border-slate-200">
-      <CardHeader className="p-3">
+    <Card className="border-gray-200 shadow-none">
+      <CardHeader className="p-4 pb-2">
         <CardTitle className="text-sm">
           <Button
             variant="ghost"
-            className="w-full justify-start p-0 h-auto font-semibold text-slate-700"
+            className="w-full justify-start p-0 h-auto font-medium text-gray-800 hover:bg-transparent"
             onClick={() => toggleSection("basic")}
           >
             {expandedSections.includes("basic") ? (
@@ -55,25 +55,25 @@ export const AdvancedSettings = ({ selectedNode, onClose, onUpdateNode }: Advanc
       </CardHeader>
       
       {expandedSections.includes("basic") && (
-        <CardContent className="p-3 pt-0 space-y-3">
+        <CardContent className="p-4 pt-0 space-y-4">
           <div>
-            <Label htmlFor="node-label" className="text-xs font-medium text-slate-700">Label</Label>
+            <Label htmlFor="node-label" className="text-xs font-medium text-gray-700 mb-1 block">Name</Label>
             <Input
               id="node-label"
               value={selectedNode.data?.label || ""}
               onChange={(e) => handleInputChange("label", e.target.value)}
-              className="mt-1 text-sm border-slate-200"
-              placeholder="Enter node label"
+              className="text-sm border-gray-200 focus:border-blue-400"
+              placeholder="Enter node name"
             />
           </div>
           
           <div>
-            <Label htmlFor="node-description" className="text-xs font-medium text-slate-700">Description</Label>
+            <Label htmlFor="node-description" className="text-xs font-medium text-gray-700 mb-1 block">Description</Label>
             <Textarea
               id="node-description"
               value={selectedNode.data?.description || ""}
               onChange={(e) => handleInputChange("description", e.target.value)}
-              className="mt-1 text-sm border-slate-200"
+              className="text-sm border-gray-200 focus:border-blue-400 resize-none"
               placeholder="Enter description"
               rows={2}
             />
@@ -84,15 +84,15 @@ export const AdvancedSettings = ({ selectedNode, onClose, onUpdateNode }: Advanc
   );
 
   const renderModelSettings = () => {
-    if (selectedNode.type !== "llm") return null;
+    if (selectedNode.data?.type !== "llm") return null;
 
     return (
-      <Card className="border-slate-200">
-        <CardHeader className="p-3">
+      <Card className="border-gray-200 shadow-none">
+        <CardHeader className="p-4 pb-2">
           <CardTitle className="text-sm">
             <Button
               variant="ghost"
-              className="w-full justify-start p-0 h-auto font-semibold text-slate-700"
+              className="w-full justify-start p-0 h-auto font-medium text-gray-800 hover:bg-transparent"
               onClick={() => toggleSection("model")}
             >
               {expandedSections.includes("model") ? (
@@ -106,14 +106,14 @@ export const AdvancedSettings = ({ selectedNode, onClose, onUpdateNode }: Advanc
         </CardHeader>
         
         {expandedSections.includes("model") && (
-          <CardContent className="p-3 pt-0 space-y-3">
+          <CardContent className="p-4 pt-0 space-y-4">
             <div>
-              <Label className="text-xs font-medium text-slate-700">Provider</Label>
+              <Label className="text-xs font-medium text-gray-700 mb-1 block">Provider</Label>
               <Select
                 value={selectedNode.data?.provider || "anthropic"}
                 onValueChange={(value) => handleInputChange("provider", value)}
               >
-                <SelectTrigger className="mt-1 text-sm border-slate-200">
+                <SelectTrigger className="text-sm border-gray-200 focus:border-blue-400">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -126,12 +126,12 @@ export const AdvancedSettings = ({ selectedNode, onClose, onUpdateNode }: Advanc
             </div>
 
             <div>
-              <Label className="text-xs font-medium text-slate-700">Model</Label>
+              <Label className="text-xs font-medium text-gray-700 mb-1 block">Model</Label>
               <Select
                 value={selectedNode.data?.model || "claude-3.5-sonnet"}
                 onValueChange={(value) => handleInputChange("model", value)}
               >
-                <SelectTrigger className="mt-1 text-sm border-slate-200">
+                <SelectTrigger className="text-sm border-gray-200 focus:border-blue-400">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -153,18 +153,18 @@ export const AdvancedSettings = ({ selectedNode, onClose, onUpdateNode }: Advanc
             </div>
 
             <div>
-              <Label className="text-xs font-medium text-slate-700">System Prompt</Label>
+              <Label className="text-xs font-medium text-gray-700 mb-1 block">System Prompt</Label>
               <Textarea
                 value={selectedNode.data?.systemPrompt || ""}
                 onChange={(e) => handleInputChange("systemPrompt", e.target.value)}
-                className="mt-1 text-sm border-slate-200"
+                className="text-sm border-gray-200 focus:border-blue-400 resize-none"
                 placeholder="Enter system prompt"
                 rows={3}
               />
             </div>
 
             <div>
-              <Label className="text-xs font-medium text-slate-700">
+              <Label className="text-xs font-medium text-gray-700 mb-2 block">
                 Temperature: {selectedNode.data?.temperature || 0.7}
               </Label>
               <Slider
@@ -173,18 +173,18 @@ export const AdvancedSettings = ({ selectedNode, onClose, onUpdateNode }: Advanc
                 max={1}
                 min={0}
                 step={0.1}
-                className="mt-2"
+                className="py-2"
               />
             </div>
 
             <div>
-              <Label htmlFor="max-tokens" className="text-xs font-medium text-slate-700">Max Tokens</Label>
+              <Label htmlFor="max-tokens" className="text-xs font-medium text-gray-700 mb-1 block">Max Tokens</Label>
               <Input
                 id="max-tokens"
                 type="number"
                 value={selectedNode.data?.maxTokens || 1000}
                 onChange={(e) => handleInputChange("maxTokens", parseInt(e.target.value))}
-                className="mt-1 text-sm border-slate-200"
+                className="text-sm border-gray-200 focus:border-blue-400"
                 min="1"
                 max="8000"
               />
@@ -196,18 +196,18 @@ export const AdvancedSettings = ({ selectedNode, onClose, onUpdateNode }: Advanc
   };
 
   return (
-    <div className="w-80 bg-slate-50 border-l border-slate-200 p-4 overflow-y-auto">
-      <div className="flex items-center justify-between mb-4">
+    <div className="w-80 bg-white border-l border-gray-200 flex flex-col">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200">
         <div>
-          <h3 className="text-lg font-semibold text-slate-800">Settings</h3>
-          <p className="text-sm text-slate-600">{selectedNode.data?.label || selectedNode.type}</p>
+          <h3 className="text-lg font-semibold text-gray-900">Settings</h3>
+          <p className="text-sm text-gray-600">{selectedNode.data?.label || selectedNode.type}</p>
         </div>
-        <Button variant="ghost" size="sm" onClick={onClose}>
+        <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0">
           <X className="h-4 w-4" />
         </Button>
       </div>
 
-      <div className="space-y-3">
+      <div className="flex-1 p-4 space-y-4 overflow-y-auto">
         {renderBasicSettings()}
         {renderModelSettings()}
       </div>
