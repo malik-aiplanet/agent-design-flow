@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Check, ChevronRight, Users, Bot, Brain, Wrench, FileText, Workflow, Rocket } from "lucide-react";
+import { ChevronRight, Users, Bot, Brain, Wrench, FileText, Workflow, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StepIndicator } from "@/components/StepIndicator";
@@ -46,30 +46,30 @@ const CreateAgent = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto flex">
-        {/* Left Sidebar - Steps */}
-        <div className="w-80 bg-white border-r min-h-screen p-6">
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Create Agent</h2>
-            <p className="text-gray-600 text-sm">Follow the steps to build your AI agent</p>
-          </div>
-          
-          <div className="space-y-2">
-            {steps.map((step, index) => (
-              <StepIndicator
-                key={step.id}
-                step={step}
-                isActive={currentStep === step.id}
-                isCompleted={currentStep > step.id}
-                onClick={() => setCurrentStep(step.id)}
-              />
-            ))}
-          </div>
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Left Sidebar - Steps */}
+      <div className="w-80 bg-white border-r min-h-screen p-6">
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Create Agent</h2>
+          <p className="text-gray-600 text-sm">Follow the steps to build your AI agent</p>
         </div>
+        
+        <div className="space-y-2">
+          {steps.map((step, index) => (
+            <StepIndicator
+              key={step.id}
+              step={step}
+              isActive={currentStep === step.id}
+              isCompleted={currentStep > step.id}
+              onClick={() => setCurrentStep(step.id)}
+            />
+          ))}
+        </div>
+      </div>
 
-        {/* Main Content */}
-        <div className="flex-1 p-8">
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        <div className="flex-1 p-8 pb-24">
           <div className="max-w-4xl mx-auto">
             <Card className="bg-white shadow-sm">
               <CardHeader className="border-b">
@@ -92,26 +92,29 @@ const CreateAgent = () => {
                 )}
               </CardContent>
             </Card>
+          </div>
+        </div>
 
-            {/* Navigation */}
-            <div className="flex justify-between mt-6">
-              <Button
-                variant="outline"
-                onClick={handlePrevious}
-                disabled={currentStep === 1}
-              >
-                Previous
-              </Button>
-              
-              <Button
-                onClick={handleNext}
-                disabled={currentStep === steps.length}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                {currentStep === steps.length ? "Complete" : "Next"}
-                {currentStep < steps.length && <ChevronRight className="ml-2 h-4 w-4" />}
-              </Button>
-            </div>
+        {/* Sticky Navigation Footer */}
+        <div className="sticky bottom-0 bg-white border-t p-6">
+          <div className="max-w-4xl mx-auto flex justify-between">
+            <Button
+              variant="outline"
+              onClick={handlePrevious}
+              disabled={currentStep === 1}
+              className="flex items-center gap-2"
+            >
+              ← Previous
+            </Button>
+            
+            <Button
+              onClick={handleNext}
+              disabled={currentStep === steps.length}
+              className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2"
+            >
+              {currentStep === steps.length ? "Complete" : "Next →"}
+              {currentStep < steps.length && <ChevronRight className="h-4 w-4" />}
+            </Button>
           </div>
         </div>
       </div>
