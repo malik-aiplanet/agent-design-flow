@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, Check, Sparkles, Bot, Brain, Wrench, Network, Users, FileOutput, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -142,7 +141,7 @@ const CreateAgent = () => {
 
       {/* Fixed Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50">
-        <div className="max-w-7xl mx-auto flex justify-center">
+        <div className="max-w-7xl mx-auto flex justify-end">
           <div className="flex gap-4">
             <Button 
               variant="outline" 

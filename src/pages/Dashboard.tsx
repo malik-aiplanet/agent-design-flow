@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
 interface Agent {
   id: string;
   name: string;
@@ -41,11 +42,14 @@ const Dashboard = () => {
   const [agents, setAgents] = useState<Agent[]>(mockAgents);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const navigate = useNavigate();
+
   const filteredAgents = agents.filter(agent => {
     const matchesSearch = agent.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || agent.status.toLowerCase() === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Active":
@@ -58,8 +62,14 @@ const Dashboard = () => {
         return "bg-slate-50 text-slate-700 border-slate-200";
     }
   };
+
+  const handleAgentCardClick = () => {
+    navigate('/create');
+  };
+
   const totalAgents = agents.length;
   const activeAgents = agents.filter(a => a.status === "Active" || a.status === "Deployed").length;
+
   return <div className="p-8 max-w-7xl mx-auto">
       {/* Header with Stats */}
       <div className="mb-8">
@@ -130,64 +140,62 @@ const Dashboard = () => {
 
       {/* Enhanced Agent Cards */}
       <div className="grid gap-6">
-        {filteredAgents.map(agent => <Card key={agent.id} className="hover:shadow-lg transition-all duration-300 bg-white border-slate-200 border-2 overflow-hidden cursor-pointer hover:border-blue-300">
+        {filteredAgents.map(agent => <Card key={agent.id} className="hover:shadow-lg transition-all duration-300 bg-white border-slate-200 border-2 overflow-hidden cursor-pointer hover:border-blue-300" onClick={handleAgentCardClick}>
             <CardContent className="p-0">
-              <Link to={`/create`} className="block">
-                <div className="p-8">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-4 mb-4">
-                        <h3 className="text-xl font-bold text-slate-900 hover:text-blue-600 transition-colors">
-                          {agent.name}
-                        </h3>
-                        <Badge className={`${getStatusColor(agent.status)} border-2 font-semibold px-3 py-1`}>
-                          {agent.status}
-                        </Badge>
-                      </div>
-                      <p className="text-slate-600 text-base mb-6 leading-relaxed">{agent.description}</p>
-                      
-                      <div className="flex items-center gap-6 text-sm text-slate-500">
-                        <span className="flex items-center gap-1">
-                          <span className="font-semibold">Model:</span> {agent.model}
-                        </span>
-                        <span>•</span>
-                        <span>Last edited {agent.lastEdited}</span>
-                      </div>
+              <div className="p-8">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-4 mb-4">
+                      <h3 className="text-xl font-bold text-slate-900 hover:text-blue-600 transition-colors">
+                        {agent.name}
+                      </h3>
+                      <Badge className={`${getStatusColor(agent.status)} border-2 font-semibold px-3 py-1`}>
+                        {agent.status}
+                      </Badge>
                     </div>
+                    <p className="text-slate-600 text-base mb-6 leading-relaxed">{agent.description}</p>
                     
-                    <div className="flex items-center gap-3" onClick={e => e.preventDefault()}>
-                      {agent.status === "Deployed" && <Link to={`/chat/${agent.id}`}>
-                          <Button variant="outline" size="sm" className="h-12 px-6 border-2 border-slate-300 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 font-semibold">
-                            <Play className="h-4 w-4 mr-2" />
-                            Chat
-                          </Button>
-                        </Link>}
-                      
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-12 w-12 p-0 hover:bg-slate-100">
-                            <MoreVertical className="h-5 w-5" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Copy className="h-4 w-4 mr-2" />
-                            Duplicate
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="text-red-600">
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                    <div className="flex items-center gap-6 text-sm text-slate-500">
+                      <span className="flex items-center gap-1">
+                        <span className="font-semibold">Model:</span> {agent.model}
+                      </span>
+                      <span>•</span>
+                      <span>Last edited {agent.lastEdited}</span>
                     </div>
                   </div>
+                  
+                  <div className="flex items-center gap-3" onClick={e => e.stopPropagation()}>
+                    {agent.status === "Deployed" && <Link to={`/chat/${agent.id}`}>
+                        <Button variant="outline" size="sm" className="h-12 px-6 border-2 border-slate-300 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 font-semibold">
+                          <Play className="h-4 w-4 mr-2" />
+                          Chat
+                        </Button>
+                      </Link>}
+                    
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-12 w-12 p-0 hover:bg-slate-100">
+                          <MoreVertical className="h-5 w-5" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <Copy className="h-4 w-4 mr-2" />
+                          Duplicate
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-red-600">
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
-              </Link>
+              </div>
             </CardContent>
           </Card>)}
       </div>
