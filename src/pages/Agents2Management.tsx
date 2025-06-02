@@ -94,38 +94,6 @@ const Agents2Management = () => {
             Add New Agent
           </Button>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <Card className="bg-blue-50 border-blue-200 border-2">
-            <CardContent className="p-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-blue-700 text-sm font-semibold mb-2">Total Agents</p>
-                  <p className="text-4xl font-bold text-blue-900">{agents.length}</p>
-                </div>
-                <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center border-2 border-blue-200">
-                  <Plus className="h-7 w-7 text-blue-700" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-green-50 border-green-200 border-2">
-            <CardContent className="p-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-green-700 text-sm font-semibold mb-2">Active Agents</p>
-                  <p className="text-4xl font-bold text-green-900">
-                    {agents.filter(a => a.status === "Active").length}
-                  </p>
-                </div>
-                <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center border-2 border-green-200">
-                  <Plus className="h-7 w-7 text-green-700" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
       </div>
 
       <div className="flex gap-4 mb-8">
@@ -151,63 +119,62 @@ const Agents2Management = () => {
         </Select>
       </div>
 
-      <div className="grid gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredAgents.map(agent => (
           <Card 
             key={agent.id} 
-            className="hover:shadow-lg transition-all duration-300 bg-white border-slate-200 border-2 overflow-hidden cursor-pointer hover:border-blue-300 group"
+            className="hover:shadow-lg transition-all duration-300 bg-white border-slate-200 border-2 overflow-hidden cursor-pointer hover:border-blue-300 group h-fit"
             onClick={() => handleCardClick(agent)}
           >
-            <CardContent className="p-0">
-              <div className="p-8">
+            <CardContent className="p-6">
+              <div className="space-y-4">
                 <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-4 mb-4">
-                      <h3 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
-                        {agent.name}
-                      </h3>
-                      <Badge className={`${getStatusColor(agent.status)} border-2 font-semibold px-3 py-1`}>
-                        {agent.status}
-                      </Badge>
-                    </div>
-                    <p className="text-slate-600 text-base mb-6 leading-relaxed">{agent.description}</p>
-                    
-                    <div className="flex items-center gap-6 text-sm text-slate-500">
-                      <span className="flex items-center gap-1">
-                        <span className="font-semibold">Model:</span> {agent.modelClient}
-                      </span>
-                      <span>•</span>
-                      <span>{agent.toolsCount} tools</span>
-                      <span>•</span>
-                      <span>Last modified {agent.lastModified}</span>
-                    </div>
+                  <h3 className="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors leading-tight">
+                    {agent.name}
+                  </h3>
+                  <Badge className={`${getStatusColor(agent.status)} border font-semibold px-2 py-1 text-xs ml-2 flex-shrink-0`}>
+                    {agent.status}
+                  </Badge>
+                </div>
+                
+                <p className="text-slate-600 text-sm leading-relaxed line-clamp-3">{agent.description}</p>
+                
+                <div className="space-y-2 text-xs text-slate-500">
+                  <div className="flex items-center gap-1">
+                    <span className="font-semibold">Model:</span> 
+                    <span className="truncate">{agent.modelClient}</span>
                   </div>
+                  <div className="flex items-center gap-2">
+                    <span>{agent.toolsCount} tools</span>
+                    <span>•</span>
+                    <span>Last modified {agent.lastModified}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity pt-2" onClick={e => e.stopPropagation()}>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="h-8 px-3 border border-slate-300 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 font-semibold text-xs flex-1"
+                    onClick={() => handleCardClick(agent)}
+                  >
+                    <Edit className="h-3 w-3 mr-1" />
+                    Edit
+                  </Button>
                   
-                  <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="h-10 px-4 border-2 border-slate-300 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 font-semibold"
-                      onClick={() => handleCardClick(agent)}
-                    >
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit
-                    </Button>
-                    
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-10 w-10 p-0 hover:bg-slate-100">
-                          <MoreVertical className="h-5 w-5" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem className="text-red-600">
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-slate-100">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem className="text-red-600">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             </CardContent>

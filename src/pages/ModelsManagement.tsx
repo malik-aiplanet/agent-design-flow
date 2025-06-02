@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Plus, Search, Filter, Edit, Trash2, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -88,38 +89,6 @@ const ModelsManagement = () => {
             <Plus className="h-5 w-5" />
             Add New Model
           </Button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <Card className="bg-blue-50 border-blue-200 border-2">
-            <CardContent className="p-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-blue-700 text-sm font-semibold mb-2">Total Models</p>
-                  <p className="text-4xl font-bold text-blue-900">{models.length}</p>
-                </div>
-                <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center border-2 border-blue-200">
-                  <Plus className="h-7 w-7 text-blue-700" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-green-50 border-green-200 border-2">
-            <CardContent className="p-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-green-700 text-sm font-semibold mb-2">Active Models</p>
-                  <p className="text-4xl font-bold text-green-900">
-                    {models.filter(m => m.status === "Active").length}
-                  </p>
-                </div>
-                <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center border-2 border-green-200">
-                  <Plus className="h-7 w-7 text-green-700" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
 
