@@ -20,8 +20,5 @@ export const AgentsSelectionCard = () => {
   const toggleAgent = (agentId: string) => {
     setSelectedAgents(prev => prev.includes(agentId) ? prev.filter(id => id !== agentId) : [...prev, agentId]);
   };
-  return <Card>
-      
-      
-    </Card>;
+  return;
 };
