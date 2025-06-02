@@ -1,8 +1,9 @@
-
 import { useState } from "react";
-import { Switch } from "@/components/ui/switch";
-import { Card, CardContent } from "@/components/ui/card";
-import { CodeEditor } from "@/components/CodeEditor";
+import { Search, Filter } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { ToolCard } from "./tools/ToolCard";
+import { ToolConfigurationDrawer } from "./tools/ToolConfigurationDrawer";
 
 interface Tool {
   id: string;
@@ -271,7 +272,9 @@ const availableTools: Tool[] = [
 
 export const ToolsStep = ({ data, onUpdate }: any) => {
   const [tools, setTools] = useState<Tool[]>(availableTools);
-  const [expandedTools, setExpandedTools] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedToolId, setSelectedToolId] = useState<string | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const toggleTool = (toolId: string) => {
     setTools(tools.map(tool =>
@@ -285,65 +288,58 @@ export const ToolsStep = ({ data, onUpdate }: any) => {
     ));
   };
 
-  const toggleToolExpanded = (toolId: string) => {
-    const newExpanded = new Set(expandedTools);
-    if (newExpanded.has(toolId)) {
-      newExpanded.delete(toolId);
-    } else {
-      newExpanded.add(toolId);
-    }
-    setExpandedTools(newExpanded);
+  const openConfiguration = (toolId: string) => {
+    setSelectedToolId(toolId);
+    setIsDrawerOpen(true);
   };
 
+  const closeConfiguration = () => {
+    setIsDrawerOpen(false);
+    setSelectedToolId(null);
+  };
+
+  const filteredTools = tools.filter(tool =>
+    tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    tool.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const selectedTool = selectedToolId ? tools.find(t => t.id === selectedToolId) : null;
+
   return (
-    <div className="space-y-8 max-w-5xl">
+    <div className="space-y-8 max-w-6xl">
       <div className="space-y-3">
         <h3 className="text-2xl font-bold text-gray-900">Tools & Integrations</h3>
-        <p className="text-gray-600 text-lg">Select the tools your agent can use and configure their behavior with custom code.</p>
+        <p className="text-gray-600 text-lg">
+          Select the tools your agent can use and configure their behavior.
+        </p>
       </div>
 
-      {/* Tool Grid - Responsive Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {tools.map((tool) => (
-          <Card 
-            key={tool.id} 
-            className={`transition-all duration-200 hover:shadow-md ${
-              tool.enabled ? "ring-2 ring-blue-500 bg-blue-50 border-blue-200" : "border-gray-200 hover:border-gray-300"
-            }`}
-          >
-            <CardContent className="p-0">
-              <div 
-                className="flex items-start justify-between p-4 cursor-pointer"
-                onClick={() => toggleTool(tool.id)}
-              >
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-semibold text-gray-900 text-sm truncate">{tool.name}</h4>
-                    <Switch
-                      checked={tool.enabled}
-                      onCheckedChange={() => toggleTool(tool.id)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
-                  <p className="text-xs text-gray-600 line-clamp-2 mb-2">{tool.description}</p>
-                  <div className="text-xs text-gray-500">
-                    {tool.actions} action{tool.actions !== 1 ? 's' : ''}
-                  </div>
-                </div>
-              </div>
+      {/* Search and Filter */}
+      <div className="flex items-center gap-4">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Search tools..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <Button variant="outline" size="sm">
+          <Filter className="h-4 w-4 mr-2" />
+          Filter
+        </Button>
+      </div>
 
-              {tool.enabled && (
-                <CodeEditor
-                  code={tool.code}
-                  onCodeChange={(code) => updateToolCode(tool.id, code)}
-                  defaultCode={tool.defaultCode}
-                  isExpanded={expandedTools.has(tool.id)}
-                  onToggleExpanded={() => toggleToolExpanded(tool.id)}
-                  placeholder={`Configure ${tool.name} behavior...`}
-                />
-              )}
-            </CardContent>
-          </Card>
+      {/* Tools Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {filteredTools.map((tool) => (
+          <ToolCard
+            key={tool.id}
+            tool={tool}
+            onToggle={toggleTool}
+            onConfigure={openConfiguration}
+          />
         ))}
       </div>
 
@@ -352,6 +348,14 @@ export const ToolsStep = ({ data, onUpdate }: any) => {
         <span>{tools.filter(t => t.enabled).length} of {tools.length} tools selected</span>
         <span className="text-xs">Tools can be reconfigured anytime after deployment</span>
       </div>
+
+      {/* Configuration Drawer */}
+      <ToolConfigurationDrawer
+        isOpen={isDrawerOpen}
+        onClose={closeConfiguration}
+        tool={selectedTool}
+        onCodeChange={updateToolCode}
+      />
     </div>
   );
 };
