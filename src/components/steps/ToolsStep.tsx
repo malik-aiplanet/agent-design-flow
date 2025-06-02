@@ -8,7 +8,6 @@ interface Tool {
   id: string;
   name: string;
   description: string;
-  icon: string;
   actions: number;
   enabled: boolean;
   code: string;
@@ -111,15 +110,86 @@ function sendEmail(to, subject, body, options = {}) {
   // Custom email logic
   console.log('Sending email:', email);
   return sendGmailMessage(email);
+}`,
+
+  "database": `// Database Operations Configuration
+function queryDatabase(query, params = {}) {
+  // Custom database query logic
+  console.log('Executing query:', query, params);
+  
+  switch(query.type) {
+    case 'SELECT':
+      return executeSelect(query, params);
+    case 'INSERT':
+      return executeInsert(query, params);
+    case 'UPDATE':
+      return executeUpdate(query, params);
+    default:
+      return { error: 'Unsupported query type' };
+  }
+}`,
+
+  "calendar": `// Calendar Integration Configuration
+const calendarConfig = {
+  defaultDuration: 60,
+  timezone: 'UTC'
+};
+
+function createEvent(title, startTime, options = {}) {
+  const event = {
+    title,
+    startTime,
+    duration: options.duration || calendarConfig.defaultDuration,
+    timezone: options.timezone || calendarConfig.timezone,
+    ...options
+  };
+  
+  // Custom calendar logic
+  console.log('Creating calendar event:', event);
+  return scheduleEvent(event);
+}`,
+
+  "webhooks": `// Webhook Configuration
+function handleWebhook(event, payload) {
+  // Custom webhook processing logic
+  console.log('Processing webhook:', event, payload);
+  
+  switch(event) {
+    case 'data.received':
+      return processDataReceived(payload);
+    case 'user.action':
+      return processUserAction(payload);
+    default:
+      return { status: 'unhandled' };
+  }
+}`,
+
+  "notifications": `// Notification System Configuration
+const notificationConfig = {
+  channels: ['email', 'push', 'sms'],
+  defaultChannel: 'email'
+};
+
+function sendNotification(message, recipient, options = {}) {
+  const notification = {
+    message,
+    recipient,
+    channel: options.channel || notificationConfig.defaultChannel,
+    priority: options.priority || 'normal',
+    ...options
+  };
+  
+  // Custom notification logic
+  console.log('Sending notification:', notification);
+  return deliverNotification(notification);
 }`
 };
 
 const availableTools: Tool[] = [
   {
     id: "task-actions",
-    name: "Task Actions",
-    description: "Use your agent to manage tasks in your projects, update due dates, assignments, and more.",
-    icon: "🧑‍🤝‍🧑",
+    name: "Task Management",
+    description: "Create, update, and manage tasks in your projects",
     actions: 5,
     enabled: true,
     code: defaultCodes["task-actions"],
@@ -128,8 +198,7 @@ const availableTools: Tool[] = [
   {
     id: "ai-assistant",
     name: "AI Assistant",
-    description: "Access AI capabilities for content generation and analysis.",
-    icon: "🤖",
+    description: "Access AI capabilities for content generation and analysis",
     actions: 2,
     enabled: false,
     code: defaultCodes["ai-assistant"],
@@ -137,9 +206,8 @@ const availableTools: Tool[] = [
   },
   {
     id: "media",
-    name: "Media",
-    description: "Handle image processing, file uploads, and multimedia content.",
-    icon: "🎬",
+    name: "Media Processing",
+    description: "Handle image processing, file uploads, and multimedia content",
     actions: 3,
     enabled: true,
     code: defaultCodes["media"],
@@ -147,9 +215,8 @@ const availableTools: Tool[] = [
   },
   {
     id: "slack",
-    name: "Slack",
-    description: "Send messages, create channels, and manage Slack communications.",
-    icon: "💬",
+    name: "Slack Integration",
+    description: "Send messages, create channels, and manage Slack communications",
     actions: 5,
     enabled: false,
     code: defaultCodes["slack"],
@@ -157,13 +224,48 @@ const availableTools: Tool[] = [
   },
   {
     id: "gmail",
-    name: "Gmail",
-    description: "Send emails, read messages, and manage Gmail functionality.",
-    icon: "📧",
+    name: "Gmail Integration",
+    description: "Send emails, read messages, and manage Gmail functionality",
     actions: 3,
     enabled: false,
     code: defaultCodes["gmail"],
     defaultCode: defaultCodes["gmail"]
+  },
+  {
+    id: "database",
+    name: "Database Operations",
+    description: "Query and manage database operations and data storage",
+    actions: 4,
+    enabled: false,
+    code: defaultCodes["database"],
+    defaultCode: defaultCodes["database"]
+  },
+  {
+    id: "calendar",
+    name: "Calendar Management",
+    description: "Schedule events and manage calendar integrations",
+    actions: 2,
+    enabled: false,
+    code: defaultCodes["calendar"],
+    defaultCode: defaultCodes["calendar"]
+  },
+  {
+    id: "webhooks",
+    name: "Webhook Processing",
+    description: "Handle incoming webhooks and external integrations",
+    actions: 3,
+    enabled: false,
+    code: defaultCodes["webhooks"],
+    defaultCode: defaultCodes["webhooks"]
+  },
+  {
+    id: "notifications",
+    name: "Notification System",
+    description: "Send notifications via email, SMS, and push notifications",
+    actions: 4,
+    enabled: false,
+    code: defaultCodes["notifications"],
+    defaultCode: defaultCodes["notifications"]
   }
 ];
 
@@ -194,41 +296,40 @@ export const ToolsStep = ({ data, onUpdate }: any) => {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-medium mb-2">Available Tools</h3>
-        <p className="text-gray-600">Select the tools your agent can use and configure their behavior with custom code.</p>
+    <div className="space-y-8 max-w-5xl">
+      <div className="space-y-3">
+        <h3 className="text-2xl font-bold text-gray-900">Tools & Integrations</h3>
+        <p className="text-gray-600 text-lg">Select the tools your agent can use and configure their behavior with custom code.</p>
       </div>
 
-      <div className="space-y-3">
+      {/* Tool Grid - Responsive Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {tools.map((tool) => (
           <Card 
             key={tool.id} 
-            className={`transition-colors ${
-              tool.enabled ? "border-blue-200 bg-blue-50" : "hover:bg-gray-50"
+            className={`transition-all duration-200 hover:shadow-md ${
+              tool.enabled ? "ring-2 ring-blue-500 bg-blue-50 border-blue-200" : "border-gray-200 hover:border-gray-300"
             }`}
           >
             <CardContent className="p-0">
               <div 
-                className="flex items-center justify-between p-6 cursor-pointer"
+                className="flex items-start justify-between p-4 cursor-pointer"
                 onClick={() => toggleTool(tool.id)}
               >
-                <div className="flex items-center gap-4">
-                  <div className="text-2xl">{tool.icon}</div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-medium text-gray-900">{tool.name}</h4>
-                      <span className="text-sm text-gray-500">{tool.actions} actions</span>
-                    </div>
-                    <p className="text-sm text-gray-600">{tool.description}</p>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-gray-900 text-sm truncate">{tool.name}</h4>
+                    <Switch
+                      checked={tool.enabled}
+                      onCheckedChange={() => toggleTool(tool.id)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
+                  <p className="text-xs text-gray-600 line-clamp-2 mb-2">{tool.description}</p>
+                  <div className="text-xs text-gray-500">
+                    {tool.actions} action{tool.actions !== 1 ? 's' : ''}
                   </div>
                 </div>
-                
-                <Switch
-                  checked={tool.enabled}
-                  onCheckedChange={() => toggleTool(tool.id)}
-                  onClick={(e) => e.stopPropagation()}
-                />
               </div>
 
               {tool.enabled && (
@@ -246,8 +347,10 @@ export const ToolsStep = ({ data, onUpdate }: any) => {
         ))}
       </div>
 
-      <div className="text-sm text-gray-500">
-        {tools.filter(t => t.enabled).length} of {tools.length} tools selected
+      {/* Summary */}
+      <div className="flex items-center justify-between text-sm text-gray-600 pt-4 border-t">
+        <span>{tools.filter(t => t.enabled).length} of {tools.length} tools selected</span>
+        <span className="text-xs">Tools can be reconfigured anytime after deployment</span>
       </div>
     </div>
   );

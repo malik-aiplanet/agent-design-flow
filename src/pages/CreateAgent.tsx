@@ -1,24 +1,22 @@
 import { useState } from "react";
-import { ArrowLeft, ArrowRight, Check, Sparkles, Bot, Brain, Wrench, Users, FileOutput, Rocket } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Sparkles, User, Users, Wrench, Settings, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 
-// Import all step components (removed CanvasStep)
-import { AgentStep } from "@/components/steps/AgentStep";
-import { ModelStep } from "@/components/steps/ModelStep";
+// Import all step components
+import { AgentDetailsStep } from "@/components/steps/AgentDetailsStep";
+import { GroupAgentsStep } from "@/components/steps/GroupAgentsStep";
 import { ToolsStep } from "@/components/steps/ToolsStep";
 import { TeamStep } from "@/components/steps/TeamStep";
-import { OutputStep } from "@/components/steps/OutputStep";
 import { DeployStep } from "@/components/steps/DeployStep";
 
 const steps = [
-  { id: 1, title: "Team", component: TeamStep, icon: Users },
-  { id: 2, title: "Agent Type", component: AgentStep, icon: Bot },
-  { id: 3, title: "Model", component: ModelStep, icon: Brain },
-  { id: 4, title: "Tools", component: ToolsStep, icon: Wrench },
-  { id: 5, title: "Output", component: OutputStep, icon: FileOutput },
-  { id: 6, title: "Deploy", component: DeployStep, icon: Rocket },
+  { id: 1, title: "Agent Details", component: AgentDetailsStep, icon: User },
+  { id: 2, title: "Group Agents", component: GroupAgentsStep, icon: Users },
+  { id: 3, title: "Tools", component: ToolsStep, icon: Wrench },
+  { id: 4, title: "Team", component: TeamStep, icon: Settings },
+  { id: 5, title: "Deploy", component: DeployStep, icon: Rocket },
 ];
 
 const CreateAgent = () => {
