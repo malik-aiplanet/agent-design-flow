@@ -1,12 +1,10 @@
-
 import { useState } from "react";
-import { X, Save, FileJson } from "lucide-react";
+import { X, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { JSONEditor } from "@/components/JSONEditor";
 
 interface Tool {
   id: string;
@@ -58,15 +56,9 @@ export const ToolConfigurationDrawer = ({ isOpen, onClose, tool }: ToolConfigura
         }`
   });
 
-  const [showJSONEditor, setShowJSONEditor] = useState(false);
-
   const handleSave = () => {
     console.log("Saving tool configuration:", formData);
     onClose();
-  };
-
-  const handleJSONUpdate = (data: any) => {
-    setFormData(data);
   };
 
   if (!isOpen) return null;
@@ -89,101 +81,79 @@ export const ToolConfigurationDrawer = ({ isOpen, onClose, tool }: ToolConfigura
                 {isEditMode ? "Configure tool settings and behavior" : "Create a new tool"}
               </p>
             </div>
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setShowJSONEditor(!showJSONEditor)}
-                className="h-10 px-3"
-              >
-                <FileJson className="h-4 w-4 mr-2" />
-                JSON Editor
-              </Button>
-              <Button variant="ghost" size="sm" onClick={onClose} className="h-10 w-10 p-0">
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
+            <Button variant="ghost" size="sm" onClick={onClose} className="h-10 w-10 p-0">
+              <X className="h-5 w-5" />
+            </Button>
           </div>
         </div>
 
         <div className="flex-1 min-h-0">
-          {showJSONEditor ? (
-            <div className="h-full p-6">
-              <JSONEditor
-                data={formData}
-                title="Tool Configuration"
-                onUpdate={handleJSONUpdate}
-                readOnly={false}
-              />
-            </div>
-          ) : (
-            <ScrollArea className="h-full">
-              <div className="p-6 space-y-6">
-                {/* Component Details */}
-                <div className="space-y-4">
-                  <h4 className="font-medium text-gray-900 text-lg">Component Details</h4>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Name</Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => setFormData({...formData, name: e.target.value})}
-                      placeholder="Tool name"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      value={formData.description}
-                      onChange={(e) => setFormData({...formData, description: e.target.value})}
-                      placeholder="Tool description"
-                      className="min-h-[80px]"
-                    />
-                  </div>
+          <ScrollArea className="h-full">
+            <div className="p-6 space-y-6">
+              {/* Component Details */}
+              <div className="space-y-4">
+                <h4 className="font-medium text-gray-900 text-lg">Component Details</h4>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="name">Name</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    placeholder="Tool name"
+                  />
                 </div>
 
-                {/* Configuration */}
-                <div className="space-y-4 border-t border-gray-200 pt-6">
-                  <h4 className="font-medium text-gray-900 text-lg">Configuration</h4>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="functionName">Function Name</Label>
-                    <Input
-                      id="functionName"
-                      value={formData.functionName}
-                      onChange={(e) => setFormData({...formData, functionName: e.target.value})}
-                      placeholder="Function name"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="globalImports">Global Imports</Label>
-                    <Textarea
-                      id="globalImports"
-                      value={formData.globalImports}
-                      onChange={(e) => setFormData({...formData, globalImports: e.target.value})}
-                      placeholder="Import statements"
-                      className="min-h-[100px] font-mono text-sm"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="sourceCode">Source Code</Label>
-                    <Textarea
-                      id="sourceCode"
-                      value={formData.sourceCode}
-                      onChange={(e) => setFormData({...formData, sourceCode: e.target.value})}
-                      placeholder="Function implementation"
-                      className="min-h-[400px] font-mono text-sm"
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    placeholder="Tool description"
+                    className="min-h-[80px]"
+                  />
                 </div>
               </div>
-            </ScrollArea>
-          )}
+
+              {/* Configuration */}
+              <div className="space-y-4 border-t border-gray-200 pt-6">
+                <h4 className="font-medium text-gray-900 text-lg">Configuration</h4>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="functionName">Function Name</Label>
+                  <Input
+                    id="functionName"
+                    value={formData.functionName}
+                    onChange={(e) => setFormData({...formData, functionName: e.target.value})}
+                    placeholder="Function name"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="globalImports">Global Imports</Label>
+                  <Textarea
+                    id="globalImports"
+                    value={formData.globalImports}
+                    onChange={(e) => setFormData({...formData, globalImports: e.target.value})}
+                    placeholder="Import statements"
+                    className="min-h-[100px] font-mono text-sm"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="sourceCode">Source Code</Label>
+                  <Textarea
+                    id="sourceCode"
+                    value={formData.sourceCode}
+                    onChange={(e) => setFormData({...formData, sourceCode: e.target.value})}
+                    placeholder="Function implementation"
+                    className="min-h-[400px] font-mono text-sm"
+                  />
+                </div>
+              </div>
+            </div>
+          </ScrollArea>
         </div>
 
         {/* Footer */}
