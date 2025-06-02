@@ -126,16 +126,10 @@ const Settings = () => {
         </Card>
 
         {/* API Keys */}
-        <Card>
-          
-          
-        </Card>
+        
 
         {/* Preferences */}
-        <Card>
-          
-          
-        </Card>
+        
 
         {/* Save Button */}
         <div className="flex justify-end">
