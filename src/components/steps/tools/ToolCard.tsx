@@ -52,10 +52,7 @@ export const ToolCard = ({
 
         {/* Actions */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center text-xs text-gray-500">
-            <Zap className="h-3 w-3 mr-1" />
-            {tool.enabled ? "Active" : "Inactive"}
-          </div>
+          
           
           {tool.enabled && <Button variant="ghost" size="sm" onClick={e => {
           e.stopPropagation();
