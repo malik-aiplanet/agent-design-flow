@@ -1,5 +1,4 @@
-
-import { Bot, Settings, Wrench, Cpu, StopCircle, Users, LogOut } from "lucide-react";
+import { Bot, Settings, Wrench, Cpu, StopCircle, Users, LogOut, Workflow } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   Sidebar,
@@ -17,8 +16,8 @@ import {
 import { toast } from "@/hooks/use-toast";
 
 const items = [
-  { title: "Agents", url: "/", icon: Bot },
-  { title: "Configure Agents", url: "/agents-2", icon: Users },
+  { title: "Workflow", url: "/", icon: Workflow },
+  { title: "Agents", url: "/agents-2", icon: Users },
   { title: "Tools", url: "/tools", icon: Wrench },
   { title: "Models", url: "/models", icon: Cpu },
   { title: "Terminations", url: "/terminations", icon: StopCircle },

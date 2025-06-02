@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { ArrowLeft, ArrowRight, Check, Sparkles, User, Users, Wrench, Settings, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,14 +6,14 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 
 // Import all step components
 import { AgentDetailsStep } from "@/components/steps/AgentDetailsStep";
-import { GroupAgentsStep } from "@/components/steps/GroupAgentsStep";
+import { SubAgentsStep } from "@/components/steps/SubAgentsStep";
 import { ToolsStep } from "@/components/steps/ToolsStep";
 import { TeamStep } from "@/components/steps/TeamStep";
 import { DeployStep } from "@/components/steps/DeployStep";
 
 const steps = [
   { id: 1, title: "Agent Details", component: AgentDetailsStep, icon: User },
-  { id: 2, title: "Group Agents", component: GroupAgentsStep, icon: Users },
+  { id: 2, title: "Sub Agents", component: SubAgentsStep, icon: Users },
   { id: 3, title: "Tools", component: ToolsStep, icon: Wrench },
   { id: 4, title: "Team", component: TeamStep, icon: Settings },
   { id: 5, title: "Deploy", component: DeployStep, icon: Rocket },
