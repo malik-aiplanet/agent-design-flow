@@ -1,5 +1,5 @@
 
-import { Bot, Settings, Sparkles } from "lucide-react";
+import { Bot, Settings, Wrench, Cpu, StopCircle } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   Sidebar,
@@ -14,6 +14,9 @@ import {
 
 const items = [
   { title: "Agents", url: "/", icon: Bot },
+  { title: "Tools", url: "/tools", icon: Wrench },
+  { title: "Models", url: "/models", icon: Cpu },
+  { title: "Terminations", url: "/terminations", icon: StopCircle },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
@@ -25,14 +28,14 @@ export function AppSidebar() {
       <SidebarHeader className="p-4 bg-white">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-            <Sparkles className="h-4 w-4 text-white" />
+            <Bot className="h-4 w-4 text-white" />
           </div>
           {state !== "collapsed" && (
             <div>
               <h2 className="text-lg font-semibold text-gray-900">
                 AI Agents
               </h2>
-              <p className="text-xs text-gray-500">Automation platform</p>
+              <p className="text-xs text-gray-500">Management platform</p>
             </div>
           )}
         </div>

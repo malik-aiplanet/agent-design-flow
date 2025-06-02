@@ -7,6 +7,9 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import Dashboard from "./pages/Dashboard";
+import ToolsManagement from "./pages/ToolsManagement";
+import ModelsManagement from "./pages/ModelsManagement";
+import TerminationsManagement from "./pages/TerminationsManagement";
 import CreateAgent from "./pages/CreateAgent";
 import ChatInterface from "./pages/ChatInterface";
 import Settings from "./pages/Settings";
@@ -35,6 +38,9 @@ const AppContent = () => {
         <main className="flex-1">
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/tools" element={<ToolsManagement />} />
+            <Route path="/models" element={<ModelsManagement />} />
+            <Route path="/terminations" element={<TerminationsManagement />} />
             <Route path="/chat/:agentId" element={<ChatInterface />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
