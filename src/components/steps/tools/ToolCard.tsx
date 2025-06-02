@@ -1,11 +1,9 @@
-
 import { useState } from "react";
 import { Settings, Zap } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-
 interface ToolCardProps {
   tool: {
     id: string;
@@ -19,23 +17,17 @@ interface ToolCardProps {
   onToggle: (toolId: string) => void;
   onConfigure: (toolId: string) => void;
 }
-
-export const ToolCard = ({ tool, onToggle, onConfigure }: ToolCardProps) => {
+export const ToolCard = ({
+  tool,
+  onToggle,
+  onConfigure
+}: ToolCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const hasCustomCode = tool.code !== tool.defaultCode;
-
-  return (
-    <Card 
-      className={`
+  return <Card className={`
         transition-all duration-200 hover:shadow-md cursor-pointer h-40
-        ${tool.enabled 
-          ? "ring-2 ring-blue-500 bg-blue-50 border-blue-200" 
-          : "border-gray-200 hover:border-gray-300"
-        }
-      `}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+        ${tool.enabled ? "ring-2 ring-blue-500 bg-blue-50 border-blue-200" : "border-gray-200 hover:border-gray-300"}
+      `} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
       <CardContent className="p-4 h-full flex flex-col">
         {/* Header */}
         <div className="flex items-start justify-between mb-3">
@@ -44,21 +36,13 @@ export const ToolCard = ({ tool, onToggle, onConfigure }: ToolCardProps) => {
               <h4 className="font-semibold text-gray-900 text-sm truncate">
                 {tool.name}
               </h4>
-              {hasCustomCode && (
-                <Badge variant="outline" className="text-xs bg-orange-50 text-orange-700 border-orange-200">
+              {hasCustomCode && <Badge variant="outline" className="text-xs bg-orange-50 text-orange-700 border-orange-200">
                   Custom
-                </Badge>
-              )}
+                </Badge>}
             </div>
-            <Badge variant="secondary" className="text-xs">
-              {tool.actions} action{tool.actions !== 1 ? 's' : ''}
-            </Badge>
+            
           </div>
-          <Switch
-            checked={tool.enabled}
-            onCheckedChange={() => onToggle(tool.id)}
-            onClick={(e) => e.stopPropagation()}
-          />
+          <Switch checked={tool.enabled} onCheckedChange={() => onToggle(tool.id)} onClick={e => e.stopPropagation()} />
         </div>
 
         {/* Description */}
@@ -73,25 +57,17 @@ export const ToolCard = ({ tool, onToggle, onConfigure }: ToolCardProps) => {
             {tool.enabled ? "Active" : "Inactive"}
           </div>
           
-          {tool.enabled && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onConfigure(tool.id);
-              }}
-              className={`
+          {tool.enabled && <Button variant="ghost" size="sm" onClick={e => {
+          e.stopPropagation();
+          onConfigure(tool.id);
+        }} className={`
                 text-xs h-7 px-2 transition-opacity
                 ${isHovered ? "opacity-100" : "opacity-60"}
-              `}
-            >
+              `}>
               <Settings className="h-3 w-3 mr-1" />
               Configure
-            </Button>
-          )}
+            </Button>}
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
