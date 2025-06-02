@@ -18,7 +18,7 @@ import { toast } from "@/hooks/use-toast";
 
 const items = [
   { title: "Agents", url: "/", icon: Bot },
-  { title: "Agents_2", url: "/agents-2", icon: Users },
+  { title: "Configure Agents", url: "/agents-2", icon: Users },
   { title: "Tools", url: "/tools", icon: Wrench },
   { title: "Models", url: "/models", icon: Cpu },
   { title: "Terminations", url: "/terminations", icon: StopCircle },
