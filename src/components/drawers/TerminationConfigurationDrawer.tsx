@@ -1,11 +1,12 @@
 
 import { useState } from "react";
-import { X, Save } from "lucide-react";
+import { X, Save, FileJson } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { JSONEditor } from "@/components/JSONEditor";
 
 interface Termination {
   id: string;
@@ -29,9 +30,15 @@ export const TerminationConfigurationDrawer = ({ isOpen, onClose, termination }:
     terminationText: termination?.terminationText || ""
   });
 
+  const [showJSONEditor, setShowJSONEditor] = useState(false);
+
   const handleSave = () => {
     console.log("Saving termination configuration:", formData);
     onClose();
+  };
+
+  const handleJSONUpdate = (data: any) => {
+    setFormData(data);
   };
 
   if (!isOpen) return null;
@@ -50,102 +57,124 @@ export const TerminationConfigurationDrawer = ({ isOpen, onClose, termination }:
               <h3 className="text-xl font-semibold text-gray-900">Termination Configuration</h3>
               <p className="text-sm text-gray-600 mt-1">Configure termination conditions and behavior</p>
             </div>
-            <Button variant="ghost" size="sm" onClick={onClose} className="h-10 w-10 p-0">
-              <X className="h-5 w-5" />
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setShowJSONEditor(!showJSONEditor)}
+                className="h-10 px-3"
+              >
+                <FileJson className="h-4 w-4 mr-2" />
+                JSON Editor
+              </Button>
+              <Button variant="ghost" size="sm" onClick={onClose} className="h-10 w-10 p-0">
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
         </div>
 
         <div className="flex-1 min-h-0">
-          <ScrollArea className="h-full">
-            <div className="p-6 space-y-6">
-              {/* Component Details */}
-              <div className="space-y-4">
-                <h4 className="font-medium text-gray-900 text-lg">Component Details</h4>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    placeholder="Termination name"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    placeholder="Termination description"
-                    className="min-h-[80px]"
-                  />
-                </div>
-              </div>
-
-              {/* Text Mention Configuration */}
-              <div className="space-y-4 border-t border-gray-200 pt-6">
-                <h4 className="font-medium text-gray-900 text-lg">Text Mention Configuration</h4>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="terminationText">Termination Text</Label>
-                  <Input
-                    id="terminationText"
-                    value={formData.terminationText}
-                    onChange={(e) => setFormData({...formData, terminationText: e.target.value})}
-                    placeholder="TASK_COMPLETE, STOP, ERROR, etc."
-                  />
-                  <p className="text-xs text-gray-500">
-                    Enter the text that will trigger this termination condition when mentioned by an agent.
-                  </p>
-                </div>
-              </div>
-
-              {/* Additional Configuration Info */}
-              <div className="space-y-4 border-t border-gray-200 pt-6">
-                <h4 className="font-medium text-gray-900 text-lg">Configuration Guidelines</h4>
-                <div className="space-y-3 text-sm text-gray-600">
-                  <div className="flex gap-3">
-                    <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-700">Case Sensitive</p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Termination text matching is case-sensitive. Use consistent casing across your agents.
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-3">
-                    <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-700">Exact Match</p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        The termination text must appear exactly as specified in the agent's output.
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-3">
-                    <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-700">Best Practices</p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Use clear, unique termination keywords that won't accidentally trigger during normal conversation.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+          {showJSONEditor ? (
+            <div className="h-full p-6">
+              <JSONEditor
+                data={formData}
+                title="Termination Configuration"
+                onUpdate={handleJSONUpdate}
+                readOnly={false}
+              />
             </div>
-          </ScrollArea>
+          ) : (
+            <ScrollArea className="h-full">
+              <div className="p-6 space-y-6">
+                {/* Component Details */}
+                <div className="space-y-4">
+                  <h4 className="font-medium text-gray-900 text-lg">Component Details</h4>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Name</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      placeholder="Termination name"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => setFormData({...formData, description: e.target.value})}
+                      placeholder="Termination description"
+                      className="min-h-[80px]"
+                    />
+                  </div>
+                </div>
+
+                {/* Text Mention Configuration */}
+                <div className="space-y-4 border-t border-gray-200 pt-6">
+                  <h4 className="font-medium text-gray-900 text-lg">Text Mention Configuration</h4>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="terminationText">Termination Text</Label>
+                    <Input
+                      id="terminationText"
+                      value={formData.terminationText}
+                      onChange={(e) => setFormData({...formData, terminationText: e.target.value})}
+                      placeholder="TASK_COMPLETE, STOP, ERROR, etc."
+                    />
+                    <p className="text-xs text-gray-500">
+                      Enter the text that will trigger this termination condition when mentioned by an agent.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Additional Configuration Info */}
+                <div className="space-y-4 border-t border-gray-200 pt-6">
+                  <h4 className="font-medium text-gray-900 text-lg">Configuration Guidelines</h4>
+                  <div className="space-y-3 text-sm text-gray-600">
+                    <div className="flex gap-3">
+                      <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-700">Case Sensitive</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Termination text matching is case-sensitive. Use consistent casing across your agents.
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-3">
+                      <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-700">Exact Match</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          The termination text must appear exactly as specified in the agent's output.
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-3">
+                      <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-700">Best Practices</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Use clear, unique termination keywords that won't accidentally trigger during normal conversation.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ScrollArea>
+          )}
         </div>
 
         {/* Footer */}

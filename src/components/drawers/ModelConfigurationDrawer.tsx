@@ -1,10 +1,12 @@
+
 import { useState } from "react";
-import { X, Save } from "lucide-react";
+import { X, Save, FileJson } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { JSONEditor } from "@/components/JSONEditor";
 
 interface Model {
   id: string;
@@ -41,9 +43,15 @@ export const ModelConfigurationDrawer = ({ isOpen, onClose, model }: ModelConfig
     stopSequences: ""
   });
 
+  const [showJSONEditor, setShowJSONEditor] = useState(false);
+
   const handleSave = () => {
     console.log("Saving model configuration:", formData);
     onClose();
+  };
+
+  const handleJSONUpdate = (data: any) => {
+    setFormData(data);
   };
 
   if (!isOpen) return null;
@@ -66,202 +74,224 @@ export const ModelConfigurationDrawer = ({ isOpen, onClose, model }: ModelConfig
                 {isEditMode ? "Configure model settings and parameters" : "Create a new AI model configuration"}
               </p>
             </div>
-            <Button variant="ghost" size="sm" onClick={onClose} className="h-10 w-10 p-0">
-              <X className="h-5 w-5" />
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setShowJSONEditor(!showJSONEditor)}
+                className="h-10 px-3"
+              >
+                <FileJson className="h-4 w-4 mr-2" />
+                JSON Editor
+              </Button>
+              <Button variant="ghost" size="sm" onClick={onClose} className="h-10 w-10 p-0">
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
         </div>
 
         <div className="flex-1 min-h-0">
-          <ScrollArea className="h-full">
-            <div className="p-6 space-y-6">
-              {/* Component Details */}
-              <div className="space-y-4">
-                <h4 className="font-medium text-gray-900 text-lg">Component Details</h4>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    placeholder="Model name"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    placeholder="Model description"
-                    className="min-h-[80px]"
-                  />
-                </div>
-              </div>
-
-              {/* Model Configuration */}
-              <div className="space-y-4 border-t border-gray-200 pt-6">
-                <h4 className="font-medium text-gray-900 text-lg">Model Configuration</h4>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="model">Model</Label>
-                    <Input
-                      id="model"
-                      value={formData.model}
-                      onChange={(e) => setFormData({...formData, model: e.target.value})}
-                      placeholder="gpt-4o-mini"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="apiKey">API Key</Label>
-                    <Input
-                      id="apiKey"
-                      type="password"
-                      value={formData.apiKey}
-                      onChange={(e) => setFormData({...formData, apiKey: e.target.value})}
-                      placeholder="sk-..."
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="organization">Organization</Label>
-                    <Input
-                      id="organization"
-                      value={formData.organization}
-                      onChange={(e) => setFormData({...formData, organization: e.target.value})}
-                      placeholder="org-..."
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="baseUrl">Base URL</Label>
-                    <Input
-                      id="baseUrl"
-                      value={formData.baseUrl}
-                      onChange={(e) => setFormData({...formData, baseUrl: e.target.value})}
-                      placeholder="https://api.openai.com/v1"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Advanced */}
-              <div className="space-y-4 border-t border-gray-200 pt-6">
-                <h4 className="font-medium text-gray-900 text-lg">Advanced</h4>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="timeout">Timeout (seconds)</Label>
-                    <Input
-                      id="timeout"
-                      type="number"
-                      value={formData.timeout}
-                      onChange={(e) => setFormData({...formData, timeout: parseInt(e.target.value)})}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="maxRetries">Max Retries</Label>
-                    <Input
-                      id="maxRetries"
-                      type="number"
-                      value={formData.maxRetries}
-                      onChange={(e) => setFormData({...formData, maxRetries: parseInt(e.target.value)})}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Model Parameters */}
-              <div className="space-y-4 border-t border-gray-200 pt-6">
-                <h4 className="font-medium text-gray-900 text-lg">Model Parameters</h4>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="temperature">Temperature</Label>
-                    <Input
-                      id="temperature"
-                      type="number"
-                      step="0.1"
-                      min="0"
-                      max="2"
-                      value={formData.temperature}
-                      onChange={(e) => setFormData({...formData, temperature: parseFloat(e.target.value)})}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="maxTokens">Max Tokens</Label>
-                    <Input
-                      id="maxTokens"
-                      type="number"
-                      value={formData.maxTokens}
-                      onChange={(e) => setFormData({...formData, maxTokens: parseInt(e.target.value)})}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="topP">Top P</Label>
-                    <Input
-                      id="topP"
-                      type="number"
-                      step="0.1"
-                      min="0"
-                      max="1"
-                      value={formData.topP}
-                      onChange={(e) => setFormData({...formData, topP: parseFloat(e.target.value)})}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="frequencyPenalty">Frequency Penalty</Label>
-                    <Input
-                      id="frequencyPenalty"
-                      type="number"
-                      step="0.1"
-                      min="-2"
-                      max="2"
-                      value={formData.frequencyPenalty}
-                      onChange={(e) => setFormData({...formData, frequencyPenalty: parseFloat(e.target.value)})}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="presencePenalty">Presence Penalty</Label>
-                    <Input
-                      id="presencePenalty"
-                      type="number"
-                      step="0.1"
-                      min="-2"
-                      max="2"
-                      value={formData.presencePenalty}
-                      onChange={(e) => setFormData({...formData, presencePenalty: parseFloat(e.target.value)})}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="stopSequences">Stop Sequences</Label>
-                    <Input
-                      id="stopSequences"
-                      value={formData.stopSequences}
-                      onChange={(e) => setFormData({...formData, stopSequences: e.target.value})}
-                      placeholder="Comma-separated values"
-                    />
-                  </div>
-                </div>
-              </div>
+          {showJSONEditor ? (
+            <div className="h-full p-6">
+              <JSONEditor
+                data={formData}
+                title="Model Configuration"
+                onUpdate={handleJSONUpdate}
+                readOnly={false}
+              />
             </div>
-          </ScrollArea>
+          ) : (
+            <ScrollArea className="h-full">
+              <div className="p-6 space-y-6">
+                {/* Component Details */}
+                <div className="space-y-4">
+                  <h4 className="font-medium text-gray-900 text-lg">Component Details</h4>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Name</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      placeholder="Model name"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => setFormData({...formData, description: e.target.value})}
+                      placeholder="Model description"
+                      className="min-h-[80px]"
+                    />
+                  </div>
+                </div>
+
+                {/* Model Configuration */}
+                <div className="space-y-4 border-t border-gray-200 pt-6">
+                  <h4 className="font-medium text-gray-900 text-lg">Model Configuration</h4>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="model">Model</Label>
+                      <Input
+                        id="model"
+                        value={formData.model}
+                        onChange={(e) => setFormData({...formData, model: e.target.value})}
+                        placeholder="gpt-4o-mini"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="apiKey">API Key</Label>
+                      <Input
+                        id="apiKey"
+                        type="password"
+                        value={formData.apiKey}
+                        onChange={(e) => setFormData({...formData, apiKey: e.target.value})}
+                        placeholder="sk-..."
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="organization">Organization</Label>
+                      <Input
+                        id="organization"
+                        value={formData.organization}
+                        onChange={(e) => setFormData({...formData, organization: e.target.value})}
+                        placeholder="org-..."
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="baseUrl">Base URL</Label>
+                      <Input
+                        id="baseUrl"
+                        value={formData.baseUrl}
+                        onChange={(e) => setFormData({...formData, baseUrl: e.target.value})}
+                        placeholder="https://api.openai.com/v1"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Advanced */}
+                <div className="space-y-4 border-t border-gray-200 pt-6">
+                  <h4 className="font-medium text-gray-900 text-lg">Advanced</h4>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="timeout">Timeout (seconds)</Label>
+                      <Input
+                        id="timeout"
+                        type="number"
+                        value={formData.timeout}
+                        onChange={(e) => setFormData({...formData, timeout: parseInt(e.target.value)})}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="maxRetries">Max Retries</Label>
+                      <Input
+                        id="maxRetries"
+                        type="number"
+                        value={formData.maxRetries}
+                        onChange={(e) => setFormData({...formData, maxRetries: parseInt(e.target.value)})}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Model Parameters */}
+                <div className="space-y-4 border-t border-gray-200 pt-6">
+                  <h4 className="font-medium text-gray-900 text-lg">Model Parameters</h4>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="temperature">Temperature</Label>
+                      <Input
+                        id="temperature"
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        max="2"
+                        value={formData.temperature}
+                        onChange={(e) => setFormData({...formData, temperature: parseFloat(e.target.value)})}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="maxTokens">Max Tokens</Label>
+                      <Input
+                        id="maxTokens"
+                        type="number"
+                        value={formData.maxTokens}
+                        onChange={(e) => setFormData({...formData, maxTokens: parseInt(e.target.value)})}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="topP">Top P</Label>
+                      <Input
+                        id="topP"
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        max="1"
+                        value={formData.topP}
+                        onChange={(e) => setFormData({...formData, topP: parseFloat(e.target.value)})}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="frequencyPenalty">Frequency Penalty</Label>
+                      <Input
+                        id="frequencyPenalty"
+                        type="number"
+                        step="0.1"
+                        min="-2"
+                        max="2"
+                        value={formData.frequencyPenalty}
+                        onChange={(e) => setFormData({...formData, frequencyPenalty: parseFloat(e.target.value)})}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="presencePenalty">Presence Penalty</Label>
+                      <Input
+                        id="presencePenalty"
+                        type="number"
+                        step="0.1"
+                        min="-2"
+                        max="2"
+                        value={formData.presencePenalty}
+                        onChange={(e) => setFormData({...formData, presencePenalty: parseFloat(e.target.value)})}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="stopSequences">Stop Sequences</Label>
+                      <Input
+                        id="stopSequences"
+                        value={formData.stopSequences}
+                        onChange={(e) => setFormData({...formData, stopSequences: e.target.value})}
+                        placeholder="Comma-separated values"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ScrollArea>
+          )}
         </div>
 
         {/* Footer */}
