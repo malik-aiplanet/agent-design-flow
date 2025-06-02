@@ -1,31 +1,44 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Bot } from "lucide-react";
 
-export const AgentDetailsStep = ({ data, onUpdate }: any) => {
-  const [name, setName] = useState(data?.name || "");
-  const [description, setDescription] = useState(data?.description || "");
+export const AgentDetailsStep = ({ data, onUpdate, isEditMode }: any) => {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+
+  // Initialize with data when in edit mode
+  useEffect(() => {
+    if (isEditMode && data) {
+      setName(data.name || "");
+      setDescription(data.description || "");
+    }
+  }, [isEditMode, data]);
 
   const handleNameChange = (value: string) => {
     setName(value);
-    onUpdate?.({ name: value, description });
+    onUpdate?.({ ...data, name: value, description });
   };
 
   const handleDescriptionChange = (value: string) => {
     setDescription(value);
-    onUpdate?.({ name, description: value });
+    onUpdate?.({ ...data, name, description: value });
   };
 
   return (
     <div className="space-y-8 max-w-4xl">
       <div className="space-y-3">
-        <h3 className="text-2xl font-bold text-gray-900">Agent Details</h3>
+        <h3 className="text-2xl font-bold text-gray-900">
+          {isEditMode ? "Edit Agent Details" : "Agent Details"}
+        </h3>
         <p className="text-gray-600 text-lg">
-          Configure your agent's basic information and identity. This forms the foundation of your agent's profile.
+          {isEditMode 
+            ? "Update your agent's basic information and identity."
+            : "Configure your agent's basic information and identity. This forms the foundation of your agent's profile."
+          }
         </p>
       </div>
 

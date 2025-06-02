@@ -7,7 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ModelConfigurationDrawer } from "@/components/drawers/ModelConfigurationDrawer";
+import { JSONEditor } from "@/components/JSONEditor";
 
 interface Model {
   id: string;
@@ -51,6 +53,7 @@ const ModelsManagement = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedModel, setSelectedModel] = useState<Model | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [currentView, setCurrentView] = useState<"cards" | "json">("cards");
 
   const filteredModels = models.filter(model => {
     const matchesSearch = model.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -115,64 +118,86 @@ const ModelsManagement = () => {
         </Select>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredModels.map(model => (
-          <Card 
-            key={model.id} 
-            className="hover:shadow-lg transition-all duration-300 bg-white border-slate-200 border-2 overflow-hidden cursor-pointer hover:border-blue-300 group h-fit"
-            onClick={() => handleCardClick(model)}
-          >
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                <div className="flex items-start justify-between">
-                  <h3 className="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors leading-tight">
-                    {model.name}
-                  </h3>
-                  <Badge className={`${getStatusColor(model.status)} border font-semibold px-2 py-1 text-xs ml-2 flex-shrink-0`}>
-                    {model.status}
-                  </Badge>
-                </div>
-                
-                <p className="text-slate-600 text-sm leading-relaxed line-clamp-3">{model.description}</p>
-                
-                <div className="space-y-2 text-xs text-slate-500">
-                  <div className="flex items-center gap-1">
-                    <span className="font-semibold">Model ID:</span> 
-                    <span className="truncate">{model.modelId}</span>
-                  </div>
-                  <div>Last modified {model.lastModified}</div>
-                </div>
+      <Tabs value={currentView} onValueChange={(value) => setCurrentView(value as "cards" | "json")} className="w-full">
+        <TabsList className="mb-6">
+          <TabsTrigger value="cards">Card View</TabsTrigger>
+          <TabsTrigger value="json">JSON View</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="cards">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredModels.map(model => (
+              <Card 
+                key={model.id} 
+                className="hover:shadow-lg transition-all duration-300 bg-white border-slate-200 border-2 overflow-hidden cursor-pointer hover:border-blue-300 group h-fit"
+                onClick={() => handleCardClick(model)}
+              >
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <div className="flex items-start justify-between">
+                      <h3 className="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors leading-tight">
+                        {model.name}
+                      </h3>
+                      <Badge className={`${getStatusColor(model.status)} border font-semibold px-2 py-1 text-xs ml-2 flex-shrink-0`}>
+                        {model.status}
+                      </Badge>
+                    </div>
+                    
+                    <p className="text-slate-600 text-sm leading-relaxed line-clamp-3">{model.description}</p>
+                    
+                    <div className="space-y-2 text-xs text-slate-500">
+                      <div className="flex items-center gap-1">
+                        <span className="font-semibold">Model ID:</span> 
+                        <span className="truncate">{model.modelId}</span>
+                      </div>
+                      <div>Last modified {model.lastModified}</div>
+                    </div>
 
-                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity pt-2" onClick={e => e.stopPropagation()}>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="h-8 px-3 border border-slate-300 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 font-semibold text-xs flex-1"
-                    onClick={() => handleCardClick(model)}
-                  >
-                    <Edit className="h-3 w-3 mr-1" />
-                    Edit
-                  </Button>
-                  
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-slate-100">
-                        <MoreVertical className="h-4 w-4" />
+                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity pt-2" onClick={e => e.stopPropagation()}>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="h-8 px-3 border border-slate-300 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 font-semibold text-xs flex-1"
+                        onClick={() => handleCardClick(model)}
+                      >
+                        <Edit className="h-3 w-3 mr-1" />
+                        Edit
                       </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem className="text-red-600">
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                      
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-slate-100">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem className="text-red-600">
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="json">
+          <div className="space-y-6">
+            {filteredModels.map(model => (
+              <JSONEditor
+                key={model.id}
+                data={model}
+                title={model.name}
+                readOnly={true}
+              />
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
 
       {filteredModels.length === 0 && (
         <div className="text-center py-20">

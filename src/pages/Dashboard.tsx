@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Plus, Search, Filter, Edit, Copy, Trash2, MoreVertical, Play, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link, useNavigate } from "react-router-dom";
-import { AgentConfigurationDrawer } from "@/components/drawers/AgentConfigurationDrawer";
 
 interface Agent {
   id: string;
@@ -46,8 +44,6 @@ const Dashboard = () => {
   const [agents, setAgents] = useState<Agent[]>(mockAgents);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
 
   const filteredAgents = agents.filter(agent => {
@@ -70,8 +66,7 @@ const Dashboard = () => {
   };
 
   const handleAgentCardClick = (agent: Agent) => {
-    setSelectedAgent(agent);
-    setDrawerOpen(true);
+    navigate(`/agent/edit/${agent.id}`);
   };
 
   const totalAgents = agents.length;
@@ -238,12 +233,6 @@ const Dashboard = () => {
           </Link>
         </div>
       )}
-
-      <AgentConfigurationDrawer 
-        isOpen={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        agent={selectedAgent}
-      />
     </div>
   );
 };

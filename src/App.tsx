@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,6 +12,7 @@ import ModelsManagement from "./pages/ModelsManagement";
 import TerminationsManagement from "./pages/TerminationsManagement";
 import Agents2Management from "./pages/Agents2Management";
 import CreateAgent from "./pages/CreateAgent";
+import EditAgent from "./pages/EditAgent";
 import ChatInterface from "./pages/ChatInterface";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -20,12 +22,14 @@ const queryClient = new QueryClient();
 const AppContent = () => {
   const location = useLocation();
   const isCreateRoute = location.pathname === "/create";
+  const isEditRoute = location.pathname.startsWith("/agent/edit");
 
-  if (isCreateRoute) {
+  if (isCreateRoute || isEditRoute) {
     return (
       <main className="w-full">
         <Routes>
           <Route path="/create" element={<CreateAgent />} />
+          <Route path="/agent/edit/:id" element={<EditAgent />} />
         </Routes>
       </main>
     );
