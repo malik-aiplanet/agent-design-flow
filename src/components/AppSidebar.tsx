@@ -1,15 +1,20 @@
-import { Bot, Settings, Wrench, Cpu, StopCircle, Users } from "lucide-react";
+
+import { Bot, Settings, Wrench, Cpu, StopCircle, Users, LogOut } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarSeparator,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { toast } from "@/hooks/use-toast";
 
 const items = [
   { title: "Agents", url: "/", icon: Bot },
@@ -22,6 +27,15 @@ const items = [
 
 export function AppSidebar() {
   const { state } = useSidebar();
+
+  const handleLogout = () => {
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out.",
+    });
+    // TODO: Implement actual logout logic when authentication is added
+    console.log("Logout clicked");
+  };
 
   return (
     <Sidebar collapsible="icon" className="bg-white border-r border-gray-200">
@@ -75,6 +89,24 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <SidebarFooter className="bg-white p-2">
+        <SidebarSeparator className="mb-2" />
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              onClick={handleLogout}
+              className="text-red-600 hover:bg-red-50 hover:text-red-700 w-full"
+              tooltip={state === "collapsed" ? "Logout" : undefined}
+            >
+              <LogOut className="h-4 w-4" />
+              {state !== "collapsed" && (
+                <span className="font-medium text-sm">Logout</span>
+              )}
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 }
