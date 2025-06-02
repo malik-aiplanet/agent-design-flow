@@ -1,5 +1,4 @@
-
-import { Bot, Settings, Wrench, Cpu, StopCircle } from "lucide-react";
+import { Bot, Settings, Wrench, Cpu, StopCircle, Users } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   Sidebar,
@@ -14,6 +13,7 @@ import {
 
 const items = [
   { title: "Agents", url: "/", icon: Bot },
+  { title: "Agents_2", url: "/agents-2", icon: Users },
   { title: "Tools", url: "/tools", icon: Wrench },
   { title: "Models", url: "/models", icon: Cpu },
   { title: "Terminations", url: "/terminations", icon: StopCircle },

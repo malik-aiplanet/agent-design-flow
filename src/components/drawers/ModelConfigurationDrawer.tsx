@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { X, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,6 +22,8 @@ interface ModelConfigurationDrawerProps {
 }
 
 export const ModelConfigurationDrawer = ({ isOpen, onClose, model }: ModelConfigurationDrawerProps) => {
+  const isEditMode = !!model;
+  
   const [formData, setFormData] = useState({
     name: model?.name || "",
     description: model?.description || "",
@@ -58,8 +59,12 @@ export const ModelConfigurationDrawer = ({ isOpen, onClose, model }: ModelConfig
         <div className="flex-shrink-0 border-b border-gray-200 bg-white">
           <div className="flex items-center justify-between p-6">
             <div>
-              <h3 className="text-xl font-semibold text-gray-900">Model Configuration</h3>
-              <p className="text-sm text-gray-600 mt-1">Configure model settings and parameters</p>
+              <h3 className="text-xl font-semibold text-gray-900">
+                {isEditMode ? "Model Configuration" : "Add New Model"}
+              </h3>
+              <p className="text-sm text-gray-600 mt-1">
+                {isEditMode ? "Configure model settings and parameters" : "Create a new AI model configuration"}
+              </p>
             </div>
             <Button variant="ghost" size="sm" onClick={onClose} className="h-10 w-10 p-0">
               <X className="h-5 w-5" />

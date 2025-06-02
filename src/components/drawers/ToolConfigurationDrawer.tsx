@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { X, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,6 +21,8 @@ interface ToolConfigurationDrawerProps {
 }
 
 export const ToolConfigurationDrawer = ({ isOpen, onClose, tool }: ToolConfigurationDrawerProps) => {
+  const isEditMode = !!tool;
+  
   const [formData, setFormData] = useState({
     name: tool?.name || "",
     description: tool?.description || "",
@@ -73,8 +74,12 @@ export const ToolConfigurationDrawer = ({ isOpen, onClose, tool }: ToolConfigura
         <div className="flex-shrink-0 border-b border-gray-200 bg-white">
           <div className="flex items-center justify-between p-6">
             <div>
-              <h3 className="text-xl font-semibold text-gray-900">Tool Configuration</h3>
-              <p className="text-sm text-gray-600 mt-1">Configure tool settings and behavior</p>
+              <h3 className="text-xl font-semibold text-gray-900">
+                {isEditMode ? "Tool Configuration" : "Add New Tool"}
+              </h3>
+              <p className="text-sm text-gray-600 mt-1">
+                {isEditMode ? "Configure tool settings and behavior" : "Create a new tool"}
+              </p>
             </div>
             <Button variant="ghost" size="sm" onClick={onClose} className="h-10 w-10 p-0">
               <X className="h-5 w-5" />

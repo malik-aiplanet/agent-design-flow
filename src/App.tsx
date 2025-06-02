@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import ToolsManagement from "./pages/ToolsManagement";
 import ModelsManagement from "./pages/ModelsManagement";
 import TerminationsManagement from "./pages/TerminationsManagement";
+import Agents2Management from "./pages/Agents2Management";
 import CreateAgent from "./pages/CreateAgent";
 import ChatInterface from "./pages/ChatInterface";
 import Settings from "./pages/Settings";
@@ -38,6 +38,7 @@ const AppContent = () => {
         <main className="flex-1">
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/agents-2" element={<Agents2Management />} />
             <Route path="/tools" element={<ToolsManagement />} />
             <Route path="/models" element={<ModelsManagement />} />
             <Route path="/terminations" element={<TerminationsManagement />} />
