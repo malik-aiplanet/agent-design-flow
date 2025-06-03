@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Plus, Search, Filter, Edit, Copy, Trash2, MoreVertical, Play, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -78,13 +79,13 @@ const Dashboard = () => {
       <div className="mb-8">
         <div className="flex justify-between items-start mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">Agents</h1>
-            <p className="text-slate-600 text-lg">Manage and deploy your intelligent agents</p>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">Workflow</h1>
+            <p className="text-slate-600 text-lg">Manage and deploy your intelligent workflows</p>
           </div>
           <Link to="/create">
             <Button className="bg-blue-600 hover:bg-blue-700 text-white h-auto flex items-center gap-3 font-semibold transition-colors rounded-lg py-[10px] px-[16px] text-sm">
               <Plus className="h-5 w-5" />
-              Create New Agent
+              Create New Workflow
             </Button>
           </Link>
         </div>
@@ -95,7 +96,7 @@ const Dashboard = () => {
             <CardContent className="p-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-blue-700 text-sm font-semibold mb-2">Total Agents</p>
+                  <p className="text-blue-700 text-sm font-semibold mb-2">Total Workflows</p>
                   <p className="text-4xl font-bold text-blue-900">{totalAgents}</p>
                 </div>
                 <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center border-2 border-blue-200">
@@ -109,7 +110,7 @@ const Dashboard = () => {
             <CardContent className="p-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-green-700 text-sm font-semibold mb-2">Active Agents</p>
+                  <p className="text-green-700 text-sm font-semibold mb-2">Active Workflows</p>
                   <p className="text-4xl font-bold text-green-900">{activeAgents}</p>
                 </div>
                 <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center border-2 border-green-200">
@@ -125,7 +126,7 @@ const Dashboard = () => {
       <div className="flex gap-4 mb-8">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5" />
-          <Input placeholder="Search agents by name or description..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-12 h-14 border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-base" />
+          <Input placeholder="Search workflows by name or description..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-12 h-14 border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-base" />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-48 h-14 border-slate-300 text-base">
@@ -223,12 +224,12 @@ const Dashboard = () => {
           <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-8 border-2 border-slate-200">
             <Search className="h-12 w-12 text-slate-400" />
           </div>
-          <div className="text-slate-500 text-xl font-semibold mb-3">No agents found</div>
-          <p className="text-slate-400 mb-8 text-base">Try adjusting your search terms or create your first agent</p>
+          <div className="text-slate-500 text-xl font-semibold mb-3">No workflows found</div>
+          <p className="text-slate-400 mb-8 text-base">Try adjusting your search terms or create your first workflow</p>
           <Link to="/create">
             <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 h-auto rounded-lg font-semibold text-base">
               <Plus className="h-5 w-5 mr-2" />
-              Create Your First Agent
+              Create Your First Workflow
             </Button>
           </Link>
         </div>
