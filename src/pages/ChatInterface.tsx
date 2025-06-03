@@ -1,11 +1,10 @@
-
 import { useState, useRef, useEffect } from "react";
-import { Send, Paperclip, Bot, User } from "lucide-react";
+import { Send, Paperclip, Bot, User, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import ConversationSidebar from "@/components/ConversationSidebar";
 
 interface Message {
@@ -17,6 +16,7 @@ interface Message {
 
 const ChatInterface = () => {
   const { agentId, conversationId } = useParams();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -51,6 +51,10 @@ const ChatInterface = () => {
       ]);
     }
   }, [conversationId]);
+
+  const handleBackToMain = () => {
+    navigate("/");
+  };
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
@@ -97,6 +101,14 @@ const ChatInterface = () => {
         <div className="bg-white border-b p-4">
           <div className="max-w-4xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleBackToMain}
+                className="h-10 w-10 p-0 hover:bg-gray-100"
+              >
+                <ArrowLeft className="h-5 w-5 text-gray-600" />
+              </Button>
               <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                 <Bot className="h-5 w-5 text-blue-600" />
               </div>
