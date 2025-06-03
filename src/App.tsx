@@ -23,13 +23,16 @@ const AppContent = () => {
   const location = useLocation();
   const isCreateRoute = location.pathname === "/create";
   const isEditRoute = location.pathname.startsWith("/agent/edit");
+  const isChatRoute = location.pathname.startsWith("/chat");
 
-  if (isCreateRoute || isEditRoute) {
+  if (isCreateRoute || isEditRoute || isChatRoute) {
     return (
       <main className="w-full">
         <Routes>
           <Route path="/create" element={<CreateAgent />} />
           <Route path="/agent/edit/:id" element={<EditAgent />} />
+          <Route path="/chat/:agentId" element={<ChatInterface />} />
+          <Route path="/chat/:agentId/:conversationId" element={<ChatInterface />} />
         </Routes>
       </main>
     );
@@ -46,7 +49,6 @@ const AppContent = () => {
             <Route path="/tools" element={<ToolsManagement />} />
             <Route path="/models" element={<ModelsManagement />} />
             <Route path="/terminations" element={<TerminationsManagement />} />
-            <Route path="/chat/:agentId" element={<ChatInterface />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useParams } from "react-router-dom";
+import ConversationSidebar from "@/components/ConversationSidebar";
 
 interface Message {
   id: string;
@@ -15,7 +16,7 @@ interface Message {
 }
 
 const ChatInterface = () => {
-  const { agentId } = useParams();
+  const { agentId, conversationId } = useParams();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -35,6 +36,21 @@ const ChatInterface = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Reset messages when conversation changes
+  useEffect(() => {
+    if (conversationId) {
+      // In a real app, you would load the conversation messages here
+      setMessages([
+        {
+          id: "1",
+          content: "Hello! I'm your AI agent. How can I help you today?",
+          sender: "agent",
+          timestamp: new Date()
+        }
+      ]);
+    }
+  }, [conversationId]);
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
@@ -72,6 +88,9 @@ const ChatInterface = () => {
 
   return (
     <div className="flex h-screen bg-gray-50">
+      {/* Conversation Sidebar */}
+      <ConversationSidebar />
+
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
@@ -86,6 +105,11 @@ const ChatInterface = () => {
                 <div className="flex items-center gap-2 text-sm text-gray-500">
                   <Badge variant="secondary" className="text-xs">GPT-4</Badge>
                   <Badge variant="secondary" className="text-xs">Active</Badge>
+                  {conversationId && (
+                    <Badge variant="outline" className="text-xs">
+                      Chat {conversationId.slice(-6)}
+                    </Badge>
+                  )}
                 </div>
               </div>
             </div>
@@ -180,28 +204,6 @@ const ChatInterface = () => {
                 </Button>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Side Panel */}
-      <div className="w-80 bg-white border-l p-4">
-        <h3 className="font-medium mb-4">Agent Details</h3>
-        <div className="space-y-4">
-          <div>
-            <span className="text-sm text-gray-500">Model</span>
-            <p className="font-medium">GPT-4</p>
-          </div>
-          <div>
-            <span className="text-sm text-gray-500">Tools</span>
-            <div className="flex flex-wrap gap-1 mt-1">
-              <Badge variant="secondary" className="text-xs">Taskade Actions</Badge>
-              <Badge variant="secondary" className="text-xs">Media</Badge>
-            </div>
-          </div>
-          <div>
-            <span className="text-sm text-gray-500">Status</span>
-            <Badge className="bg-green-100 text-green-800 border-0">Active</Badge>
           </div>
         </div>
       </div>
