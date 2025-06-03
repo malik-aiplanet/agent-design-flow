@@ -1,12 +1,12 @@
 
 import { useState } from "react";
-import { CheckCircle, Loader2, Rocket } from "lucide-react";
+import { CheckCircle, Loader2, Rocket, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 
-export const DeployStep = ({ data, onUpdate }: any) => {
+export const DeployStep = ({ data, onUpdate, hasUnsavedChanges, onSave }: any) => {
   const [isDeploying, setIsDeploying] = useState(false);
   const [isDeployed, setIsDeployed] = useState(false);
   const navigate = useNavigate();
@@ -31,27 +31,36 @@ export const DeployStep = ({ data, onUpdate }: any) => {
     navigate("/chat/test");
   };
 
+  const handleSaveAndDeploy = async () => {
+    if (hasUnsavedChanges) {
+      onSave();
+      // Wait a moment for save to complete
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    handleDeploy();
+  };
+
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium mb-2">Deploy Your Agent</h3>
-        <p className="text-gray-600">Review your configuration and deploy your AI agent.</p>
+        <h3 className="text-lg font-medium mb-2">Deploy Your Workflow</h3>
+        <p className="text-gray-600">Review your configuration and deploy your AI workflow.</p>
       </div>
 
       {/* Summary Card */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Agent Summary</CardTitle>
+          <CardTitle className="text-base">Workflow Summary</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <span className="text-sm text-gray-500">Agent Name</span>
-              <p className="font-medium">Customer Support Agent</p>
+              <span className="text-sm text-gray-500">Workflow Name</span>
+              <p className="font-medium">Customer Support Workflow</p>
             </div>
             <div>
-              <span className="text-sm text-gray-500">Model</span>
-              <p className="font-medium">GPT-4</p>
+              <span className="text-sm text-gray-500">Operator</span>
+              <p className="font-medium">OpenAI</p>
             </div>
           </div>
           
@@ -63,12 +72,34 @@ export const DeployStep = ({ data, onUpdate }: any) => {
               <Badge variant="secondary">URL</Badge>
             </div>
           </div>
+
+          <div>
+            <span className="text-sm text-gray-500">Sub Agents</span>
+            <div className="flex gap-2 mt-1">
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <Users className="h-3 w-3" />
+                Agent 1 - Research
+              </Badge>
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <Users className="h-3 w-3" />
+                Agent 2 - Analysis
+              </Badge>
+            </div>
+          </div>
           
           <div>
             <span className="text-sm text-gray-500">Tools</span>
             <div className="flex gap-2 mt-1">
               <Badge variant="secondary">Taskade Actions</Badge>
               <Badge variant="secondary">Media</Badge>
+            </div>
+          </div>
+
+          <div>
+            <span className="text-sm text-gray-500">Termination Conditions</span>
+            <div className="flex gap-2 mt-1">
+              <Badge variant="secondary">Max Iterations</Badge>
+              <Badge variant="secondary">User Approval</Badge>
             </div>
           </div>
           
@@ -79,13 +110,25 @@ export const DeployStep = ({ data, onUpdate }: any) => {
         </CardContent>
       </Card>
 
+      {/* Unsaved Changes Warning */}
+      {hasUnsavedChanges && (
+        <Card className="border-amber-200 bg-amber-50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 text-amber-800">
+              <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+              <span className="text-sm font-medium">You have unsaved changes that will be saved before deployment.</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Deployment Status */}
       {isDeployed && (
         <Card className="border-green-200 bg-green-50">
           <CardContent className="p-6 text-center">
             <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-green-900 mb-2">Agent Deployed Successfully! 🎉</h3>
-            <p className="text-green-700">Your agent is now ready to use.</p>
+            <h3 className="text-lg font-medium text-green-900 mb-2">Workflow Deployed Successfully! 🎉</h3>
+            <p className="text-green-700">Your workflow is now ready to use.</p>
           </CardContent>
         </Card>
       )}
@@ -102,7 +145,7 @@ export const DeployStep = ({ data, onUpdate }: any) => {
         </Button>
         
         <Button
-          onClick={handleDeploy}
+          onClick={handleSaveAndDeploy}
           disabled={isDeploying || isDeployed}
           className="flex-1 bg-blue-600 hover:bg-blue-700"
         >
@@ -119,7 +162,7 @@ export const DeployStep = ({ data, onUpdate }: any) => {
           ) : (
             <>
               <Rocket className="mr-2 h-4 w-4" />
-              Deploy System
+              {hasUnsavedChanges ? "Save & Deploy System" : "Deploy System"}
             </>
           )}
         </Button>

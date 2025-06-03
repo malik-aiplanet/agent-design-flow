@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, Check, Sparkles, User, Users, Wrench, Settings, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,7 @@ import { TeamStep } from "@/components/steps/TeamStep";
 import { DeployStep } from "@/components/steps/DeployStep";
 
 const steps = [
-  { id: 1, title: "Agent Details", component: AgentDetailsStep, icon: User },
+  { id: 1, title: "Workflow Details", component: AgentDetailsStep, icon: User },
   { id: 2, title: "Sub Agents", component: SubAgentsStep, icon: Users },
   { id: 3, title: "Tools", component: ToolsStep, icon: Wrench },
   { id: 4, title: "Team", component: TeamStep, icon: Settings },
@@ -22,6 +23,7 @@ const steps = [
 const CreateAgent = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [agentData, setAgentData] = useState({});
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const nextStep = () => {
     if (currentStep < steps.length) {
@@ -37,6 +39,16 @@ const CreateAgent = () => {
 
   const goToStep = (stepId: number) => {
     setCurrentStep(stepId);
+  };
+
+  const updateAgentData = (newData: any) => {
+    setAgentData(newData);
+    setHasUnsavedChanges(true);
+  };
+
+  const saveChanges = () => {
+    // Simulate save operation
+    setHasUnsavedChanges(false);
   };
 
   const CurrentStepComponent = steps[currentStep - 1].component;
@@ -58,7 +70,7 @@ const CreateAgent = () => {
                 <Sparkles className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-semibold text-gray-900">Create Agent</h1>
+                <h1 className="text-lg font-semibold text-gray-900">Create Workflow</h1>
                 <p className="text-sm text-gray-500">Step by step setup</p>
               </div>
             </div>
@@ -126,9 +138,11 @@ const CreateAgent = () => {
             <CardContent className="p-8">
               <CurrentStepComponent 
                 data={agentData} 
-                onUpdate={setAgentData}
+                onUpdate={updateAgentData}
                 onNext={nextStep}
                 onPrev={prevStep}
+                onSave={saveChanges}
+                hasUnsavedChanges={hasUnsavedChanges}
               />
             </CardContent>
           </Card>

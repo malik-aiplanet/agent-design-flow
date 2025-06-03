@@ -2,65 +2,34 @@
 import { useState } from "react";
 import { Zap, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 
-const terminationConditions = [
-  { 
-    value: "max-iterations", 
-    label: "Max Iterations",
-    hasInput: true,
-    inputType: "number",
-    inputPlaceholder: "e.g., 100"
-  },
-  { 
-    value: "time-limit", 
-    label: "Time Limit",
-    hasInput: true,
-    inputType: "number",
-    inputPlaceholder: "Minutes"
-  },
-  { 
-    value: "success-condition", 
-    label: "Success Condition",
-    hasInput: true,
-    inputType: "text",
-    inputPlaceholder: "Define success criteria"
-  },
-  { 
-    value: "user-approval", 
-    label: "User Approval",
-    hasInput: false
-  }
+const terminationOptions = [
+  { value: "max-iterations", label: "Max Iterations" },
+  { value: "time-limit", label: "Time Limit" },
+  { value: "success-condition", label: "Success Condition" },
+  { value: "user-approval", label: "User Approval" },
+  { value: "error-threshold", label: "Error Threshold" },
+  { value: "cost-limit", label: "Cost Limit" }
 ];
 
 export const MultiSelectTerminationCard = () => {
   const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
-  const [conditionValues, setConditionValues] = useState<Record<string, string>>({});
 
-  const toggleCondition = (conditionValue: string) => {
-    setSelectedConditions(prev => 
-      prev.includes(conditionValue)
-        ? prev.filter(c => c !== conditionValue)
-        : [...prev, conditionValue]
-    );
-  };
-
-  const updateConditionValue = (conditionValue: string, value: string) => {
-    setConditionValues(prev => ({
-      ...prev,
-      [conditionValue]: value
-    }));
+  const handleSelectCondition = (value: string) => {
+    if (!selectedConditions.includes(value)) {
+      setSelectedConditions(prev => [...prev, value]);
+    }
   };
 
   const removeCondition = (conditionValue: string) => {
     setSelectedConditions(prev => prev.filter(c => c !== conditionValue));
-    setConditionValues(prev => {
-      const { [conditionValue]: removed, ...rest } = prev;
-      return rest;
-    });
+  };
+
+  const getAvailableOptions = () => {
+    return terminationOptions.filter(option => !selectedConditions.includes(option.value));
   };
 
   return (
@@ -78,7 +47,7 @@ export const MultiSelectTerminationCard = () => {
             <Label className="text-sm font-medium">Selected Conditions:</Label>
             <div className="flex flex-wrap gap-2">
               {selectedConditions.map(conditionValue => {
-                const condition = terminationConditions.find(c => c.value === conditionValue);
+                const condition = terminationOptions.find(c => c.value === conditionValue);
                 return (
                   <Badge 
                     key={conditionValue} 
@@ -99,44 +68,26 @@ export const MultiSelectTerminationCard = () => {
           </div>
         )}
 
-        {/* Condition Selection */}
-        <div className="space-y-3">
-          <Label className="text-sm font-medium">Available Conditions:</Label>
-          {terminationConditions.map(condition => (
-            <div key={condition.value} className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id={condition.value}
-                  checked={selectedConditions.includes(condition.value)}
-                  onCheckedChange={() => toggleCondition(condition.value)}
-                />
-                <Label 
-                  htmlFor={condition.value}
-                  className="text-sm font-normal cursor-pointer"
-                >
-                  {condition.label}
-                </Label>
-              </div>
-              
-              {/* Conditional Input Field */}
-              {condition.hasInput && selectedConditions.includes(condition.value) && (
-                <div className="ml-6">
-                  <Input
-                    type={condition.inputType}
-                    placeholder={condition.inputPlaceholder}
-                    value={conditionValues[condition.value] || ""}
-                    onChange={(e) => updateConditionValue(condition.value, e.target.value)}
-                    className="max-w-xs"
-                  />
-                </div>
-              )}
-            </div>
-          ))}
+        {/* Add Condition Dropdown */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Add Condition:</Label>
+          <Select onValueChange={handleSelectCondition}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select a termination condition" />
+            </SelectTrigger>
+            <SelectContent>
+              {getAvailableOptions().map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {selectedConditions.length === 0 && (
           <p className="text-sm text-gray-500 italic">
-            Select one or more termination conditions for your agent.
+            Select one or more termination conditions for your workflow.
           </p>
         )}
       </CardContent>

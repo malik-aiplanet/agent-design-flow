@@ -15,19 +15,19 @@ export const TeamStep = ({
     <div className="space-y-8 max-w-4xl">
       <div className="space-y-3">
         <h3 className="text-2xl font-bold text-gray-900">Team Configuration</h3>
-        <p className="text-gray-600 text-lg">Configure team settings, input components, and administrative options for your agent deployment.</p>
+        <p className="text-gray-600 text-lg">Configure team settings, input components, and administrative options for your workflow deployment.</p>
       </div>
 
       {/* Input Components - First Item */}
       <InputComponentCard />
 
-      {/* Model & Termination */}
+      {/* Operator & Termination */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ModelSelectionCard />
         <MultiSelectTerminationCard />
       </div>
 
-      {/* Agents */}
+      {/* Sub Agents */}
       <AgentsSelectionCard />
 
       {/* Output Format */}

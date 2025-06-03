@@ -4,33 +4,33 @@ import { Brain } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const models = [
-  { value: "gpt-4", label: "GPT-4" },
-  { value: "gpt-3.5-turbo", label: "GPT-3.5 Turbo" },
-  { value: "claude-3", label: "Claude 3" },
-  { value: "gemini-pro", label: "Gemini Pro" }
+const operators = [
+  { value: "claude", label: "Claude" },
+  { value: "openai", label: "OpenAI" },
+  { value: "gemini", label: "Gemini" },
+  { value: "llama", label: "LLaMA" }
 ];
 
 export const ModelSelectionCard = () => {
-  const [selectedModel, setSelectedModel] = useState("");
+  const [selectedOperator, setSelectedOperator] = useState("");
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2">
           <Brain className="h-5 w-5 text-blue-600" />
-          Model
+          Operator
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <Select value={selectedModel} onValueChange={setSelectedModel}>
+        <Select value={selectedOperator} onValueChange={setSelectedOperator}>
           <SelectTrigger>
-            <SelectValue placeholder="Select a model" />
+            <SelectValue placeholder="Select an operator" />
           </SelectTrigger>
           <SelectContent>
-            {models.map(model => (
-              <SelectItem key={model.value} value={model.value}>
-                {model.label}
+            {operators.map(operator => (
+              <SelectItem key={operator.value} value={operator.value}>
+                {operator.label}
               </SelectItem>
             ))}
           </SelectContent>
