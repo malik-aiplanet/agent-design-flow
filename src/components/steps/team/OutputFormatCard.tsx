@@ -32,7 +32,8 @@ export const OutputFormatCard = () => {
         <div className="flex gap-3">
           {[
             { key: "json", label: "JSON", desc: "Structured data format" },
-            { key: "markdown", label: "Markdown", desc: "Rich text format" }
+            { key: "markdown", label: "Markdown", desc: "Rich text format" },
+            { key: "text", label: "Text", desc: "Simple text response" }
           ].map(format => (
             <button
               key={format.key}
