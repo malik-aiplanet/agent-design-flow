@@ -1,39 +1,42 @@
-
 import { useState } from "react";
 import { Zap, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-
-const terminationOptions = [
-  { value: "max-iterations", label: "Max Iterations" },
-  { value: "time-limit", label: "Time Limit" },
-  { value: "success-condition", label: "Success Condition" },
-  { value: "user-approval", label: "User Approval" },
-  { value: "error-threshold", label: "Error Threshold" },
-  { value: "cost-limit", label: "Cost Limit" }
-];
-
+const terminationOptions = [{
+  value: "max-iterations",
+  label: "Max Iterations"
+}, {
+  value: "time-limit",
+  label: "Time Limit"
+}, {
+  value: "success-condition",
+  label: "Success Condition"
+}, {
+  value: "user-approval",
+  label: "User Approval"
+}, {
+  value: "error-threshold",
+  label: "Error Threshold"
+}, {
+  value: "cost-limit",
+  label: "Cost Limit"
+}];
 export const MultiSelectTerminationCard = () => {
   const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
-
   const handleSelectCondition = (value: string) => {
     if (!selectedConditions.includes(value)) {
       setSelectedConditions(prev => [...prev, value]);
     }
   };
-
   const removeCondition = (conditionValue: string) => {
     setSelectedConditions(prev => prev.filter(c => c !== conditionValue));
   };
-
   const getAvailableOptions = () => {
     return terminationOptions.filter(option => !selectedConditions.includes(option.value));
   };
-
-  return (
-    <Card>
+  return <Card>
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2">
           <Zap className="h-5 w-5 text-orange-600" />
@@ -42,55 +45,27 @@ export const MultiSelectTerminationCard = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Selected Conditions Display */}
-        {selectedConditions.length > 0 && (
-          <div className="space-y-2">
+        {selectedConditions.length > 0 && <div className="space-y-2">
             <Label className="text-sm font-medium">Selected Conditions:</Label>
             <div className="flex flex-wrap gap-2">
               {selectedConditions.map(conditionValue => {
-                const condition = terminationOptions.find(c => c.value === conditionValue);
-                return (
-                  <Badge 
-                    key={conditionValue} 
-                    variant="secondary" 
-                    className="flex items-center gap-1"
-                  >
+            const condition = terminationOptions.find(c => c.value === conditionValue);
+            return <Badge key={conditionValue} variant="secondary" className="flex items-center gap-1">
                     {condition?.label}
-                    <button
-                      onClick={() => removeCondition(conditionValue)}
-                      className="ml-1 hover:bg-gray-200 rounded-full p-0.5"
-                    >
+                    <button onClick={() => removeCondition(conditionValue)} className="ml-1 hover:bg-gray-200 rounded-full p-0.5">
                       <X className="h-3 w-3" />
                     </button>
-                  </Badge>
-                );
-              })}
+                  </Badge>;
+          })}
             </div>
-          </div>
-        )}
+          </div>}
 
         {/* Add Condition Dropdown */}
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">Add Condition:</Label>
-          <Select onValueChange={handleSelectCondition}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a termination condition" />
-            </SelectTrigger>
-            <SelectContent>
-              {getAvailableOptions().map(option => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        
 
-        {selectedConditions.length === 0 && (
-          <p className="text-sm text-gray-500 italic">
+        {selectedConditions.length === 0 && <p className="text-sm text-gray-500 italic">
             Select one or more termination conditions for your workflow.
-          </p>
-        )}
+          </p>}
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
