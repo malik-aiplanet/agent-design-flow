@@ -83,7 +83,7 @@ const Agents2Management = () => {
       <div className="mb-8">
         <div className="flex justify-between items-start mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">Configure Agents</h1>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">Agents</h1>
             <p className="text-slate-600 text-lg">Manage and configure your specialized AI agents</p>
           </div>
           <Button 
