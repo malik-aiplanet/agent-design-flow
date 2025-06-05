@@ -1,4 +1,4 @@
-import { Bot, Settings, Wrench, Cpu, StopCircle, Users, LogOut, Workflow } from "lucide-react";
+import { Bot, Settings, Wrench, Cpu, StopCircle, Users, Workflow } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   Sidebar,
@@ -9,11 +9,10 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
-  SidebarMenuButton,
   SidebarSeparator,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { toast } from "@/hooks/use-toast";
+import { UserAvatar } from "@/components/auth/UserAvatar";
 
 const items = [
   { title: "Workflow", url: "/", icon: Workflow },
@@ -26,15 +25,6 @@ const items = [
 
 export function AppSidebar() {
   const { state } = useSidebar();
-
-  const handleLogout = () => {
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out.",
-    });
-    // TODO: Implement actual logout logic when authentication is added
-    console.log("Logout clicked");
-  };
 
   return (
     <Sidebar collapsible="icon" className="bg-white border-r border-gray-200">
@@ -53,20 +43,20 @@ export function AppSidebar() {
           )}
         </div>
       </SidebarHeader>
-      
+
       <SidebarContent className="bg-white p-2">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <NavLink 
-                    to={item.url} 
+                  <NavLink
+                    to={item.url}
                     end
                     className={({ isActive }) =>
                       `flex items-center gap-3 px-3 py-2 h-10 rounded-md transition-colors relative ${
-                        isActive 
-                          ? "bg-blue-600 text-white border-l-4 border-blue-800" 
+                        isActive
+                          ? "bg-blue-600 text-white border-l-4 border-blue-800"
                           : "text-gray-700 hover:bg-gray-100"
                       }`
                     }
@@ -91,20 +81,7 @@ export function AppSidebar() {
 
       <SidebarFooter className="bg-white p-2">
         <SidebarSeparator className="mb-2" />
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              onClick={handleLogout}
-              className="text-red-600 hover:bg-red-50 hover:text-red-700 w-full"
-              tooltip={state === "collapsed" ? "Logout" : undefined}
-            >
-              <LogOut className="h-4 w-4" />
-              {state !== "collapsed" && (
-                <span className="font-medium text-sm">Logout</span>
-              )}
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        {state !== "collapsed" && <UserAvatar />}
       </SidebarFooter>
     </Sidebar>
   );
