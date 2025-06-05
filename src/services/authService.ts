@@ -1,4 +1,5 @@
 import { ApiService, API_ENDPOINTS, ApiError } from '@/lib/api';
+import axios from 'axios';
 
 // Auth types
 export interface User {
@@ -89,37 +90,26 @@ class AuthService {
     formData.append('password', credentials.password);
 
     try {
-      const response = await fetch(API_ENDPOINTS.PUBLIC.LOGIN, {
-        method: 'POST',
-        body: formData,
+      const response = await axios.post<TokenResponse>(API_ENDPOINTS.PUBLIC.LOGIN, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        let errorMessage: string;
-
-        try {
-          const errorData = JSON.parse(errorText);
-          errorMessage = errorData.detail || 'Login failed';
-        } catch {
-          errorMessage = 'Login failed';
-        }
-
-        throw new Error(errorMessage);
-      }
-
-      const data: TokenResponse = await response.json();
-
       const tokens: AuthTokens = {
-        accessToken: data.access_token,
-        refreshToken: data.refresh_token,
-        tokenType: data.token_type
+        accessToken: response.data.access_token,
+        refreshToken: response.data.refresh_token,
+        tokenType: response.data.token_type
       };
 
       AuthService.setTokens(tokens);
       return tokens;
-    } catch (error) {
-      throw error instanceof Error ? error : new Error('Login failed');
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.detail ||
+                          error.response?.data?.message ||
+                          error.message ||
+                          'Login failed';
+      throw new Error(errorMessage);
     }
   }
 
@@ -130,9 +120,15 @@ class AuthService {
     };
 
     try {
-      const response = await ApiService.post<User>(
+      const response = await ApiService.requestFullUrl<User>(
         API_ENDPOINTS.PUBLIC.REGISTER,
-        payload
+        {
+          method: 'POST',
+          data: payload,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
       );
       return response;
     } catch (error) {
@@ -148,39 +144,42 @@ class AuthService {
     }
 
     try {
-      const response = await ApiService.post<TokenResponse>(
+      const response = await axios.post<TokenResponse>(
         API_ENDPOINTS.PUBLIC.REFRESH,
-        tokens.refreshToken
+        tokens.refreshToken,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
       );
 
       const newTokens: AuthTokens = {
-        accessToken: response.access_token,
-        refreshToken: response.refresh_token,
-        tokenType: response.token_type
+        accessToken: response.data.access_token,
+        refreshToken: response.data.refresh_token,
+        tokenType: response.data.token_type
       };
 
       AuthService.setTokens(newTokens);
       return newTokens;
-    } catch (error) {
+    } catch (error: any) {
       AuthService.clearTokens();
-      throw new Error('Token refresh failed');
+      const errorMessage = error.response?.data?.detail ||
+                          error.response?.data?.message ||
+                          'Token refresh failed';
+      throw new Error(errorMessage);
     }
   }
 
   static async getCurrentUser(): Promise<User> {
     try {
-      // Check if token needs refresh
-      const tokens = AuthService.getTokens();
-      if (tokens && AuthService.isTokenExpired(tokens.accessToken)) {
-        await AuthService.refreshToken();
-      }
-
+      // The axios interceptor will handle token refresh automatically
       const user = await ApiService.get<User>(API_ENDPOINTS.PRIVATE.USER_ME);
       return user;
     } catch (error) {
       const apiError = error as ApiError;
 
-      // If unauthorized, clear tokens
+      // If unauthorized, clear tokens (interceptor should have already handled this)
       if (apiError.status === 401) {
         AuthService.clearTokens();
       }
@@ -199,24 +198,10 @@ class AuthService {
     return !!tokens?.accessToken;
   }
 
-    // Automatic token refresh for API calls
+  // This method is now simplified since axios interceptors handle token refresh automatically
   static async ensureValidToken(): Promise<string | null> {
     const tokens = AuthService.getTokens();
-
-    if (!tokens) {
-      return null;
-    }
-
-    if (AuthService.isTokenExpired(tokens.accessToken)) {
-      try {
-        const refreshedTokens = await AuthService.refreshToken();
-        return refreshedTokens?.accessToken || null;
-      } catch {
-        return null;
-      }
-    }
-
-    return tokens.accessToken;
+    return tokens?.accessToken || null;
   }
 }
 

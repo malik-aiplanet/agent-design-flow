@@ -16,7 +16,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
@@ -87,6 +87,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       queryClient.clear();
     }
   }, [userError, queryClient]);
+
+  // Listen for auth:logout events from axios interceptor
+  useEffect(() => {
+    const handleAuthLogout = () => {
+      console.log('Auto-logout triggered by axios interceptor');
+      AuthService.clearTokens();
+      queryClient.clear();
+      // You could also redirect to login page here if needed
+      // window.location.href = '/login';
+    };
+
+    window.addEventListener('auth:logout', handleAuthLogout);
+
+    return () => {
+      window.removeEventListener('auth:logout', handleAuthLogout);
+    };
+  }, [queryClient]);
 
   // Auto-refresh token when app starts if user is authenticated
   useEffect(() => {
