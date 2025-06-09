@@ -1,18 +1,16 @@
 
 import { useState } from "react";
-import { Zap } from "lucide-react";
+import { Zap, Loader2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-const terminationConditions = [
-  { value: "max-iterations", label: "Max Iterations" },
-  { value: "time-limit", label: "Time Limit" },
-  { value: "success-condition", label: "Success Condition" },
-  { value: "user-approval", label: "User Approval" }
-];
+import { useTerminations } from "@/hooks/useTerminations";
 
 export const TerminationConditionCard = () => {
-  const [terminationCondition, setTerminationCondition] = useState("");
+  const [selectedTerminationId, setSelectedTerminationId] = useState("");
+
+  // Fetch termination conditions from backend
+  const { data: terminationsResponse, isLoading } = useTerminations({ limit: 100 });
+  const terminations = (terminationsResponse as any)?.items || [];
 
   return (
     <Card>
@@ -23,18 +21,25 @@ export const TerminationConditionCard = () => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <Select value={terminationCondition} onValueChange={setTerminationCondition}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select condition" />
-          </SelectTrigger>
-          <SelectContent>
-            {terminationConditions.map(condition => (
-              <SelectItem key={condition.value} value={condition.value}>
-                {condition.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {isLoading ? (
+          <div className="flex items-center justify-center p-4">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span className="ml-2 text-sm text-gray-500">Loading conditions...</span>
+          </div>
+        ) : (
+          <Select value={selectedTerminationId} onValueChange={setSelectedTerminationId}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select condition" />
+            </SelectTrigger>
+            <SelectContent>
+              {terminations.map(termination => (
+                <SelectItem key={termination.id} value={termination.id}>
+                  {termination.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       </CardContent>
     </Card>
   );
