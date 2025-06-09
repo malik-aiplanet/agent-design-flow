@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tansta
 import { agentsApi, AgentFilters } from '../api/agents'
 import { buildersApi } from '../api/builders'
 import { AgentCreate, AgentUpdate, Agent2 } from '../types/agent'
+import { formatRelativeTime } from '../lib/datetime'
 
 // Utility function to transform backend Agent to frontend Agent2 format
 const transformAgentToAgent2 = (agent: any): Agent2 => {
@@ -9,25 +10,9 @@ const transformAgentToAgent2 = (agent: any): Agent2 => {
   const modelClient = config?.model_client;
   const workbench = config?.workbench;
 
-  // Handle date parsing with fallback
-  let lastModified = "Unknown";
-  if (agent.updated_at) {
-    try {
-      const date = new Date(agent.updated_at);
-      // Check if date is valid (not NaN and not epoch)
-      if (!isNaN(date.getTime()) && date.getTime() > 0) {
-        lastModified = date.toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        });
-      }
-    } catch (error) {
-      console.warn('Failed to parse date:', agent.updated_at);
-    }
-  }
+  // Select the most recent date (updated_at or created_at as fallback)
+  const dateToFormat = agent.updated_at || agent.created_at;
+  const lastModified = formatRelativeTime(dateToFormat);
 
   return {
     id: agent.id,
