@@ -13,7 +13,7 @@ import ToolsManagement from "./pages/ToolsManagement";
 import ModelsManagement from "./pages/ModelsManagement";
 import TerminationsManagement from "./pages/TerminationsManagement";
 import Agents2Management from "./pages/Agents2Management";
-import CreateAgent from "./pages/CreateAgent";
+import CreateWorkflow from "./pages/CreateWorkflow";
 import EditAgent from "./pages/EditAgent";
 import ChatInterface from "./pages/ChatInterface";
 import Settings from "./pages/Settings";
@@ -48,7 +48,7 @@ const AppContent = () => {
       <ProtectedRoute>
         <main className="w-full">
           <Routes>
-            <Route path="/create" element={<CreateAgent />} />
+            <Route path="/create" element={<CreateWorkflow />} />
             <Route path="/agent/edit/:id" element={<EditAgent />} />
             <Route path="/chat/:agentId" element={<ChatInterface />} />
             <Route path="/chat/:agentId/:conversationId" element={<ChatInterface />} />

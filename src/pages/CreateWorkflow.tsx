@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, Check, Sparkles, User, Users, Wrench, Settings, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,9 +19,9 @@ const steps = [
   { id: 5, title: "Deploy", component: DeployStep, icon: Rocket },
 ];
 
-const CreateAgent = () => {
+const CreateWorkflow = () => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [agentData, setAgentData] = useState({});
+  const [workflowData, setWorkflowData] = useState({});
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const nextStep = () => {
@@ -41,8 +40,8 @@ const CreateAgent = () => {
     setCurrentStep(stepId);
   };
 
-  const updateAgentData = (newData: any) => {
-    setAgentData(newData);
+  const updateWorkflowData = (newData: any) => {
+    setWorkflowData(newData);
     setHasUnsavedChanges(true);
   };
 
@@ -84,23 +83,23 @@ const CreateAgent = () => {
               const isActive = currentStep === step.id;
               const isCompleted = currentStep > step.id;
               const IconComponent = step.icon;
-              
+
               return (
                 <button
                   key={step.id}
                   onClick={() => goToStep(step.id)}
                   className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
-                    isActive 
-                      ? "bg-blue-600 text-white" 
+                    isActive
+                      ? "bg-blue-600 text-white"
                       : isCompleted
                       ? "bg-green-50 text-green-700 hover:bg-green-100"
                       : "text-gray-600 hover:bg-gray-100"
                   }`}
                 >
                   <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
-                    isCompleted 
+                    isCompleted
                       ? "bg-green-100 border-green-500"
-                      : isActive 
+                      : isActive
                       ? "bg-white border-white"
                       : "border-gray-300"
                   }`}>
@@ -136,9 +135,9 @@ const CreateAgent = () => {
         <div className="max-w-4xl mx-auto">
           <Card className="bg-white border border-gray-200 shadow-sm">
             <CardContent className="p-8">
-              <CurrentStepComponent 
-                data={agentData} 
-                onUpdate={updateAgentData}
+              <CurrentStepComponent
+                data={workflowData}
+                onUpdate={updateWorkflowData}
                 onNext={nextStep}
                 onPrev={prevStep}
                 onSave={saveChanges}
@@ -153,8 +152,8 @@ const CreateAgent = () => {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50">
         <div className="max-w-7xl mx-auto flex justify-end">
           <div className="flex gap-4">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={prevStep}
               disabled={currentStep === 1}
               className="flex items-center gap-2 px-6 py-2 h-10 text-sm disabled:opacity-50 border-gray-300"
@@ -162,16 +161,16 @@ const CreateAgent = () => {
               <ArrowLeft className="h-4 w-4" />
               Previous
             </Button>
-            
+
             {currentStep === steps.length ? (
-              <Button 
+              <Button
                 className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white h-10 text-sm"
               >
                 <Check className="h-4 w-4" />
                 Complete
               </Button>
             ) : (
-              <Button 
+              <Button
                 onClick={nextStep}
                 className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white h-10 text-sm"
               >
@@ -186,4 +185,4 @@ const CreateAgent = () => {
   );
 };
 
-export default CreateAgent;
+export default CreateWorkflow;
