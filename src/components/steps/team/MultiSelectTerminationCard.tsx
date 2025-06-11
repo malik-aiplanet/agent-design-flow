@@ -1,5 +1,3 @@
-
-import { useState } from "react";
 import { Zap, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -15,17 +13,22 @@ const terminationOptions = [
   { value: "cost-limit", label: "Cost Limit" }
 ];
 
-export const MultiSelectTerminationCard = () => {
-  const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
+interface MultiSelectTerminationCardProps {
+    terminationConditions?: string[];
+    onUpdate?: (data: { terminationConditions: string[] }) => void;
+}
+
+export const MultiSelectTerminationCard = ({ terminationConditions, onUpdate }: MultiSelectTerminationCardProps) => {
+  const selectedConditions = terminationConditions || [];
 
   const handleSelectCondition = (value: string) => {
     if (!selectedConditions.includes(value)) {
-      setSelectedConditions(prev => [...prev, value]);
+      onUpdate?.({ terminationConditions: [...selectedConditions, value] });
     }
   };
 
   const removeCondition = (conditionValue: string) => {
-    setSelectedConditions(prev => prev.filter(c => c !== conditionValue));
+    onUpdate?.({ terminationConditions: selectedConditions.filter(c => c !== conditionValue) });
   };
 
   const getAvailableOptions = () => {
@@ -49,9 +52,9 @@ export const MultiSelectTerminationCard = () => {
               {selectedConditions.map(conditionValue => {
                 const condition = terminationOptions.find(c => c.value === conditionValue);
                 return (
-                  <Badge 
-                    key={conditionValue} 
-                    variant="secondary" 
+                  <Badge
+                    key={conditionValue}
+                    variant="secondary"
                     className="flex items-center gap-1"
                   >
                     {condition?.label}
@@ -71,7 +74,7 @@ export const MultiSelectTerminationCard = () => {
         {/* Add Condition Dropdown */}
         <div className="space-y-2">
           <Label className="text-sm font-medium">Add Condition:</Label>
-          <Select onValueChange={handleSelectCondition}>
+          <Select onValueChange={handleSelectCondition} value="">
             <SelectTrigger>
               <SelectValue placeholder="Select a termination condition" />
             </SelectTrigger>

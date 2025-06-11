@@ -5,26 +5,36 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 
 // Import all step components
-import { AgentDetailsStep } from "@/components/steps/AgentDetailsStep";
+import { teamDetailsStep } from "@/components/steps/TeamDetailsStep";
 import { SubAgentsStep } from "@/components/steps/SubAgentsStep";
-import { ToolsStep } from "@/components/steps/ToolsStep";
 import { TeamStep } from "@/components/steps/TeamStep";
 import { DeployStep } from "@/components/steps/DeployStep";
 
 const steps = [
-  { id: 1, title: "Workflow Details", component: AgentDetailsStep, icon: User },
+  { id: 1, title: "Workflow Details", component: teamDetailsStep, icon: User },
   { id: 2, title: "Sub Agents", component: SubAgentsStep, icon: Users },
-  { id: 3, title: "Tools", component: ToolsStep, icon: Wrench },
-  { id: 4, title: "Team", component: TeamStep, icon: Settings },
-  { id: 5, title: "Deploy", component: DeployStep, icon: Rocket },
+  { id: 3, title: "Team", component: TeamStep, icon: Settings },
+  { id: 4, title: "Deploy", component: DeployStep, icon: Rocket },
 ];
 
-const CreateWorkflow = () => {
+const CreateTeam = () => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [workflowData, setWorkflowData] = useState({});
+  const [teamData, setTeamData] = useState<any>({});
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const nextStep = () => {
+    // Basic validation for step 1
+    if (currentStep === 1) {
+      const hasName = teamData.name?.trim();
+      const hasTeamType = teamData.teamType;
+
+      if (!hasName || !hasTeamType) {
+        // Scroll to top to show validation messages
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+    }
+
     if (currentStep < steps.length) {
       setCurrentStep(currentStep + 1);
     }
@@ -41,12 +51,13 @@ const CreateWorkflow = () => {
   };
 
   const updateWorkflowData = (newData: any) => {
-    setWorkflowData(newData);
+    setTeamData(prev => ({ ...prev, ...newData }));
     setHasUnsavedChanges(true);
   };
 
   const saveChanges = () => {
-    // Simulate save operation
+    // Could implement local storage or draft saving here
+    console.log("Saving workflow data:", teamData);
     setHasUnsavedChanges(false);
   };
 
@@ -88,38 +99,33 @@ const CreateWorkflow = () => {
                 <button
                   key={step.id}
                   onClick={() => goToStep(step.id)}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
-                    isActive
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${isActive
                       ? "bg-blue-600 text-white"
                       : isCompleted
-                      ? "bg-green-50 text-green-700 hover:bg-green-100"
-                      : "text-gray-600 hover:bg-gray-100"
-                  }`}
+                        ? "bg-green-50 text-green-700 hover:bg-green-100"
+                        : "text-gray-600 hover:bg-gray-100"
+                    }`}
                 >
-                  <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
-                    isCompleted
+                  <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${isCompleted
                       ? "bg-green-100 border-green-500"
                       : isActive
-                      ? "bg-white border-white"
-                      : "border-gray-300"
-                  }`}>
+                        ? "bg-white border-white"
+                        : "border-gray-300"
+                    }`}>
                     {isCompleted ? (
                       <Check className="h-4 w-4 text-green-600" />
                     ) : (
-                      <IconComponent className={`h-4 w-4 ${
-                        isActive ? "text-blue-600" : "text-gray-400"
-                      }`} />
+                      <IconComponent className={`h-4 w-4 ${isActive ? "text-blue-600" : "text-gray-400"
+                        }`} />
                     )}
                   </div>
                   <div className="flex-1">
-                    <div className={`font-medium text-sm ${
-                      isActive ? "text-white" : isCompleted ? "text-green-700" : "text-gray-700"
-                    }`}>
+                    <div className={`font-medium text-sm ${isActive ? "text-white" : isCompleted ? "text-green-700" : "text-gray-700"
+                      }`}>
                       {step.title}
                     </div>
-                    <div className={`text-xs ${
-                      isActive ? "text-blue-100" : isCompleted ? "text-green-600" : "text-gray-500"
-                    }`}>
+                    <div className={`text-xs ${isActive ? "text-blue-100" : isCompleted ? "text-green-600" : "text-gray-500"
+                      }`}>
                       Step {step.id} of {steps.length}
                     </div>
                   </div>
@@ -136,7 +142,7 @@ const CreateWorkflow = () => {
           <Card className="bg-white border border-gray-200 shadow-sm">
             <CardContent className="p-8">
               <CurrentStepComponent
-                data={workflowData}
+                data={teamData}
                 onUpdate={updateWorkflowData}
                 onNext={nextStep}
                 onPrev={prevStep}
@@ -185,4 +191,4 @@ const CreateWorkflow = () => {
   );
 };
 
-export default CreateWorkflow;
+export default CreateTeam;

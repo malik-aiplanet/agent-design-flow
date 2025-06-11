@@ -1,18 +1,20 @@
-
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { FileType } from "lucide-react";
 
-export const OutputFormatCard = () => {
-  const [outputFormat, setOutputFormat] = useState<string[]>(["json"]);
+interface OutputFormatCardProps {
+    outputFormat?: string[];
+    onUpdate?: (data: { outputFormat: string[] }) => void;
+}
+
+export const OutputFormatCard = ({ outputFormat, onUpdate }: OutputFormatCardProps) => {
+  const selectedFormats = outputFormat || ["json"];
 
   const toggleOutputFormat = (format: string) => {
-    setOutputFormat(prev => 
-      prev.includes(format) 
-        ? prev.filter(f => f !== format)
-        : [...prev, format]
-    );
+    const newFormats = selectedFormats.includes(format)
+        ? selectedFormats.filter(f => f !== format)
+        : [...selectedFormats, format];
+    onUpdate?.({ outputFormat: newFormats });
   };
 
   return (
@@ -39,7 +41,7 @@ export const OutputFormatCard = () => {
               key={format.key}
               onClick={() => toggleOutputFormat(format.key)}
               className={`p-4 rounded-lg font-medium transition-all border-2 text-left ${
-                outputFormat.includes(format.key)
+                selectedFormats.includes(format.key)
                   ? "bg-green-50 text-green-700 border-green-200 shadow-sm"
                   : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100 hover:border-gray-300"
               }`}

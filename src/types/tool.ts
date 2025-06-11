@@ -62,3 +62,14 @@ export interface ToolFilters {
   name_like?: string;
   is_active?: boolean;
 }
+
+// Tool component for builder service (matches the builder API response format)
+export interface ToolComponent {
+  provider: string;
+  component_type: string;
+  version: number;
+  component_version: number;
+  description: string;
+  label: string;
+  config: Record<string, any>;
+}

@@ -1,5 +1,3 @@
-
-import { useState } from "react";
 import { Plus, X, FileText, Upload, Link, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -11,7 +9,6 @@ interface InputComponent {
   id: string;
   type: string;
   enabled: boolean;
-  icon: React.ComponentType<any>;
 }
 
 const inputTypes = [{
@@ -32,33 +29,41 @@ const inputTypes = [{
   icon: Image
 }];
 
-export const InputComponentCard = () => {
-  const [inputs, setInputs] = useState<InputComponent[]>([{
+interface InputComponentCardProps {
+    inputComponents?: InputComponent[];
+    onUpdate?: (inputComponents: InputComponent[]) => void;
+}
+
+export const InputComponentCard = ({ inputComponents, onUpdate }: InputComponentCardProps) => {
+  const inputs = inputComponents && inputComponents.length > 0 ? inputComponents : [{
     id: "1",
     type: "text",
     enabled: true,
-    icon: FileText
-  }]);
+  }];
+
+  const handleUpdate = (updatedInputs: InputComponent[]) => {
+      onUpdate?.(updatedInputs);
+  }
 
   const addInput = () => {
     const newInput: InputComponent = {
       id: Date.now().toString(),
       type: "text",
       enabled: true,
-      icon: FileText
     };
-    setInputs([...inputs, newInput]);
+    handleUpdate([...inputs, newInput]);
   };
 
   const removeInput = (id: string) => {
-    setInputs(inputs.filter(input => input.id !== id));
+    handleUpdate(inputs.filter(input => input.id !== id));
   };
 
   const updateInput = (id: string, field: string, value: any) => {
-    setInputs(inputs.map(input => input.id === id ? {
+    const updatedInputs = inputs.map(input => (input.id === id ? {
       ...input,
       [field]: value
     } : input));
+    handleUpdate(updatedInputs);
   };
 
   return (
@@ -78,7 +83,7 @@ export const InputComponentCard = () => {
               <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-lg">
                 <IconComponent className="h-5 w-5 text-gray-600" />
               </div>
-              
+
               <div className="flex-1 grid grid-cols-2 gap-4">
                 <div>
                   <Label className="text-xs text-gray-500">Type</Label>
@@ -98,22 +103,13 @@ export const InputComponentCard = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="text-xs text-gray-500">Enabled</Label>
-                    <div className="mt-2">
-                      <Switch 
-                        checked={input.enabled} 
-                        onCheckedChange={checked => updateInput(input.id, "enabled", checked)} 
-                      />
-                    </div>
-                  </div>
                   {inputs.length > 1 && (
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => removeInput(input.id)} 
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeInput(input.id)}
                       className="text-red-600 hover:text-red-700"
                     >
                       <X className="h-4 w-4" />

@@ -1,13 +1,14 @@
-
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { MessageSquare } from "lucide-react";
 
-export const SystemPromptCard = () => {
-  const [systemPrompt, setSystemPrompt] = useState("");
+interface SystemPromptCardProps {
+    systemPrompt?: string;
+    onUpdate?: (data: { systemPrompt: string }) => void;
+}
 
+export const SystemPromptCard = ({ systemPrompt, onUpdate }: SystemPromptCardProps) => {
   return (
     <Card className="border-gray-200 shadow-sm">
       <CardHeader>
@@ -26,7 +27,7 @@ export const SystemPromptCard = () => {
           id="system-prompt"
           placeholder="You are a helpful AI assistant that specializes in customer support. Always be friendly, professional, and solution-oriented. When you don't know something, acknowledge it honestly and offer to escalate to a human agent."
           value={systemPrompt}
-          onChange={(e) => setSystemPrompt(e.target.value)}
+          onChange={(e) => onUpdate?.({ systemPrompt: e.target.value })}
           className="min-h-[140px] resize-none border-gray-300 focus:border-purple-500 focus:ring-purple-500"
         />
         <div className="text-xs text-gray-500">

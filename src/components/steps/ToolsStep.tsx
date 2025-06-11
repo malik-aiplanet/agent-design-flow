@@ -1,9 +1,10 @@
-import { useState } from "react";
-import { Search, Filter } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Search, Filter, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ToolCard } from "./tools/ToolCard";
 import { ToolConfigurationDrawer } from "./tools/ToolConfigurationDrawer";
+import { useTools } from "@/hooks/useTools";
 interface Tool {
   id: string;
   name: string;
@@ -45,16 +46,16 @@ function processAIRequest(prompt, context) {
   const enhancedPrompt = \`
     Context: \${context}
     User Request: \${prompt}
-    
+
     Please provide a helpful response.
   \`;
-  
+
   return callAI(enhancedPrompt, aiConfig);
 }`,
   "media": `// Media Processing Configuration
 function processMedia(file, options = {}) {
   const { type, size, format } = options;
-  
+
   switch(file.type) {
     case 'image':
       return processImage(file, format);
@@ -83,7 +84,7 @@ function sendSlackMessage(channel, message, options = {}) {
     text: message,
     ...options
   };
-  
+
   // Custom Slack message logic
   console.log('Sending to Slack:', formattedMessage);
   return postToSlack(formattedMessage);
@@ -101,7 +102,7 @@ function sendEmail(to, subject, body, options = {}) {
     body: body + '\\n\\n' + emailConfig.signature,
     ...options
   };
-  
+
   // Custom email logic
   console.log('Sending email:', email);
   return sendGmailMessage(email);
@@ -110,7 +111,7 @@ function sendEmail(to, subject, body, options = {}) {
 function queryDatabase(query, params = {}) {
   // Custom database query logic
   console.log('Executing query:', query, params);
-  
+
   switch(query.type) {
     case 'SELECT':
       return executeSelect(query, params);
@@ -136,7 +137,7 @@ function createEvent(title, startTime, options = {}) {
     timezone: options.timezone || calendarConfig.timezone,
     ...options
   };
-  
+
   // Custom calendar logic
   console.log('Creating calendar event:', event);
   return scheduleEvent(event);
@@ -145,7 +146,7 @@ function createEvent(title, startTime, options = {}) {
 function handleWebhook(event, payload) {
   // Custom webhook processing logic
   console.log('Processing webhook:', event, payload);
-  
+
   switch(event) {
     case 'data.received':
       return processDataReceived(payload);
@@ -169,7 +170,7 @@ function sendNotification(message, recipient, options = {}) {
     priority: options.priority || 'normal',
     ...options
   };
-  
+
   // Custom notification logic
   console.log('Sending notification:', notification);
   return deliverNotification(notification);
@@ -252,32 +253,79 @@ export const ToolsStep = ({
   data,
   onUpdate
 }: any) => {
-  const [tools, setTools] = useState<Tool[]>(availableTools);
+  const [selectedTools, setSelectedTools] = useState<string[]>(data?.selectedTools || []);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedToolId, setSelectedToolId] = useState<string | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  // Query parameters for backend filtering
+  const queryParams = useMemo(() => ({
+    name_like: searchQuery || undefined,
+    is_active: true,
+    limit: 100,
+  }), [searchQuery]);
+
+  // Fetch tools from backend
+  const { data: toolsResponse, isLoading, error } = useTools(queryParams);
+  const tools = (toolsResponse as any)?.items || [];
+
   const toggleTool = (toolId: string) => {
-    setTools(tools.map(tool => tool.id === toolId ? {
-      ...tool,
-      enabled: !tool.enabled
-    } : tool));
+    const updatedSelection = selectedTools.includes(toolId)
+      ? selectedTools.filter(id => id !== toolId)
+      : [...selectedTools, toolId];
+
+    setSelectedTools(updatedSelection);
+    onUpdate?.({ ...data, selectedTools: updatedSelection });
   };
-  const updateToolCode = (toolId: string, code: string) => {
-    setTools(tools.map(tool => tool.id === toolId ? {
-      ...tool,
-      code
-    } : tool));
-  };
+
   const openConfiguration = (toolId: string) => {
     setSelectedToolId(toolId);
     setIsDrawerOpen(true);
   };
+
   const closeConfiguration = () => {
     setIsDrawerOpen(false);
     setSelectedToolId(null);
   };
-  const filteredTools = tools.filter(tool => tool.name.toLowerCase().includes(searchQuery.toLowerCase()) || tool.description.toLowerCase().includes(searchQuery.toLowerCase()));
+
   const selectedTool = selectedToolId ? tools.find(t => t.id === selectedToolId) : null;
+
+  // Handle loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-8 max-w-6xl">
+        <div className="space-y-3">
+          <h3 className="text-2xl font-bold text-gray-900">Tools & Integrations</h3>
+          <p className="text-gray-600 text-lg">
+            Select the tools your agent can use and configure their behavior.
+          </p>
+        </div>
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <span className="ml-2 text-slate-600">Loading tools...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle error state
+  if (error) {
+    return (
+      <div className="space-y-8 max-w-6xl">
+        <div className="space-y-3">
+          <h3 className="text-2xl font-bold text-gray-900">Tools & Integrations</h3>
+          <p className="text-gray-600 text-lg">
+            Select the tools your agent can use and configure their behavior.
+          </p>
+        </div>
+        <div className="text-center py-20">
+          <div className="text-red-600 text-xl font-semibold mb-3">Error loading tools</div>
+          <p className="text-slate-400 mb-8 text-base">{(error as any)?.message || 'Something went wrong'}</p>
+        </div>
+      </div>
+    );
+  }
+
   return <div className="space-y-8 max-w-6xl">
       <div className="space-y-3">
         <h3 className="text-2xl font-bold text-gray-900">Tools & Integrations</h3>
@@ -300,16 +348,33 @@ export const ToolsStep = ({
 
       {/* Tools Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {filteredTools.map(tool => <ToolCard key={tool.id} tool={tool} onToggle={toggleTool} onConfigure={openConfiguration} />)}
+        {tools.length === 0 ? (
+          <div className="col-span-full text-center py-8 text-gray-500">
+            No tools found matching your search.
+          </div>
+        ) : (
+          tools.map(tool => (
+            <ToolCard
+              key={tool.id}
+              tool={{
+                ...tool,
+                enabled: selectedTools.includes(tool.id),
+                code: "",
+                defaultCode: ""
+              }}
+              onToggle={toggleTool}
+              onConfigure={openConfiguration}
+            />
+          ))
+        )}
       </div>
 
       {/* Summary */}
       <div className="flex items-center justify-between text-sm text-gray-600 pt-4 border-t">
-        <span>{tools.filter(t => t.enabled).length} of {tools.length} tools selected</span>
-        
+        <span>{selectedTools.length} of {tools.length} tools selected</span>
       </div>
 
       {/* Configuration Drawer */}
-      <ToolConfigurationDrawer isOpen={isDrawerOpen} onClose={closeConfiguration} tool={selectedTool} onCodeChange={updateToolCode} />
+      <ToolConfigurationDrawer isOpen={isDrawerOpen} onClose={closeConfiguration} tool={selectedTool} onCodeChange={() => {}} />
     </div>;
 };

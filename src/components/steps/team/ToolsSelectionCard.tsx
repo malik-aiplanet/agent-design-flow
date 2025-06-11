@@ -1,5 +1,3 @@
-
-import { useState } from "react";
 import { Wrench, Zap, FileText, Image } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -11,15 +9,18 @@ const availableTools = [
   { id: "image-analysis", name: "Image Analysis", icon: Image }
 ];
 
-export const ToolsSelectionCard = () => {
-  const [selectedTools, setSelectedTools] = useState<string[]>([]);
+interface ToolsSelectionCardProps {
+    selectedTools?: string[];
+    onUpdate?: (data: { selectedTools: string[] }) => void;
+}
 
-  const toggleTool = (toolId: string) => {
-    setSelectedTools(prev => 
-      prev.includes(toolId) 
-        ? prev.filter(id => id !== toolId)
-        : [...prev, toolId]
-    );
+export const ToolsSelectionCard = ({ selectedTools, onUpdate }: ToolsSelectionCardProps) => {
+  const handleToggleTool = (toolId: string) => {
+    const tools = selectedTools || [];
+    const newTools = tools.includes(toolId)
+        ? tools.filter(id => id !== toolId)
+        : [...tools, toolId];
+    onUpdate?.({ selectedTools: newTools });
   };
 
   return (
@@ -35,13 +36,13 @@ export const ToolsSelectionCard = () => {
           {availableTools.map(tool => {
             const IconComponent = tool.icon;
             return (
-              <div 
-                key={tool.id} 
+              <div
+                key={tool.id}
                 className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50"
               >
-                <Checkbox 
-                  checked={selectedTools.includes(tool.id)}
-                  onCheckedChange={() => toggleTool(tool.id)}
+                <Checkbox
+                  checked={selectedTools?.includes(tool.id)}
+                  onCheckedChange={() => handleToggleTool(tool.id)}
                 />
                 <IconComponent className="h-4 w-4 text-gray-600" />
                 <span className="font-medium">{tool.name}</span>

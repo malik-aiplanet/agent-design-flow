@@ -1,83 +1,83 @@
 
-import { useState } from "react";
-import { Plus, X, Search } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Plus, X, Search, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-
-interface Agent {
-  id: string;
-  name: string;
-  description: string;
-  model: string;
-  status: "Active" | "Inactive";
-  tools: string[];
-}
-
-// Mock data for available agents (in real app, this would come from the main Agents tab)
-const availableAgents: Agent[] = [
-  {
-    id: "1",
-    name: "Customer Support Agent",
-    description: "Handles customer inquiries and support tickets",
-    model: "GPT-4",
-    status: "Active",
-    tools: ["slack", "email"]
-  },
-  {
-    id: "2", 
-    name: "Content Writer Agent",
-    description: "Creates engaging content and copy",
-    model: "GPT-4",
-    status: "Active",
-    tools: ["research", "writing"]
-  },
-  {
-    id: "3",
-    name: "Data Analyst Agent", 
-    description: "Analyzes data and generates insights",
-    model: "GPT-3.5",
-    status: "Active",
-    tools: ["database", "analytics"]
-  },
-  {
-    id: "4",
-    name: "Marketing Agent",
-    description: "Manages marketing campaigns and strategies",
-    model: "Claude-3",
-    status: "Inactive",
-    tools: ["social-media", "analytics"]
-  }
-];
+import { useAgents } from "@/hooks/useAgents";
 
 export const SubAgentsStep = ({ data, onUpdate }: any) => {
-  const [selectedAgents, setSelectedAgents] = useState<string[]>(data?.subAgents || []);
+  const [selectedAgents, setSelectedAgents] = useState<string[]>(data?.selectedAgents || []);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredAgents = availableAgents.filter(agent =>
-    agent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    agent.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Query parameters for backend filtering
+  const queryParams = useMemo(() => ({
+    name_like: searchTerm || undefined,
+    is_active: true,
+    limit: 100,
+  }), [searchTerm]);
 
-  const toggleAgent = (agentId: string) => {
+  // Fetch agents from backend
+  const { data: agentsResponse, isLoading, error } = useAgents(queryParams);
+  const agents = (agentsResponse as any)?.items || [];
+
+  const filteredAgents = agents;
+
+    const toggleAgent = (agentId: string) => {
     const updatedSelection = selectedAgents.includes(agentId)
       ? selectedAgents.filter(id => id !== agentId)
       : [...selectedAgents, agentId];
-    
+
     setSelectedAgents(updatedSelection);
-    onUpdate?.({ ...data, subAgents: updatedSelection });
+    onUpdate?.({ ...data, selectedAgents: updatedSelection });
   };
 
   const removeAgent = (agentId: string) => {
     const updatedSelection = selectedAgents.filter(id => id !== agentId);
     setSelectedAgents(updatedSelection);
-    onUpdate?.({ ...data, subAgents: updatedSelection });
+    onUpdate?.({ ...data, selectedAgents: updatedSelection });
   };
 
-  const selectedAgentsList = availableAgents.filter(agent => selectedAgents.includes(agent.id));
+  const selectedAgentsList = agents.filter(agent => selectedAgents.includes(agent.id));
+
+  // Handle loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-8 max-w-4xl">
+        <div className="space-y-3">
+          <h3 className="text-2xl font-bold text-gray-900">Sub Agents</h3>
+          <p className="text-gray-600 text-lg leading-relaxed">
+            Select existing agents to add as sub-agents for this workflow. Sub-agents will work together to accomplish complex tasks.
+          </p>
+        </div>
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <span className="ml-2 text-slate-600">Loading agents...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle error state
+  if (error) {
+    return (
+      <div className="space-y-8 max-w-4xl">
+        <div className="space-y-3">
+          <h3 className="text-2xl font-bold text-gray-900">Sub Agents</h3>
+          <p className="text-gray-600 text-lg leading-relaxed">
+            Select existing agents to add as sub-agents for this workflow.
+          </p>
+        </div>
+        <div className="text-center py-20">
+          <div className="text-red-600 text-xl font-semibold mb-3">Error loading agents</div>
+          <p className="text-slate-400 mb-8 text-base">{(error as any)?.message || 'Something went wrong'}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 max-w-4xl">
@@ -119,16 +119,14 @@ export const SubAgentsStep = ({ data, onUpdate }: any) => {
                     <Badge variant={agent.status === "Active" ? "default" : "secondary"}>
                       {agent.status}
                     </Badge>
-                    <Badge variant="outline">{agent.model}</Badge>
+                    <Badge variant="outline">{agent.modelClient}</Badge>
                   </div>
                   <p className="text-sm text-gray-600">{agent.description}</p>
-                  <div className="flex gap-1 mt-2">
-                    {agent.tools.map(tool => (
-                      <Badge key={tool} variant="secondary" className="text-xs">
-                        {tool}
+                                      <div className="flex gap-1 mt-2">
+                      <Badge variant="secondary" className="text-xs">
+                        {agent.toolsCount} tools
                       </Badge>
-                    ))}
-                  </div>
+                    </div>
                 </div>
                 <Button
                   variant="ghost"
@@ -181,16 +179,14 @@ export const SubAgentsStep = ({ data, onUpdate }: any) => {
                         <Badge variant={agent.status === "Active" ? "default" : "secondary"}>
                           {agent.status}
                         </Badge>
-                        <Badge variant="outline">{agent.model}</Badge>
+                        <Badge variant="outline">{agent.modelClient}</Badge>
                       </div>
                       <p className="text-sm text-gray-600 mb-2">{agent.description}</p>
-                      <div className="flex gap-1">
-                        {agent.tools.map(tool => (
-                          <Badge key={tool} variant="secondary" className="text-xs">
-                            {tool}
+                                              <div className="flex gap-1">
+                          <Badge variant="secondary" className="text-xs">
+                            {agent.toolsCount} tools
                           </Badge>
-                        ))}
-                      </div>
+                        </div>
                     </div>
                   </div>
                 </div>

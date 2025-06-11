@@ -16,6 +16,15 @@ export const API_ENDPOINTS = {
     MODELS: `${API_BASE_URL}/private/models`,
     AGENTS: `${API_BASE_URL}/private/agents`,
     TOOLS: `${API_BASE_URL}/private/tools`,
+    TEAMS: `${API_BASE_URL}/private/teams`,
+    // Builder endpoints (note: plural 'builders')
+    BUILDER_TEAM_CONFIGS: `${API_BASE_URL}/private/builders/team_configs`,
+    BUILDER_MODEL_CONFIGS: `${API_BASE_URL}/private/builders/model_configs`,
+    BUILDER_TOOL_CONFIGS: `${API_BASE_URL}/private/builders/tool_configs`,
+    BUILDER_TERMINATION_CONFIGS: `${API_BASE_URL}/private/builders/termination_condition_configs`,
+    BUILDER_AGENT_CONFIGS: `${API_BASE_URL}/private/builders/agent_config`,
+    BUILDER_INPUT_CONFIGS: `${API_BASE_URL}/private/builders/input_configs`,
+    BUILDER_OUTPUT_CONFIGS: `${API_BASE_URL}/private/builders/output_configs`,
     // Add other private endpoints as needed
   }
 };

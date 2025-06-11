@@ -1,22 +1,20 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, ArrowRight, Check, Sparkles, User, Users, Wrench, Settings, Rocket } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Sparkles, User, Users, Settings, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link, useParams, useNavigate } from "react-router-dom";
 
 // Import all step components
-import { AgentDetailsStep } from "@/components/steps/AgentDetailsStep";
+import { teamDetailsStep } from "@/components/steps/TeamDetailsStep";
 import { SubAgentsStep } from "@/components/steps/SubAgentsStep";
-import { ToolsStep } from "@/components/steps/ToolsStep";
 import { TeamStep } from "@/components/steps/TeamStep";
 import { DeployStep } from "@/components/steps/DeployStep";
 
 const steps = [
-  { id: 1, title: "Agent Details", component: AgentDetailsStep, icon: User },
+  { id: 1, title: "Workflow Details", component: teamDetailsStep, icon: User },
   { id: 2, title: "Sub Agents", component: SubAgentsStep, icon: Users },
-  { id: 3, title: "Tools", component: ToolsStep, icon: Wrench },
-  { id: 4, title: "Team", component: TeamStep, icon: Settings },
-  { id: 5, title: "Deploy", component: DeployStep, icon: Rocket },
+  { id: 3, title: "Team", component: TeamStep, icon: Settings },
+  { id: 4, title: "Deploy", component: DeployStep, icon: Rocket },
 ];
 
 // Mock data for existing agent
@@ -94,23 +92,23 @@ const EditAgent = () => {
               const isActive = currentStep === step.id;
               const isCompleted = currentStep > step.id;
               const IconComponent = step.icon;
-              
+
               return (
                 <button
                   key={step.id}
                   onClick={() => goToStep(step.id)}
                   className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
-                    isActive 
-                      ? "bg-blue-600 text-white" 
+                    isActive
+                      ? "bg-blue-600 text-white"
                       : isCompleted
                       ? "bg-green-50 text-green-700 hover:bg-green-100"
                       : "text-gray-600 hover:bg-gray-100"
                   }`}
                 >
                   <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
-                    isCompleted 
+                    isCompleted
                       ? "bg-green-100 border-green-500"
-                      : isActive 
+                      : isActive
                       ? "bg-white border-white"
                       : "border-gray-300"
                   }`}>
@@ -146,8 +144,8 @@ const EditAgent = () => {
         <div className="max-w-4xl mx-auto">
           <Card className="bg-white border border-gray-200 shadow-sm">
             <CardContent className="p-8">
-              <CurrentStepComponent 
-                data={agentData} 
+              <CurrentStepComponent
+                data={agentData}
                 onUpdate={setAgentData}
                 onNext={nextStep}
                 onPrev={prevStep}
@@ -161,17 +159,17 @@ const EditAgent = () => {
       {/* Fixed Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50">
         <div className="max-w-7xl mx-auto flex justify-between">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => navigate("/")}
             className="flex items-center gap-2 px-6 py-2 h-10 text-sm border-gray-300"
           >
             Cancel
           </Button>
-          
+
           <div className="flex gap-4">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={prevStep}
               disabled={currentStep === 1}
               className="flex items-center gap-2 px-6 py-2 h-10 text-sm disabled:opacity-50 border-gray-300"
@@ -179,9 +177,9 @@ const EditAgent = () => {
               <ArrowLeft className="h-4 w-4" />
               Previous
             </Button>
-            
+
             {currentStep === steps.length ? (
-              <Button 
+              <Button
                 onClick={handleSave}
                 className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white h-10 text-sm"
               >
@@ -189,7 +187,7 @@ const EditAgent = () => {
                 Save Changes
               </Button>
             ) : (
-              <Button 
+              <Button
                 onClick={nextStep}
                 className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white h-10 text-sm"
               >
