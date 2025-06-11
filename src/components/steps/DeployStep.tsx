@@ -6,13 +6,22 @@ import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { useCreateTeam } from "@/hooks/useTeams";
 import { TeamCreateRequest } from "@/types/team";
+interface DeployStepProps {
+  data?: any;
+  onUpdate?: (data: any) => void;
+  hasUnsavedChanges?: boolean;
+  onSave?: () => void;
+  isValid?: boolean;
+}
+
 export const DeployStep = ({
   data,
   onUpdate,
   hasUnsavedChanges,
-  onSave
-}: any) => {
-  const [teamId, setTeamId] = useState<string | null>(null);
+  onSave,
+  isValid
+}: DeployStepProps) => {
+  const [teamId, setTeamId] = useState<string | null>(data?.teamId || null);
   const navigate = useNavigate();
 
   // Hooks for workflow operations
@@ -55,6 +64,13 @@ export const DeployStep = ({
     try {
       const result = await createTeamMutation.mutateAsync(teamConfig);
       setTeamId(result.id);
+
+      // Update parent data to indicate deployment is complete
+      onUpdate?.({
+        ...data,
+        deploymentComplete: true,
+        teamId: result.id
+      });
     } catch (error) {
       console.error("Failed to create workflow:", error);
     }
@@ -225,6 +241,25 @@ export const DeployStep = ({
           </Button>
         )}
       </div>
+
+      {/* Validation Status */}
+      {!isValid && !isCreated && (
+        <Card className="border border-blue-200 bg-blue-50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-blue-600 text-xs font-bold">!</span>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium text-blue-800">Ready to Deploy</h4>
+                <p className="text-xs text-blue-700">
+                  Click "Deploy Workflow" to create and deploy your workflow. This step will be marked complete once deployment is successful.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
 
     </div>;

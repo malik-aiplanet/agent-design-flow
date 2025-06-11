@@ -19,11 +19,13 @@ interface TeamStepProps {
     [key: string]: any;
   };
   onUpdate?: (data: any) => void;
+  isValid?: boolean;
 }
 
 export const TeamStep = ({
   data,
-  onUpdate
+  onUpdate,
+  isValid
 }: TeamStepProps) => {
   const [teamConfigs, setTeamConfigs] = useState<TeamComponent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -417,6 +419,27 @@ export const TeamStep = ({
 
       {/* Configuration Summary */}
       {renderConfigurationSummary()}
+
+      {/* Validation Status */}
+      {!isValid && selectedTemplate && (
+        <Card className="border border-red-200 bg-red-50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-5 h-5 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-red-600 text-xs font-bold">!</span>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium text-red-800">Configuration Required</h4>
+                <p className="text-xs text-red-700">
+                  {selectedTemplate.provider === "autogen_agentchat.teams.SelectorGroupChat"
+                    ? "Please select a model for the SelectorGroupChat to continue."
+                    : "Please complete the required configuration fields."}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

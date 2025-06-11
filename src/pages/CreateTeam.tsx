@@ -19,24 +19,70 @@ const steps = [
 
 const CreateTeam = () => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [maxStepReached, setMaxStepReached] = useState(1);
   const [teamData, setTeamData] = useState<any>({});
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  const nextStep = () => {
-    // Basic validation for step 1
-    if (currentStep === 1) {
-      const hasName = teamData.name?.trim();
-      const hasTeamType = teamData.teamType;
+  // Validation functions for each step
+  const validateStep1 = (data: any): boolean => {
+    return !!(data?.name?.trim() && data?.teamType);
+  };
 
-      if (!hasName || !hasTeamType) {
-        // Scroll to top to show validation messages
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        return;
-      }
+  const validateStep2 = (data: any): boolean => {
+    return !!(data?.selectedAgents?.length > 0);
+  };
+
+  const validateStep3 = (data: any): boolean => {
+    // Basic validation: should have team config and if it's SelectorGroupChat, should have model
+    if (!data?.teamConfig) return false;
+
+    // If it's a SelectorGroupChat, require model selection
+    if (data?.selectedTeamTemplate?.provider === "autogen_agentchat.teams.SelectorGroupChat") {
+      return !!(data?.selectedModelId || data?.teamConfig?.model_client);
+    }
+
+    // For other team types, basic config is sufficient
+    return true;
+  };
+
+  const validateStep4 = (data: any): boolean => {
+    // Deploy step is complete when workflow has been successfully created/deployed
+    return !!(data?.deploymentComplete || data?.teamId);
+  };
+
+  // Check if a step is completed (all required fields filled)
+  const isStepCompleted = (stepId: number): boolean => {
+    switch (stepId) {
+      case 1:
+        return validateStep1(teamData);
+      case 2:
+        return validateStep2(teamData);
+      case 3:
+        return validateStep3(teamData);
+      case 4:
+        return validateStep4(teamData);
+      default:
+        return false;
+    }
+  };
+
+  // Check if user can proceed to next step
+  const canProceedToNextStep = (): boolean => {
+    return isStepCompleted(currentStep);
+  };
+
+  const nextStep = () => {
+    // Validate current step before proceeding
+    if (!canProceedToNextStep()) {
+      // Scroll to top to show validation messages
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
     }
 
     if (currentStep < steps.length) {
-      setCurrentStep(currentStep + 1);
+      const newStep = currentStep + 1;
+      setCurrentStep(newStep);
+      setMaxStepReached(Math.max(maxStepReached, newStep));
     }
   };
 
@@ -47,7 +93,11 @@ const CreateTeam = () => {
   };
 
   const goToStep = (stepId: number) => {
-    setCurrentStep(stepId);
+    // Allow access to any step that has been reached before, or the next step if current step is valid
+    if (stepId <= maxStepReached || (stepId === currentStep + 1 && canProceedToNextStep())) {
+      setCurrentStep(stepId);
+      setMaxStepReached(Math.max(maxStepReached, stepId));
+    }
   };
 
   const updateWorkflowData = (newData: any) => {
@@ -92,40 +142,67 @@ const CreateTeam = () => {
           <div className="space-y-2">
             {steps.map((step, index) => {
               const isActive = currentStep === step.id;
-              const isCompleted = currentStep > step.id;
+              const isCompleted = isStepCompleted(step.id);
+              const isAccessible = step.id <= maxStepReached || (step.id === currentStep + 1 && canProceedToNextStep());
               const IconComponent = step.icon;
 
               return (
                 <button
                   key={step.id}
                   onClick={() => goToStep(step.id)}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${isActive
+                  disabled={!isAccessible}
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
+                    isActive
                       ? "bg-blue-600 text-white"
                       : isCompleted
                         ? "bg-green-50 text-green-700 hover:bg-green-100"
-                        : "text-gray-600 hover:bg-gray-100"
-                    }`}
+                        : isAccessible
+                          ? "text-gray-600 hover:bg-gray-100"
+                          : "text-gray-400 cursor-not-allowed"
+                  }`}
                 >
-                  <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${isCompleted
+                  <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
+                    isCompleted
                       ? "bg-green-100 border-green-500"
                       : isActive
                         ? "bg-white border-white"
-                        : "border-gray-300"
-                    }`}>
+                        : isAccessible
+                          ? "border-gray-300"
+                          : "border-gray-200"
+                  }`}>
                     {isCompleted ? (
                       <Check className="h-4 w-4 text-green-600" />
                     ) : (
-                      <IconComponent className={`h-4 w-4 ${isActive ? "text-blue-600" : "text-gray-400"
-                        }`} />
+                      <IconComponent className={`h-4 w-4 ${
+                        isActive
+                          ? "text-blue-600"
+                          : isAccessible
+                            ? "text-gray-400"
+                            : "text-gray-300"
+                      }`} />
                     )}
                   </div>
                   <div className="flex-1">
-                    <div className={`font-medium text-sm ${isActive ? "text-white" : isCompleted ? "text-green-700" : "text-gray-700"
-                      }`}>
+                    <div className={`font-medium text-sm ${
+                      isActive
+                        ? "text-white"
+                        : isCompleted
+                          ? "text-green-700"
+                          : isAccessible
+                            ? "text-gray-700"
+                            : "text-gray-400"
+                    }`}>
                       {step.title}
                     </div>
-                    <div className={`text-xs ${isActive ? "text-blue-100" : isCompleted ? "text-green-600" : "text-gray-500"
-                      }`}>
+                    <div className={`text-xs ${
+                      isActive
+                        ? "text-blue-100"
+                        : isCompleted
+                          ? "text-green-600"
+                          : isAccessible
+                            ? "text-gray-500"
+                            : "text-gray-300"
+                    }`}>
                       Step {step.id} of {steps.length}
                     </div>
                   </div>
@@ -148,6 +225,7 @@ const CreateTeam = () => {
                 onPrev={prevStep}
                 onSave={saveChanges}
                 hasUnsavedChanges={hasUnsavedChanges}
+                isValid={isStepCompleted(currentStep)}
               />
             </CardContent>
           </Card>
@@ -171,6 +249,7 @@ const CreateTeam = () => {
             {currentStep === steps.length ? (
               <Button
                 className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white h-10 text-sm"
+                disabled={!isStepCompleted(currentStep)}
               >
                 <Check className="h-4 w-4" />
                 Complete
@@ -178,7 +257,8 @@ const CreateTeam = () => {
             ) : (
               <Button
                 onClick={nextStep}
-                className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white h-10 text-sm"
+                disabled={!canProceedToNextStep()}
+                className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white h-10 text-sm disabled:opacity-50"
               >
                 Next
                 <ArrowRight className="h-4 w-4" />

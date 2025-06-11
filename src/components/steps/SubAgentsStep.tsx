@@ -196,6 +196,25 @@ export const SubAgentsStep = ({ data, onUpdate }: any) => {
         </CardContent>
       </Card>
 
+      {/* Validation Status */}
+      {selectedAgents.length === 0 && (
+        <Card className="border border-red-200 bg-red-50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-5 h-5 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-red-600 text-xs font-bold">!</span>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium text-red-800">Required: Select At Least One Agent</h4>
+                <p className="text-xs text-red-700">
+                  Your workflow needs at least one sub-agent to function properly.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Tips Card */}
       <Card className="border border-amber-200 bg-amber-50">
         <CardContent className="p-4">
@@ -206,7 +225,8 @@ export const SubAgentsStep = ({ data, onUpdate }: any) => {
             <div className="space-y-1">
               <h4 className="text-sm font-medium text-amber-800">Sub Agent Best Practices</h4>
               <ul className="text-xs text-amber-700 space-y-1">
-                <li>• Select agents with complementary skills for better collaboration</li>
+                <li>• Select at least one agent (required for workflow functionality)</li>
+                <li>• Choose agents with complementary skills for better collaboration</li>
                 <li>• Ensure selected agents are active and properly configured</li>
                 <li>• Consider the workflow complexity when choosing the number of sub-agents</li>
                 <li>• Sub-agents will coordinate automatically based on the main workflow logic</li>
