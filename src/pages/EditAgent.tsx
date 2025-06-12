@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { ArrowLeft, ArrowRight, Check, Sparkles, User, Users, Settings, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
 
 // Import all step components
 import { teamDetailsStep } from "@/components/steps/TeamDetailsStep";
@@ -30,13 +30,27 @@ const mockAgentData = {
 const EditAgent = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [currentStep, setCurrentStep] = useState(1);
-  const [agentData, setAgentData] = useState(mockAgentData);
+
+  // Get team data from router state or use mock data as fallback
+  const teamData = location.state?.teamData;
+  const initialData = teamData ? {
+    name: teamData.name,
+    description: teamData.description,
+    teamType: teamData.teamType,
+    status: teamData.status,
+    participantsCount: teamData.participantsCount,
+    maxTurns: teamData.maxTurns,
+    lastModified: teamData.lastModified
+  } : mockAgentData;
+
+  const [agentData, setAgentData] = useState(initialData);
 
   useEffect(() => {
-    // In a real app, you would fetch the agent data by ID here
-    console.log("Editing agent with ID:", id);
-  }, [id]);
+    console.log("Editing team with ID:", id);
+    console.log("Team data:", teamData);
+  }, [id, teamData]);
 
   const nextStep = () => {
     if (currentStep < steps.length) {
@@ -78,7 +92,9 @@ const EditAgent = () => {
                 <Sparkles className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-semibold text-gray-900">Edit Agent</h1>
+                <h1 className="text-lg font-semibold text-gray-900">
+                  {teamData ? "Edit Team" : "Edit Agent"}
+                </h1>
                 <p className="text-sm text-gray-500">{agentData.name}</p>
               </div>
             </div>

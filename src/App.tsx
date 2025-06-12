@@ -27,7 +27,7 @@ const AppContent = () => {
   const location = useLocation();
   const isAuthRoute = location.pathname === "/login" || location.pathname === "/register";
   const isCreateRoute = location.pathname === "/create";
-  const isEditRoute = location.pathname.startsWith("/agent/edit");
+  const isEditRoute = location.pathname.startsWith("/agent/edit") || location.pathname.startsWith("/team/edit");
   const isChatRoute = location.pathname.startsWith("/chat");
 
   // Public routes (auth pages)
@@ -50,6 +50,7 @@ const AppContent = () => {
           <Routes>
             <Route path="/create" element={<CreateTeam />} />
             <Route path="/agent/edit/:id" element={<EditAgent />} />
+            <Route path="/team/edit/:id" element={<EditAgent />} />
             <Route path="/chat/:agentId" element={<ChatInterface />} />
             <Route path="/chat/:agentId/:conversationId" element={<ChatInterface />} />
           </Routes>
