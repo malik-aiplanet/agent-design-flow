@@ -13,9 +13,9 @@ export const buildersApi = {
     return ApiService.get<ModelConfig[]>('/private/builders/model_configs')
   },
 
-  // Agent configurations
-  getAgentConfig: (): Promise<AgentConfig> => {
-    return ApiService.get<AgentConfig>('/private/builders/agent_config')
+  // Agent configurations - returns an array from backend
+  getAgentConfig: (): Promise<AgentConfig[]> => {
+    return ApiService.get<AgentConfig[]>('/private/builders/agent_config')
   },
 
   // Termination condition configurations

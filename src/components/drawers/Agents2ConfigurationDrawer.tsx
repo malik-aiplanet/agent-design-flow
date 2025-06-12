@@ -153,10 +153,13 @@ export const Agents2ConfigurationDrawer = ({ isOpen, onClose, agent }: Agents2Co
     }
 
     // Create the component structure based on the template
+    // agentConfig is an array from the backend, use the first component (AssistantAgent)
+    const templateComponent = Array.isArray(agentConfig) ? agentConfig[0] : agentConfig;
+
     const component: AgentConfig = {
-      ...agentConfig,
+      ...templateComponent,
       config: {
-        ...agentConfig.config,
+        ...templateComponent.config,
         name: formData.name,
         description: formData.description,
         system_message: formData.systemMessage,
