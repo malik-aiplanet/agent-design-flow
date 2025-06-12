@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { ArrowLeft, ArrowRight, Check, Sparkles, User, Users, Wrench, Settings, Rocket } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Sparkles, User, Users, Wrench, Settings, Rocket, Loader2, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
+import { useCreateTeam } from "@/hooks/useTeams";
+import { toast } from "@/hooks/use-toast";
 
 // Import all step components
 import { teamDetailsStep } from "@/components/steps/TeamDetailsStep";
@@ -22,6 +24,10 @@ const CreateTeam = () => {
   const [maxStepReached, setMaxStepReached] = useState(1);
   const [teamData, setTeamData] = useState<any>({});
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isWorkflowSaved, setIsWorkflowSaved] = useState(false);
+
+  // Initialize the create team mutation
+  const createTeamMutation = useCreateTeam();
 
   // Validation functions for each step
   const validateStep1 = (data: any): boolean => {
@@ -103,12 +109,85 @@ const CreateTeam = () => {
   const updateWorkflowData = (newData: any) => {
     setTeamData(prev => ({ ...prev, ...newData }));
     setHasUnsavedChanges(true);
+    setIsWorkflowSaved(false);
   };
 
-  const saveChanges = () => {
-    // Could implement local storage or draft saving here
-    console.log("Saving workflow data:", teamData);
-    setHasUnsavedChanges(false);
+  const saveChanges = async () => {
+    try {
+      // Transform teamData into the required payload format
+      const payload = {
+        component: {
+          component_type: "team" as const,
+          component_version: 1,
+          config: {
+            emit_team_events: teamData.teamConfig?.emit_team_events || false,
+            max_turns: teamData.teamConfig?.max_turns || 10,
+            participants: teamData.selectedAgents?.map((agent: any) => ({
+              component_type: "agent" as const,
+              component_version: 1,
+              config: {
+                description: agent.description || "An agent",
+                name: agent.name,
+                handoffs: agent.handoffs || [],
+                metadata: agent.metadata || {},
+                model_client: agent.model_client || teamData.teamConfig?.model_client,
+                model_client_stream: agent.model_client_stream || false,
+                model_context: agent.model_context || {
+                  component_type: "chat_completion_context" as const,
+                  component_version: 1,
+                  config: {},
+                  description: "An unbounded chat completion context that keeps a view of the all the messages.",
+                  label: "UnboundedChatCompletionContext",
+                  provider: "autogen_core.model_context.UnboundedChatCompletionContext",
+                  version: 1
+                },
+                reflect_on_tool_use: agent.reflect_on_tool_use || false,
+                system_message: agent.system_message || "You are a helpful assistant.",
+                tool_call_summary_format: agent.tool_call_summary_format || "{result}",
+                workbench: agent.workbench || {
+                  component_type: "workbench" as const,
+                  component_version: 1,
+                  config: {
+                    tools: []
+                  },
+                  description: "A workbench that provides a static set of tools that do not change after each tool execution.",
+                  label: "StaticWorkbench",
+                  provider: "autogen_core.tools.StaticWorkbench",
+                  version: 1
+                }
+              },
+              description: agent.componentDescription || "An agent that provides assistance.",
+              label: agent.label || "Agent",
+              provider: agent.provider || "autogen_agentchat.agents.AssistantAgent",
+              version: 1
+            })) || []
+          },
+          description: teamData.selectedTeamTemplate?.description || "A team workflow",
+          label: teamData.name || "Workflow Team",
+          provider: teamData.selectedTeamTemplate?.provider || "autogen_agentchat.teams.RoundRobinGroupChat",
+          version: 1
+        },
+        organization_id: "123e4567-e89b-12d3-a456-426614174000" // TODO: Get from user context
+      };
+
+      // Send the POST request
+      await createTeamMutation.mutateAsync(payload);
+
+      // Update state on success
+      setHasUnsavedChanges(false);
+      setIsWorkflowSaved(true);
+      toast({
+        title: "Workflow saved successfully",
+        description: "Your team workflow has been saved to the platform."
+      });
+    } catch (error) {
+      console.error("Failed to save workflow:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save workflow. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const CurrentStepComponent = steps[currentStep - 1].component;
@@ -234,7 +313,8 @@ const CreateTeam = () => {
 
       {/* Fixed Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50">
-        <div className="max-w-7xl mx-auto flex justify-end">
+        <div className="max-w-7xl mx-auto flex justify-between">
+          {/* Left side - Previous button */}
           <div className="flex gap-4">
             <Button
               variant="outline"
@@ -245,16 +325,79 @@ const CreateTeam = () => {
               <ArrowLeft className="h-4 w-4" />
               Previous
             </Button>
+          </div>
 
+          {/* Right side - Action buttons */}
+          <div className="flex gap-4">
             {currentStep === steps.length ? (
-              <Button
-                className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white h-10 text-sm"
-                disabled={!isStepCompleted(currentStep)}
-              >
-                <Check className="h-4 w-4" />
-                Complete
-              </Button>
+              <>
+                {/* Deploy Step - Three buttons: Save Workflow, Run Test, Deploy */}
+                {isWorkflowSaved ? (
+                  <div className="flex items-center gap-2 px-6 py-2 h-10 text-sm text-green-700">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Workflow saved
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    onClick={saveChanges}
+                    disabled={!hasUnsavedChanges || createTeamMutation.isPending}
+                    className="flex items-center gap-2 px-6 py-2 h-10 text-sm disabled:opacity-50"
+                  >
+                    {createTeamMutation.isPending ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Settings className="h-4 w-4" />
+                        Save Workflow
+                      </>
+                    )}
+                  </Button>
+                )}
+
+                <Button
+                  variant="outline"
+                  onClick={() => teamData?.deployStepActions?.handleTest()}
+                  disabled={teamData?.deployStepActions?.isCreating || !teamData?.deployStepActions?.isCreated}
+                  className="flex items-center gap-2 px-6 py-2 h-10 text-sm disabled:opacity-50"
+                >
+                  <Wrench className="h-4 w-4" />
+                  Run Test
+                </Button>
+
+                {!teamData?.deployStepActions?.isCreated ? (
+                  <Button
+                    onClick={() => teamData?.deployStepActions?.handleCreateTeam()}
+                    disabled={teamData?.deployStepActions?.isCreating || !isStepCompleted(currentStep)}
+                    className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white h-10 text-sm disabled:opacity-50"
+                  >
+                    {teamData?.deployStepActions?.isCreating ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Deploying...
+                      </>
+                    ) : (
+                      <>
+                        <Rocket className="mr-2 h-4 w-4" />
+                        Deploy
+                      </>
+                    )}
+                  </Button>
+                ) : (
+                  <Button
+                    disabled
+                    className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white h-10 text-sm"
+                  >
+                    <CheckCircle className="mr-2 h-4 w-4" />
+                    Deployed Successfully
+                  </Button>
+                )}
+              </>
             ) : (
+              /* Other Steps - Next button */
               <Button
                 onClick={nextStep}
                 disabled={!canProceedToNextStep()}

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { useCreateTeam } from "@/hooks/useTeams";
 import { TeamCreateRequest } from "@/types/team";
+
 interface DeployStepProps {
   data?: any;
   onUpdate?: (data: any) => void;
@@ -97,6 +98,25 @@ export const DeployStep = ({
   const isCreating = createTeamMutation.isPending;
   const isCreated = !!teamId;
   const isDeployed = createTeamMutation.isSuccess; // Creating IS deploying
+
+  // Export handlers and state for parent component to use
+  const deployStepActions = {
+    handleCreateTeam,
+    handleTest,
+    isCreating,
+    isCreated,
+    isDeployed
+  };
+
+  // Store actions in data for parent to access
+  if (onUpdate && typeof onUpdate === 'function') {
+    // Update the data with the actions so parent can access them
+    const updatedData = { ...data, deployStepActions };
+    if (JSON.stringify(updatedData.deployStepActions) !== JSON.stringify(data?.deployStepActions)) {
+      onUpdate(updatedData);
+    }
+  }
+
   return <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium mb-2">Deploy Your Workflow</h3>
@@ -201,66 +221,6 @@ export const DeployStep = ({
             <p className="text-green-700">Your workflow is now ready to use.</p>
           </CardContent>
         </Card>}
-
-      {/* Action Buttons */}
-      <div className="flex gap-4">
-        <Button
-          variant="outline"
-          onClick={handleTest}
-          disabled={isCreating}
-          className="flex-1"
-        >
-          Run Test
-        </Button>
-
-        {!isCreated ? (
-          <Button
-            onClick={handleCreateTeam}
-            disabled={isCreating}
-            className="flex-1 bg-blue-600 hover:bg-blue-700"
-          >
-            {isCreating ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating & Deploying Workflow...
-              </>
-            ) : (
-              <>
-                <Rocket className="mr-2 h-4 w-4" />
-                {hasUnsavedChanges ? "Save & Deploy Workflow" : "Deploy Workflow"}
-              </>
-            )}
-          </Button>
-        ) : (
-          <Button
-            disabled
-            className="flex-1 bg-green-600"
-          >
-            <CheckCircle className="mr-2 h-4 w-4" />
-            Deployed Successfully
-          </Button>
-        )}
-      </div>
-
-      {/* Validation Status */}
-      {!isValid && !isCreated && (
-        <Card className="border border-blue-200 bg-blue-50">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-blue-600 text-xs font-bold">!</span>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium text-blue-800">Ready to Deploy</h4>
-                <p className="text-xs text-blue-700">
-                  Click "Deploy Workflow" to create and deploy your workflow. This step will be marked complete once deployment is successful.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
 
     </div>;
 };
