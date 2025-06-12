@@ -27,7 +27,7 @@ const mockAgentData = {
   systemPrompt: "You are a helpful customer support agent..."
 };
 
-const EditAgent = () => {
+const EditTeam = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -218,4 +218,4 @@ const EditAgent = () => {
   );
 };
 
-export default EditAgent;
+export default EditTeam;

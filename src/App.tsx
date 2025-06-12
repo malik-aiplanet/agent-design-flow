@@ -14,7 +14,7 @@ import ModelsManagement from "./pages/ModelsManagement";
 import TerminationsManagement from "./pages/TerminationsManagement";
 import Agents2Management from "./pages/Agents2Management";
 import CreateTeam from "./pages/CreateTeam";
-import EditAgent from "./pages/EditAgent";
+import EditTeam from "./pages/EditTeam";
 import ChatInterface from "./pages/ChatInterface";
 import Settings from "./pages/Settings";
 import Login from "./pages/Login";
@@ -49,8 +49,8 @@ const AppContent = () => {
         <main className="w-full">
           <Routes>
             <Route path="/create" element={<CreateTeam />} />
-            <Route path="/agent/edit/:id" element={<EditAgent />} />
-            <Route path="/team/edit/:id" element={<EditAgent />} />
+            <Route path="/agent/edit/:id" element={<EditTeam />} />
+            <Route path="/team/edit/:id" element={<EditTeam />} />
             <Route path="/chat/:agentId" element={<ChatInterface />} />
             <Route path="/chat/:agentId/:conversationId" element={<ChatInterface />} />
           </Routes>
