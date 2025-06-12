@@ -7,7 +7,12 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { useModelConfigs, useAgentConfig, useCreateAgent, useUpdateAgent, useAgent } from "@/hooks/useAgents";
+import { useTools, useTool } from "@/hooks/useTools";
+import { toolsApi } from "@/api/tools";
 import { Agent2, AgentCreate, AgentUpdate, ModelConfig, AgentConfig } from "@/types/agent";
 import { toast } from "@/hooks/use-toast";
 
@@ -24,6 +29,14 @@ export const Agents2ConfigurationDrawer = ({ isOpen, onClose, agent }: Agents2Co
   const { data: modelConfigs, isLoading: isLoadingModelConfigs } = useModelConfigs();
   const { data: agentConfig, isLoading: isLoadingAgentConfig } = useAgentConfig();
   const { data: fullAgentData, isLoading: isLoadingAgentData } = useAgent(agent?.id || '');
+
+  // Fetch available tools
+  const { data: toolsResponse, isLoading: isLoadingTools } = useTools({
+    is_active: true,
+    limit: 100
+  });
+  const availableTools = (toolsResponse as any)?.items || [];
+
   const createAgentMutation = useCreateAgent();
   const updateAgentMutation = useUpdateAgent();
 
@@ -37,7 +50,8 @@ export const Agents2ConfigurationDrawer = ({ isOpen, onClose, agent }: Agents2Co
     reflectOnToolUse: false,
     streamModelClient: false,
     toolCallSummaryFormat: "{result}",
-    metadata: {}
+    metadata: {},
+    selectedTools: [] as string[]
   });
 
     // Reset initial load flag when drawer opens
@@ -54,6 +68,10 @@ export const Agents2ConfigurationDrawer = ({ isOpen, onClose, agent }: Agents2Co
       const component = fullAgentData.component;
       const config = component?.config;
       const modelClient = config?.model_client;
+      const workbench = config?.workbench;
+
+      // Extract selected tool IDs from workbench config
+      const selectedToolIds = workbench?.config?.tools?.map((tool: any) => tool.id) || [];
 
       setFormData({
         name: config?.name || "", // name is in component.config.name
@@ -64,7 +82,8 @@ export const Agents2ConfigurationDrawer = ({ isOpen, onClose, agent }: Agents2Co
         reflectOnToolUse: config?.reflect_on_tool_use || false,
         streamModelClient: config?.model_client_stream || false,
         toolCallSummaryFormat: config?.tool_call_summary_format || "{result}",
-        metadata: config?.metadata || {}
+        metadata: config?.metadata || {},
+        selectedTools: selectedToolIds
       });
     } else if (!isEditMode) {
       // Reset form for new agent
@@ -77,7 +96,8 @@ export const Agents2ConfigurationDrawer = ({ isOpen, onClose, agent }: Agents2Co
         reflectOnToolUse: false,
         streamModelClient: false,
         toolCallSummaryFormat: "{result}",
-        metadata: {}
+        metadata: {},
+        selectedTools: []
       });
     }
   }, [agent, isEditMode, fullAgentData]);
@@ -152,6 +172,35 @@ export const Agents2ConfigurationDrawer = ({ isOpen, onClose, agent }: Agents2Co
       return;
     }
 
+                // Build the selected tools array from available tools
+    // We need to fetch full tool data for each selected tool to get the complete component structure
+    let selectedToolComponents = [];
+
+    if (formData.selectedTools.length > 0) {
+      try {
+        // Fetch full data for each selected tool using the API service
+        const toolPromises = formData.selectedTools.map(async (toolId) => {
+          try {
+            const toolData = await toolsApi.getById(toolId);
+            return toolData.component; // Return just the component part
+          } catch (error) {
+            console.warn(`Error fetching tool ${toolId}:`, error);
+            return null;
+          }
+        });
+
+        selectedToolComponents = (await Promise.all(toolPromises)).filter(Boolean);
+      } catch (error) {
+        console.error('Error fetching tool components:', error);
+        toast({
+          title: "Warning",
+          description: "Some tools could not be loaded. Agent will be created without tools.",
+          variant: "destructive",
+        });
+        selectedToolComponents = [];
+      }
+    }
+
     // Create the component structure based on the template
     // agentConfig is an array from the backend, use the first component (AssistantAgent)
     const templateComponent = Array.isArray(agentConfig) ? agentConfig[0] : agentConfig;
@@ -170,6 +219,13 @@ export const Agents2ConfigurationDrawer = ({ isOpen, onClose, agent }: Agents2Co
         model_client: {
           ...selectedModel,
           config: formData.modelConfig
+        },
+        workbench: {
+          ...templateComponent.config.workbench,
+          config: {
+            ...templateComponent.config.workbench.config,
+            tools: selectedToolComponents
+          }
         }
       }
     };
@@ -210,6 +266,15 @@ export const Agents2ConfigurationDrawer = ({ isOpen, onClose, agent }: Agents2Co
         variant: "destructive",
       });
     }
+  };
+
+  const handleToolToggle = (toolId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      selectedTools: prev.selectedTools.includes(toolId)
+        ? prev.selectedTools.filter(id => id !== toolId)
+        : [...prev.selectedTools, toolId]
+    }));
   };
 
   const renderModelConfigFields = () => {
@@ -278,7 +343,7 @@ export const Agents2ConfigurationDrawer = ({ isOpen, onClose, agent }: Agents2Co
 
   if (!isOpen) return null;
 
-  const isLoading = isLoadingModelConfigs || isLoadingAgentConfig || (isEditMode && isLoadingAgentData);
+  const isLoading = isLoadingModelConfigs || isLoadingAgentConfig || isLoadingTools || (isEditMode && isLoadingAgentData);
   const isSaving = createAgentMutation.isPending || updateAgentMutation.isPending;
 
   return (
@@ -367,6 +432,58 @@ export const Agents2ConfigurationDrawer = ({ isOpen, onClose, agent }: Agents2Co
                       <div className="space-y-4 pl-4 border-l-2 border-blue-200">
                         <h5 className="font-medium text-gray-800">Model Settings</h5>
                         {renderModelConfigFields()}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Tools Selection */}
+                  <div className="space-y-4 border-t border-gray-200 pt-6">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium text-gray-900 text-lg">Tools</h4>
+                      <Badge variant="secondary" className="text-xs">
+                        {formData.selectedTools.length} selected
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-gray-600">
+                      Select the tools that your agent will have access to during conversations.
+                    </p>
+
+                    {availableTools.length > 0 ? (
+                      <div className="grid grid-cols-1 gap-3 max-h-60 overflow-y-auto">
+                        {availableTools.map((tool) => (
+                          <Card key={tool.id} className="hover:bg-gray-50 transition-colors">
+                            <CardContent className="p-4">
+                              <div className="flex items-start space-x-3">
+                                <Checkbox
+                                  checked={formData.selectedTools.includes(tool.id)}
+                                  onCheckedChange={() => handleToolToggle(tool.id)}
+                                  className="mt-1"
+                                />
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <h5 className="font-medium text-gray-900 text-sm">{tool.name}</h5>
+                                    <Badge
+                                      variant="outline"
+                                      className={`text-xs ${tool.status === 'Active' ? 'border-green-200 text-green-700' : 'border-gray-200 text-gray-700'}`}
+                                    >
+                                      {tool.status}
+                                    </Badge>
+                                  </div>
+                                  <p className="text-xs text-gray-600 line-clamp-2">{tool.description}</p>
+                                  <div className="flex items-center gap-1 mt-2 text-xs text-gray-500">
+                                    <span className="font-medium">Provider:</span>
+                                    <span className="truncate">{tool.provider}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <p className="text-sm">No tools available</p>
+                        <p className="text-xs mt-1">Create some tools first to add them to your agent</p>
                       </div>
                     )}
                   </div>
