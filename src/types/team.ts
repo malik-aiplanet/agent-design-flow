@@ -78,6 +78,11 @@ export interface TeamComponent extends BaseComponent {
 export interface TeamCreateRequest {
   component: TeamComponent;
   organization_id?: string;
+  model_id?: string;
+  team_agent_ids?: string[];
+  team_input_ids?: string[];
+  team_output_ids?: string[];
+  team_termination_condition_ids?: string[];
 }
 
 export interface TeamResponse {
@@ -95,18 +100,25 @@ export interface WorkflowUIState {
   name?: string;
   description?: string;
 
-  // Step 2: Sub Agents (this might be for creating custom agents)
+  // Step 2: Sub Agents
   customAgents?: AgentComponent[];
+  selectedAgents?: any[];
 
-  // Step 3: Team Type Selection
+  // Step 3: IO Configuration
+  selectedInputIds?: string[];
+  selectedOutputIds?: string[];
+  team_input_ids?: string[];  // for backend payload
+  team_output_ids?: string[]; // for backend payload
+
+  // Step 4: Team Configuration (moved from step 3)
   selectedTeamType?: string;
   availableTeamTemplates?: TeamComponent[];
-
-  // Step 4: Team Configuration
   teamConfiguration?: TeamComponent;
 
-  // Step 5: Deploy
+  // Step 5: Deploy (moved from step 4)
   deploymentConfig?: any;
+  deploymentComplete?: boolean;
+  teamId?: string;
 }
 
 // List and filter types

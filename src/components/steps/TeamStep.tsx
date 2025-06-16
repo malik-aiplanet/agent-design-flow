@@ -4,10 +4,12 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, AlertCircle } from "lucide-react";
 import { buildersApi } from "@/api/builders";
 import { TeamComponent, TEAM_TYPE_INFO } from "@/types/team";
 import { getTeamTypeIcon } from "@/lib/teamUtils";
+import { useTerminations } from "@/hooks/useTerminations";
 import { ModelSelectionCard } from "./team/ModelSelectionCard";
 
 interface TeamStepProps {
@@ -30,6 +32,10 @@ export const TeamStep = ({
   const [teamConfigs, setTeamConfigs] = useState<TeamComponent[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTemplate, setSelectedTemplate] = useState<TeamComponent | null>(null);
+
+  // Fetch user-created termination conditions
+  const { data: terminationsResponse, isLoading: terminationsLoading } = useTerminations({ limit: 100 });
+  const terminations = terminationsResponse?.items || [];
 
   // Fetch team configurations and find the template for selected team type
   useEffect(() => {
@@ -133,6 +139,35 @@ export const TeamStep = ({
             />
             <p className="text-xs text-gray-500 mt-1">
               Maximum number of conversation turns before the workflow stops
+            </p>
+          </div>
+
+          <div>
+            <Label htmlFor="terminationCondition">Termination Condition</Label>
+            {terminationsLoading ? (
+              <div className="flex items-center justify-center p-4">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="ml-2 text-sm text-gray-500">Loading conditions...</span>
+              </div>
+            ) : (
+              <Select
+                value={config?.termination_condition || ""}
+                onValueChange={(value) => handleConfigUpdate('termination_condition', value)}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select termination condition" />
+                </SelectTrigger>
+                <SelectContent>
+                  {terminations.map((termination) => (
+                    <SelectItem key={termination.id} value={termination.id}>
+                      {termination.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <p className="text-xs text-gray-500 mt-1">
+              Define when the conversation should end
             </p>
           </div>
 

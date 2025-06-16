@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, ArrowRight, Check, Sparkles, User, Users, Wrench, Settings, Rocket, Loader2, CheckCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Sparkles, User, Users, Wrench, Settings, Rocket, Loader2, CheckCircle, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
@@ -9,14 +9,16 @@ import { toast } from "@/hooks/use-toast";
 // Import all step components
 import { teamDetailsStep } from "@/components/steps/TeamDetailsStep";
 import { SubAgentsStep } from "@/components/steps/SubAgentsStep";
+import { IOStep } from "@/components/steps/IOStep";
 import { TeamStep } from "@/components/steps/TeamStep";
 import { DeployStep } from "@/components/steps/DeployStep";
 
 const steps = [
   { id: 1, title: "Workflow Details", component: teamDetailsStep, icon: User },
   { id: 2, title: "Sub Agents", component: SubAgentsStep, icon: Users },
-  { id: 3, title: "Team", component: TeamStep, icon: Settings },
-  { id: 4, title: "Deploy", component: DeployStep, icon: Rocket },
+  { id: 3, title: "IO", component: IOStep, icon: ArrowUpDown },
+  { id: 4, title: "Team", component: TeamStep, icon: Settings },
+  { id: 5, title: "Deploy", component: DeployStep, icon: Rocket },
 ];
 
 const CreateTeam = () => {
@@ -39,7 +41,15 @@ const CreateTeam = () => {
   };
 
   const validateStep3 = (data: any): boolean => {
-    // Basic validation: should have team config and if it's SelectorGroupChat, should have model
+    // IO step validation: needs at least one input and one output
+    return !!(
+      (data?.selectedInputIds?.length > 0 || data?.team_input_ids?.length > 0) &&
+      (data?.selectedOutputIds?.length > 0 || data?.team_output_ids?.length > 0)
+    );
+  };
+
+  const validateStep4 = (data: any): boolean => {
+    // Team step validation (moved from step 3)
     if (!data?.teamConfig) return false;
 
     // If it's a SelectorGroupChat, require model selection
@@ -51,8 +61,8 @@ const CreateTeam = () => {
     return true;
   };
 
-  const validateStep4 = (data: any): boolean => {
-    // Deploy step is complete when workflow has been successfully created/deployed
+  const validateStep5 = (data: any): boolean => {
+    // Deploy step validation (moved from step 4)
     return !!(data?.deploymentComplete || data?.teamId);
   };
 
@@ -67,6 +77,8 @@ const CreateTeam = () => {
         return validateStep3(teamData);
       case 4:
         return validateStep4(teamData);
+      case 5:
+        return validateStep5(teamData);
       default:
         return false;
     }
@@ -167,7 +179,12 @@ const CreateTeam = () => {
           provider: teamData.selectedTeamTemplate?.provider || "autogen_agentchat.teams.RoundRobinGroupChat",
           version: 1
         },
-        organization_id: "123e4567-e89b-12d3-a456-426614174000" // TODO: Get from user context
+        organization_id: "123e4567-e89b-12d3-a456-426614174000", // TODO: Get from user context
+        model_id: teamData.selectedModelId,
+        team_agent_ids: teamData.selectedAgents?.map((agent: any) => agent.id) || [],
+        team_input_ids: teamData.selectedInputIds || teamData.team_input_ids || [],
+        team_output_ids: teamData.selectedOutputIds || teamData.team_output_ids || [],
+        team_termination_condition_ids: teamData.terminationConditionIds || []
       };
 
       // Send the POST request

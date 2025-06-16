@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, ArrowRight, Check, Sparkles, User, Users, Settings, Rocket } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Sparkles, User, Users, Settings, Rocket, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
@@ -7,14 +7,16 @@ import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
 // Import all step components
 import { teamDetailsStep } from "@/components/steps/TeamDetailsStep";
 import { SubAgentsStep } from "@/components/steps/SubAgentsStep";
+import { IOStep } from "@/components/steps/IOStep";
 import { TeamStep } from "@/components/steps/TeamStep";
 import { DeployStep } from "@/components/steps/DeployStep";
 
 const steps = [
   { id: 1, title: "Workflow Details", component: teamDetailsStep, icon: User },
   { id: 2, title: "Sub Agents", component: SubAgentsStep, icon: Users },
-  { id: 3, title: "Team", component: TeamStep, icon: Settings },
-  { id: 4, title: "Deploy", component: DeployStep, icon: Rocket },
+  { id: 3, title: "IO", component: IOStep, icon: ArrowUpDown },
+  { id: 4, title: "Team", component: TeamStep, icon: Settings },
+  { id: 5, title: "Deploy", component: DeployStep, icon: Rocket },
 ];
 
 // Mock data for existing agent
