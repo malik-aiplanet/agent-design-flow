@@ -139,7 +139,7 @@ const CreateTeam = () => {
             // Re-use the participants defined in the team configuration/template
             participants: teamData.teamConfig?.participants || [],
           },
-          description: teamData.selectedTeamTemplate?.description || "A team workflow",
+          description: teamData.description || teamData.selectedTeamTemplate?.description || "A team workflow",
           label: teamData.name || "Workflow Team",
           provider: teamData.selectedTeamTemplate?.provider || "autogen_agentchat.teams.RoundRobinGroupChat",
           version: 1,
