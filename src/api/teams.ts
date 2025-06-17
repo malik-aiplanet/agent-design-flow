@@ -7,6 +7,26 @@ import {
   TeamFilters
 } from '../types/team';
 
+// Add new interfaces for deployment and testing
+export interface TeamDeployResponse {
+  success: boolean;
+  message?: string;
+  deployment_id?: string;
+}
+
+export interface TeamTestRequest {
+  test_input?: any;
+  max_iterations?: number;
+  timeout?: number;
+}
+
+export interface TeamTestResponse {
+  success: boolean;
+  result?: any;
+  logs?: string[];
+  execution_time?: number;
+}
+
 export const teamsApi = {
   getAll: (params?: TeamFilters): Promise<TeamListResponse> => {
     const searchParams = new URLSearchParams();
@@ -44,5 +64,18 @@ export const teamsApi = {
 
   restore: (id: string): Promise<TeamResponse> => {
     return ApiService.post<TeamResponse>(`/private/teams/${id}/restore`);
+  },
+
+  // New deployment and testing methods
+  deploy: (id: string): Promise<TeamDeployResponse> => {
+    return ApiService.post<TeamDeployResponse>(`/private/teams/${id}/deploy`);
+  },
+
+  undeploy: (id: string): Promise<TeamDeployResponse> => {
+    return ApiService.post<TeamDeployResponse>(`/private/teams/${id}/stop-deployment`);
+  },
+
+  test: (id: string, testData?: TeamTestRequest): Promise<TeamTestResponse> => {
+    return ApiService.post<TeamTestResponse>(`/private/teams/${id}/test`, testData);
   },
 };

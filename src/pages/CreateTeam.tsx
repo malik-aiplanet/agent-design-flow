@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, ArrowRight, Check, Sparkles, User, Users, Wrench, Settings, Rocket, Loader2, CheckCircle, ArrowUpDown } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Sparkles, User, Users, Wrench, Settings, Rocket, Loader2, CheckCircle, ArrowUpDown, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
@@ -118,10 +118,12 @@ const CreateTeam = () => {
     }
   };
 
-  const updateWorkflowData = (newData: any) => {
+  const updateWorkflowData = (newData: any, markUnsaved: boolean = true) => {
     setTeamData(prev => ({ ...prev, ...newData }));
-    setHasUnsavedChanges(true);
-    setIsWorkflowSaved(false);
+    if (markUnsaved) {
+      setHasUnsavedChanges(true);
+      setIsWorkflowSaved(false);
+    }
   };
 
   const saveChanges = async () => {
@@ -170,7 +172,10 @@ const CreateTeam = () => {
       }
 
       // Send the POST request
-      await createTeamMutation.mutateAsync(payload);
+      const result = await createTeamMutation.mutateAsync(payload);
+
+      // Store team ID in workflow data so DeployStep knows a team has been created
+      setTeamData(prev => ({ ...prev, teamId: result.id }));
 
       // Update state on success
       setHasUnsavedChanges(false);
@@ -330,7 +335,9 @@ const CreateTeam = () => {
           <div className="flex gap-4">
             {currentStep === steps.length ? (
               <>
-                {/* Deploy Step - Three buttons: Save Workflow, Run Test, Deploy */}
+                {/* Deploy Step - Button sequence: Save Workflow → Deploy → Test */}
+
+                {/* Save Workflow Button - Works as before */}
                 {isWorkflowSaved ? (
                   <div className="flex items-center gap-2 px-6 py-2 h-10 text-sm text-green-700">
                     <CheckCircle className="h-4 w-4 text-green-600" />
@@ -357,43 +364,57 @@ const CreateTeam = () => {
                   </Button>
                 )}
 
-                <Button
-                  variant="outline"
-                  onClick={() => teamData?.deployStepActions?.handleTest()}
-                  disabled={teamData?.deployStepActions?.isCreating || !teamData?.deployStepActions?.isCreated}
-                  className="flex items-center gap-2 px-6 py-2 h-10 text-sm disabled:opacity-50"
-                >
-                  <Wrench className="h-4 w-4" />
-                  Run Test
-                </Button>
-
-                {!teamData?.deployStepActions?.isCreated ? (
+                {/* Deploy Button - Available after save */}
+                {isWorkflowSaved && !teamData?.deployStepActions?.isDeployed && (
                   <Button
-                    onClick={() => teamData?.deployStepActions?.handleCreateTeam()}
-                    disabled={teamData?.deployStepActions?.isCreating || !isStepCompleted(currentStep)}
+                    onClick={() => teamData?.deployStepActions?.handleDeploy()}
+                    disabled={teamData?.deployStepActions?.isDeploying || !teamData?.deployStepActions?.isCreated}
                     className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white h-10 text-sm disabled:opacity-50"
                   >
-                    {teamData?.deployStepActions?.isCreating ? (
+                    {teamData?.deployStepActions?.isDeploying ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <Loader2 className="h-4 w-4 animate-spin" />
                         Deploying...
                       </>
                     ) : (
                       <>
-                        <Rocket className="mr-2 h-4 w-4" />
+                        <Rocket className="h-4 w-4" />
                         Deploy
                       </>
                     )}
                   </Button>
-                ) : (
+                )}
+
+                {/* Deployed Status */}
+                {teamData?.deployStepActions?.isDeployed && (
+                  <div className="flex items-center gap-2 px-6 py-2 h-10 text-sm text-green-700">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Deployed
+                  </div>
+                )}
+
+                {/* Test Button - Available after deployment */}
+                {teamData?.deployStepActions?.isDeployed && (
                   <Button
-                    disabled
-                    className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white h-10 text-sm"
+                    variant="outline"
+                    onClick={() => teamData?.deployStepActions?.handleTest()}
+                    disabled={teamData?.deployStepActions?.isTesting}
+                    className="flex items-center gap-2 px-6 py-2 h-10 text-sm disabled:opacity-50"
                   >
-                    <CheckCircle className="mr-2 h-4 w-4" />
-                    Deployed Successfully
+                    {teamData?.deployStepActions?.isTesting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Testing...
+                      </>
+                    ) : (
+                      <>
+                        <Wrench className="h-4 w-4" />
+                        Run Test
+                      </>
+                    )}
                   </Button>
                 )}
+
               </>
             ) : (
               /* Other Steps - Next button */

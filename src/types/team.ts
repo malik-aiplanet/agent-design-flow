@@ -201,3 +201,23 @@ export const TEAM_TYPE_INFO: Record<TeamType, TeamTypeInfo> = {
     requiresSelectorPrompt: false,
   },
 };
+
+// Add deployment and testing interfaces
+export interface TeamDeployResponse {
+  success: boolean;
+  message?: string;
+  deployment_id?: string;
+}
+
+export interface TeamTestRequest {
+  test_input?: any;
+  max_iterations?: number;
+  timeout?: number;
+}
+
+export interface TeamTestResponse {
+  success: boolean;
+  result?: any;
+  logs?: string[];
+  execution_time?: number;
+}

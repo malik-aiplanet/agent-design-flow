@@ -4,14 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
-import { useCreateTeam } from "@/hooks/useTeams";
+import { useCreateTeam, useDeployTeam, useUndeployTeam, useTestTeam } from "@/hooks/useTeams";
 import { useInputs } from "@/hooks/useInputs";
 import { useOutputs } from "@/hooks/useOutputs";
 import { TeamCreateRequest } from "@/types/team";
 
 interface DeployStepProps {
   data?: any;
-  onUpdate?: (data: any) => void;
+  onUpdate?: (data: any, markUnsaved?: boolean) => void;
   hasUnsavedChanges?: boolean;
   onSave?: () => void;
   isValid?: boolean;
@@ -25,11 +25,14 @@ export const DeployStep = ({
   isValid
 }: DeployStepProps) => {
   const [teamId, setTeamId] = useState<string | null>(data?.teamId || null);
+  const [isDeployed, setIsDeployed] = useState<boolean>(data?.isDeployed || false);
   const navigate = useNavigate();
 
   // Hooks for workflow operations
   const createTeamMutation = useCreateTeam();
-  // No separate deploy step - creating the team is the deployment
+  const deployTeamMutation = useDeployTeam();
+  const undeployTeamMutation = useUndeployTeam();
+  const testTeamMutation = useTestTeam();
 
   // Fetch input and output data to display names properly
   const { data: inputsData } = useInputs();
@@ -42,7 +45,7 @@ export const DeployStep = ({
   const deployStepActions = {
     handleCreateTeam: async () => {
       if (hasUnsavedChanges) {
-        onSave();
+        onSave?.();
         await new Promise(resolve => setTimeout(resolve, 500));
       }
 
@@ -99,27 +102,87 @@ export const DeployStep = ({
         const result = await createTeamMutation.mutateAsync(teamConfig);
         setTeamId(result.id);
 
-        // Update parent data to indicate deployment is complete
-        onUpdate?.({
+        // Update parent data to indicate team is created (saved)
+        const updateFn = onUpdate as (data: any, markUnsaved?: boolean) => void;
+        updateFn?.({
           ...data,
-          deploymentComplete: true,
-          teamId: result.id
-        });
+          teamId: result.id,
+          isTeamCreated: true
+        }, false);
       } catch (error) {
         console.error("Failed to create workflow:", error);
       }
     },
-    handleTest: () => {
-      // Navigate to chat interface for testing
-      if (teamId) {
-        navigate(`/chat/${teamId}`);
-      } else {
-        navigate("/chat/test");
+
+    handleDeploy: async () => {
+      if (!teamId) return;
+
+      try {
+        await deployTeamMutation.mutateAsync(teamId);
+        setIsDeployed(true);
+
+        // Update parent data to indicate deployment is complete
+        const updateFn = onUpdate as (data: any, markUnsaved?: boolean) => void;
+        updateFn?.({
+          ...data,
+          isDeployed: true,
+          deploymentComplete: true
+        }, false);
+      } catch (error) {
+        console.error("Failed to deploy team:", error);
       }
     },
+
+    handleUndeploy: async () => {
+      if (!teamId) return;
+
+      try {
+        await undeployTeamMutation.mutateAsync(teamId);
+        setIsDeployed(false);
+
+        const updateFn = onUpdate as (data: any, markUnsaved?: boolean) => void;
+        updateFn?.({
+          ...data,
+          isDeployed: false,
+          deploymentComplete: false
+        }, false);
+      } catch (error) {
+        console.error("Failed to undeploy team:", error);
+      }
+    },
+
+    handleTest: async () => {
+      if (!teamId) return;
+
+      try {
+        const testData = {
+          test_input: data?.testInput || "Hello, test the workflow",
+          max_iterations: 5,
+          timeout: 30000
+        };
+
+        const result = await testTeamMutation.mutateAsync({ id: teamId, testData });
+
+        // Navigate to chat interface with test results
+        navigate(`/chat/${teamId}`, {
+          state: {
+            testMode: true,
+            testResult: result
+          }
+        });
+      } catch (error) {
+        console.error("Failed to test team:", error);
+      }
+    },
+
+    // State getters
     isCreating: createTeamMutation.isPending,
     isCreated: !!teamId,
-    isDeployed: createTeamMutation.isSuccess // Creating IS deploying
+    isDeploying: deployTeamMutation.isPending,
+    isDeployed: isDeployed,
+    isUndeploying: undeployTeamMutation.isPending,
+    isTesting: testTeamMutation.isPending,
+    deploymentStatus: isDeployed ? 'deployed' : 'idle'
   };
 
   // Move the onUpdate call to useEffect to prevent render-time state updates
@@ -128,25 +191,28 @@ export const DeployStep = ({
       // Update the data with the actions so parent can access them
       const updatedData = { ...data, deployStepActions };
       if (JSON.stringify(updatedData.deployStepActions) !== JSON.stringify(data?.deployStepActions)) {
-        onUpdate(updatedData);
+        // Pass false to markUnsaved param so it won't set unsaved changes
+        const updateFn = onUpdate as (data: any, markUnsaved?: boolean) => void;
+        updateFn?.(updatedData, false);
       }
     }
   }, [onUpdate, data, deployStepActions]);
 
+  // Sync teamId when it changes in parent data
+  useEffect(() => {
+    if (data?.teamId && data.teamId !== teamId) {
+      setTeamId(data.teamId);
+    }
+  }, [data?.teamId]);
+
   const handleCreateTeam = deployStepActions.handleCreateTeam;
+  const handleDeploy = deployStepActions.handleDeploy;
   const handleTest = deployStepActions.handleTest;
   const isCreating = deployStepActions.isCreating;
   const isCreated = deployStepActions.isCreated;
-  const isDeployed = deployStepActions.isDeployed;
-
-  const handleDeployTeam = async () => {
-    // Since creating the team IS the deployment, just navigate to success
-    if (teamId) {
-      setTimeout(() => {
-        navigate("/");
-      }, 2000);
-    }
-  };
+  const isDeploying = deployStepActions.isDeploying;
+  const isDeployedState = deployStepActions.isDeployed;
+  const isTesting = deployStepActions.isTesting;
 
   return <div className="space-y-6">
       <div>
@@ -252,12 +318,12 @@ export const DeployStep = ({
           </CardContent>
         </Card>}
 
-            {/* Deployment Status */}
-      {isDeployed && <Card className="border-green-200 bg-green-50">
+      {/* Deployment Status */}
+      {isDeployedState && <Card className="border-green-200 bg-green-50">
           <CardContent className="p-6 text-center">
             <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-green-900 mb-2">Workflow Deployed Successfully! 🎉</h3>
-            <p className="text-green-700">Your workflow is now ready to use.</p>
+            <p className="text-green-700">Your workflow is now ready to use and test.</p>
           </CardContent>
         </Card>}
 

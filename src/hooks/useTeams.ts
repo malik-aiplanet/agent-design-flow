@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
-import { teamsApi } from '../api/teams'
+import { teamsApi, TeamDeployResponse, TeamTestRequest } from '../api/teams'
 import { TeamFilters, TeamCreateRequest, TeamUpdate, Team2, TeamResponse } from '../types/team'
 import { formatRelativeTime } from '../lib/datetime'
 
@@ -97,5 +97,37 @@ export const useRestoreTeam = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teams'] })
     },
+  })
+}
+
+// New deployment and testing hooks
+export const useDeployTeam = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (id: string) => teamsApi.deploy(id),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['teams'] })
+      queryClient.invalidateQueries({ queryKey: ['team', id] })
+    },
+  })
+}
+
+export const useUndeployTeam = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (id: string) => teamsApi.undeploy(id),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['teams'] })
+      queryClient.invalidateQueries({ queryKey: ['team', id] })
+    },
+  })
+}
+
+export const useTestTeam = () => {
+  return useMutation({
+    mutationFn: ({ id, testData }: { id: string; testData?: TeamTestRequest }) =>
+      teamsApi.test(id, testData),
   })
 }
