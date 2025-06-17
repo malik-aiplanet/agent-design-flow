@@ -127,65 +127,47 @@ const CreateTeam = () => {
   const saveChanges = async () => {
     try {
       // Transform teamData into the required payload format
-      const payload = {
+      const payload: any = {
         component: {
           component_type: "team" as const,
           component_version: 1,
           config: {
             emit_team_events: teamData.teamConfig?.emit_team_events || false,
             max_turns: teamData.teamConfig?.max_turns || 10,
-            participants: teamData.selectedAgents?.map((agent: any) => ({
-              component_type: "agent" as const,
-              component_version: 1,
-              config: {
-                description: agent.description || "An agent",
-                name: agent.name,
-                handoffs: agent.handoffs || [],
-                metadata: agent.metadata || {},
-                model_client: agent.model_client || teamData.teamConfig?.model_client,
-                model_client_stream: agent.model_client_stream || false,
-                model_context: agent.model_context || {
-                  component_type: "chat_completion_context" as const,
-                  component_version: 1,
-                  config: {},
-                  description: "An unbounded chat completion context that keeps a view of the all the messages.",
-                  label: "UnboundedChatCompletionContext",
-                  provider: "autogen_core.model_context.UnboundedChatCompletionContext",
-                  version: 1
-                },
-                reflect_on_tool_use: agent.reflect_on_tool_use || false,
-                system_message: agent.system_message || "You are a helpful assistant.",
-                tool_call_summary_format: agent.tool_call_summary_format || "{result}",
-                workbench: agent.workbench || {
-                  component_type: "workbench" as const,
-                  component_version: 1,
-                  config: {
-                    tools: []
-                  },
-                  description: "A workbench that provides a static set of tools that do not change after each tool execution.",
-                  label: "StaticWorkbench",
-                  provider: "autogen_core.tools.StaticWorkbench",
-                  version: 1
-                }
-              },
-              description: agent.componentDescription || "An agent that provides assistance.",
-              label: agent.label || "Agent",
-              provider: agent.provider || "autogen_agentchat.agents.AssistantAgent",
-              version: 1
-            })) || []
+            // Re-use the participants defined in the team configuration/template
+            participants: teamData.teamConfig?.participants || [],
           },
           description: teamData.selectedTeamTemplate?.description || "A team workflow",
           label: teamData.name || "Workflow Team",
           provider: teamData.selectedTeamTemplate?.provider || "autogen_agentchat.teams.RoundRobinGroupChat",
-          version: 1
+          version: 1,
         },
         organization_id: "123e4567-e89b-12d3-a456-426614174000", // TODO: Get from user context
         model_id: teamData.selectedModelId,
-        team_agent_ids: teamData.selectedAgents?.map((agent: any) => agent.id) || [],
-        team_input_ids: teamData.selectedInputIds || teamData.team_input_ids || [],
-        team_output_ids: teamData.selectedOutputIds || teamData.team_output_ids || [],
-        team_termination_condition_ids: teamData.terminationConditionIds || []
       };
+
+      // Conditionally include ID arrays only when they contain at least one non-null/undefined value
+      if (Array.isArray(teamData.selectedAgents) && teamData.selectedAgents.filter(Boolean).length > 0) {
+        payload.team_agent_ids = teamData.selectedAgents.filter(Boolean);
+      }
+
+      if (Array.isArray(teamData.selectedInputIds) && teamData.selectedInputIds.filter(Boolean).length > 0) {
+        payload.team_input_ids = teamData.selectedInputIds.filter(Boolean);
+      }
+
+      if (Array.isArray(teamData.selectedOutputIds) && teamData.selectedOutputIds.filter(Boolean).length > 0) {
+        payload.team_output_ids = teamData.selectedOutputIds.filter(Boolean);
+      }
+
+      // Add termination condition IDs from teamConfig if present
+      const terminationId = teamData.teamConfig?.termination_condition;
+      if (terminationId) {
+        if (Array.isArray(terminationId)) {
+          payload.team_termination_condition_ids = terminationId.filter(Boolean);
+        } else {
+          payload.team_termination_condition_ids = [terminationId];
+        }
+      }
 
       // Send the POST request
       await createTeamMutation.mutateAsync(payload);

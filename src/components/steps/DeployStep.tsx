@@ -70,8 +70,30 @@ export const DeployStep = ({
             // Ensure participants are included from the template
             participants: data?.teamConfig?.participants || selectedTemplate?.config?.participants || [],
           }
-        }
+        },
+        // Include model_id if available from the workflow configuration
+        ...(data?.modelId && { model_id: data.modelId }),
+        // Include organization_id if available from user context
+        ...(data?.organizationId && { organization_id: data.organizationId }),
+        // Include team agent IDs from the configured participants
+        ...(data?.teamAgentIds && { team_agent_ids: data.teamAgentIds }),
+        // Include input component IDs that are enabled
+        ...(data?.inputComponents && {
+          team_input_ids: data.inputComponents
+            .filter((input: any) => input.enabled && input.inputId)
+            .map((input: any) => input.inputId)
+        }),
+        // Include selected output IDs
+        ...(data?.selectedOutputIds?.length > 0 && { team_output_ids: data.selectedOutputIds }),
+        ...(data?.selectedOutputId && { team_output_ids: [data.selectedOutputId] }),
       };
+
+      const terminationIdInConfig = data?.teamConfig?.termination_condition;
+      if (terminationIdInConfig) {
+        teamConfig.team_termination_condition_ids = Array.isArray(terminationIdInConfig)
+          ? terminationIdInConfig.filter(Boolean)
+          : [terminationIdInConfig];
+      }
 
       try {
         const result = await createTeamMutation.mutateAsync(teamConfig);
