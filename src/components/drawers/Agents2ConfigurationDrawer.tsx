@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Save, Plus, Trash2, Loader2 } from "lucide-react";
+import { X, Save, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,11 +10,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { useModelConfigs, useAgentConfig, useCreateAgent, useUpdateAgent, useAgent } from "@/hooks/useAgents";
-import { useTools, useTool } from "@/hooks/useTools";
+import { useAgentConfig, useCreateAgent, useUpdateAgent, useAgent } from "@/hooks/useAgents";
+import { useModels } from "@/hooks/useModels";
+import { useTools } from "@/hooks/useTools";
 import { toolsApi } from "@/api/tools";
-import { Agent2, AgentCreate, AgentUpdate, ModelConfig, AgentConfig } from "@/types/agent";
+import { Agent2, AgentCreate, AgentUpdate, AgentConfig } from "@/types/agent";
 import { toast } from "@/hooks/use-toast";
+import { modelsApi } from "@/api/models";
 
 interface Agents2ConfigurationDrawerProps {
   isOpen: boolean;
@@ -26,7 +28,6 @@ export const Agents2ConfigurationDrawer = ({ isOpen, onClose, agent }: Agents2Co
   const isEditMode = !!agent;
 
   // Hooks for fetching configs and mutations
-  const { data: modelConfigs, isLoading: isLoadingModelConfigs } = useModelConfigs();
   const { data: agentConfig, isLoading: isLoadingAgentConfig } = useAgentConfig();
   const { data: fullAgentData, isLoading: isLoadingAgentData } = useAgent(agent?.id || '');
 
@@ -35,6 +36,11 @@ export const Agents2ConfigurationDrawer = ({ isOpen, onClose, agent }: Agents2Co
     is_active: true,
     limit: 100
   });
+
+  // Fetch user created models (private/models endpoint)
+  const { data: modelsResponse, isLoading: isLoadingModels, error: modelsError } = useModels({ limit: 100 });
+  const models = (modelsResponse as any)?.items || [];
+
   const availableTools = (toolsResponse as any)?.items || [];
 
   const createAgentMutation = useCreateAgent();
@@ -44,31 +50,26 @@ export const Agents2ConfigurationDrawer = ({ isOpen, onClose, agent }: Agents2Co
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    selectedModelProvider: "",
-    modelConfig: {} as Record<string, any>,
     systemMessage: "You are a helpful AI assistant.",
     reflectOnToolUse: false,
     streamModelClient: false,
     toolCallSummaryFormat: "{result}",
     metadata: {},
-    selectedTools: [] as string[]
+    selectedTools: [] as string[],
+    selectedModelId: ""
   });
 
-    // Reset initial load flag when drawer opens
-  useEffect(() => {
-    if (isOpen) {
-      setIsInitialLoad(true);
-    }
-  }, [isOpen]);
-
-    // Initialize form data when agent or configs load
+  // Initialize form data when agent or configs load
   useEffect(() => {
     if (agent && isEditMode && fullAgentData) {
       // Populate form with existing agent data from full backend response
       const component = fullAgentData.component;
       const config = component?.config;
-      const modelClient = config?.model_client;
       const workbench = config?.workbench;
+
+      // Try to get model_id from fullAgentData (backend should return it)
+      // Fallback to empty string if not present
+      const existingModelId = (fullAgentData as any)?.model_id || "";
 
       // Extract selected tool IDs from workbench config
       const selectedToolIds = workbench?.config?.tools?.map((tool: any) => tool.id) || [];
@@ -76,62 +77,29 @@ export const Agents2ConfigurationDrawer = ({ isOpen, onClose, agent }: Agents2Co
       setFormData({
         name: config?.name || "", // name is in component.config.name
         description: config?.description || "", // description is in component.config.description
-        selectedModelProvider: modelClient?.provider || "",
-        modelConfig: modelClient?.config || {},
         systemMessage: config?.system_message || "You are a helpful AI assistant.",
         reflectOnToolUse: config?.reflect_on_tool_use || false,
         streamModelClient: config?.model_client_stream || false,
         toolCallSummaryFormat: config?.tool_call_summary_format || "{result}",
         metadata: config?.metadata || {},
-        selectedTools: selectedToolIds
+        selectedTools: selectedToolIds,
+        selectedModelId: existingModelId
       });
     } else if (!isEditMode) {
       // Reset form for new agent
       setFormData({
         name: "",
         description: "",
-        selectedModelProvider: "",
-        modelConfig: {},
         systemMessage: "You are a helpful AI assistant.",
         reflectOnToolUse: false,
         streamModelClient: false,
         toolCallSummaryFormat: "{result}",
         metadata: {},
-        selectedTools: []
+        selectedTools: [],
+        selectedModelId: ""
       });
     }
   }, [agent, isEditMode, fullAgentData]);
-
-  // Track if this is the initial load to prevent overwriting existing config
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
-
-  // Update model config when provider changes
-  useEffect(() => {
-    if (formData.selectedModelProvider && modelConfigs) {
-      const selectedModel = modelConfigs.find(m => m.provider === formData.selectedModelProvider);
-      if (selectedModel && selectedModel.config) {
-        // Only update if it's not the initial load (which would overwrite existing data)
-        // or if we're creating a new agent
-        if (!isInitialLoad || !isEditMode) {
-          setFormData(prev => ({
-            ...prev,
-            modelConfig: { ...selectedModel.config }
-          }));
-        }
-        setIsInitialLoad(false);
-      }
-    }
-  }, [formData.selectedModelProvider, modelConfigs, isEditMode, isInitialLoad]);
-
-  const handleModelConfigChange = (key: string, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      modelConfig: {
-        ...(prev.modelConfig || {}),
-        [key]: value
-      }
-    }));
-  };
 
   const handleSave = async () => {
     if (!formData.name.trim()) {
@@ -143,16 +111,16 @@ export const Agents2ConfigurationDrawer = ({ isOpen, onClose, agent }: Agents2Co
       return;
     }
 
-    if (!formData.selectedModelProvider) {
+    if (!formData.selectedModelId) {
       toast({
         title: "Validation Error",
-        description: "Please select a model provider",
+        description: "Please select a model",
         variant: "destructive",
       });
       return;
     }
 
-    if (!agentConfig || !modelConfigs) {
+    if (!agentConfig) {
       toast({
         title: "Error",
         description: "Configuration not loaded",
@@ -161,18 +129,21 @@ export const Agents2ConfigurationDrawer = ({ isOpen, onClose, agent }: Agents2Co
       return;
     }
 
-    // Find the selected model config
-    const selectedModel = modelConfigs.find(m => m.provider === formData.selectedModelProvider);
-    if (!selectedModel) {
+    // Fetch the selected model component
+    let selectedModelComponent: any = null;
+    try {
+      const modelData = await modelsApi.getById(formData.selectedModelId);
+      selectedModelComponent = modelData.component;
+    } catch (err) {
       toast({
         title: "Error",
-        description: "Invalid model selection",
+        description: "Failed to load selected model details",
         variant: "destructive",
       });
       return;
     }
 
-                // Build the selected tools array from available tools
+    // Build the selected tools array from available tools
     // We need to fetch full tool data for each selected tool to get the complete component structure
     let selectedToolComponents = [];
 
@@ -216,10 +187,7 @@ export const Agents2ConfigurationDrawer = ({ isOpen, onClose, agent }: Agents2Co
         reflect_on_tool_use: formData.reflectOnToolUse,
         tool_call_summary_format: formData.toolCallSummaryFormat,
         metadata: formData.metadata,
-        model_client: {
-          ...selectedModel,
-          config: formData.modelConfig
-        },
+        model_client: selectedModelComponent,
         workbench: {
           ...templateComponent.config.workbench,
           config: {
@@ -236,7 +204,9 @@ export const Agents2ConfigurationDrawer = ({ isOpen, onClose, agent }: Agents2Co
           name: formData.name,
           description: formData.description,
           component,
-          is_active: agent.status === "Active"
+          is_active: agent.status === "Active",
+          model_id: formData.selectedModelId || undefined,
+          tool_ids: formData.selectedTools.length ? formData.selectedTools : undefined
         };
 
         await updateAgentMutation.mutateAsync({ id: agent.id, data: updateData });
@@ -248,7 +218,9 @@ export const Agents2ConfigurationDrawer = ({ isOpen, onClose, agent }: Agents2Co
         const createData: AgentCreate = {
           name: formData.name,
           description: formData.description,
-          component
+          component,
+          model_id: formData.selectedModelId || undefined,
+          tool_ids: formData.selectedTools.length ? formData.selectedTools : undefined
         };
 
         await createAgentMutation.mutateAsync(createData);
@@ -277,73 +249,17 @@ export const Agents2ConfigurationDrawer = ({ isOpen, onClose, agent }: Agents2Co
     }));
   };
 
-  const renderModelConfigFields = () => {
-    if (!formData.selectedModelProvider || !modelConfigs) return null;
-
-    const selectedModel = modelConfigs.find(m => m.provider === formData.selectedModelProvider);
-    if (!selectedModel) return null;
-
-    return Object.entries(selectedModel.config).map(([key, defaultValue]) => {
-      if (key === 'api_key' && typeof defaultValue === 'string' && defaultValue.includes('*')) {
-        // Special handling for API keys
-        return (
-          <div key={key} className="space-y-2">
-            <Label htmlFor={key} className="capitalize">{key.replace(/_/g, ' ')}</Label>
-            <Input
-              id={key}
-              type="password"
-              value={formData.modelConfig[key] ?? ''}
-              onChange={(e) => handleModelConfigChange(key, e.target.value)}
-              placeholder="Enter API key"
-            />
-          </div>
-        );
-      }
-
-      if (typeof defaultValue === 'boolean') {
-        return (
-          <div key={key} className="flex items-center justify-between">
-            <Label htmlFor={key} className="capitalize">{key.replace(/_/g, ' ')}</Label>
-            <Switch
-              id={key}
-              checked={formData.modelConfig[key] ?? defaultValue}
-              onCheckedChange={(checked) => handleModelConfigChange(key, checked)}
-            />
-          </div>
-        );
-      }
-
-      if (typeof defaultValue === 'number') {
-        return (
-          <div key={key} className="space-y-2">
-            <Label htmlFor={key} className="capitalize">{key.replace(/_/g, ' ')}</Label>
-            <Input
-              id={key}
-              type="number"
-              value={formData.modelConfig[key] ?? defaultValue}
-              onChange={(e) => handleModelConfigChange(key, parseFloat(e.target.value) || 0)}
-            />
-          </div>
-        );
-      }
-
-      // Default to text input
-      return (
-        <div key={key} className="space-y-2">
-          <Label htmlFor={key} className="capitalize">{key.replace(/_/g, ' ')}</Label>
-          <Input
-            id={key}
-            value={formData.modelConfig[key] ?? (defaultValue?.toString() || '')}
-            onChange={(e) => handleModelConfigChange(key, e.target.value)}
-          />
-        </div>
-      );
-    });
+  // Handler for when user selects a model from their own list
+  const handleUserModelSelect = (modelId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      selectedModelId: modelId
+    }));
   };
 
   if (!isOpen) return null;
 
-  const isLoading = isLoadingModelConfigs || isLoadingAgentConfig || isLoadingTools || (isEditMode && isLoadingAgentData);
+  const isLoading = isLoadingAgentConfig || isLoadingTools || isLoadingModels || (isEditMode && isLoadingAgentData);
   const isSaving = createAgentMutation.isPending || updateAgentMutation.isPending;
 
   return (
@@ -412,28 +328,38 @@ export const Agents2ConfigurationDrawer = ({ isOpen, onClose, agent }: Agents2Co
                   <div className="space-y-4 border-t border-gray-200 pt-6">
                     <h4 className="font-medium text-gray-900 text-lg">Model Configuration</h4>
 
+                    {/* User Model selection */}
                     <div className="space-y-2">
-                      <Label htmlFor="modelProvider">Model Provider <span className="text-red-500">*</span></Label>
-                      <Select value={formData.selectedModelProvider} onValueChange={(value) => setFormData({...formData, selectedModelProvider: value})}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a model provider" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {modelConfigs?.map((model) => (
-                            <SelectItem key={model.provider} value={model.provider}>
-                              {model.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Label htmlFor="userModel">Model <span className="text-red-500">*</span></Label>
+                      {isLoadingModels && (
+                        <div className="flex items-center py-2">
+                          <Loader2 className="h-4 w-4 animate-spin text-blue-600 mr-2" />
+                          <span className="text-sm text-gray-600">Loading models...</span>
+                        </div>
+                      )}
+                      {modelsError && (
+                        <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-md">
+                          <span className="text-xs text-red-700">Failed to load models</span>
+                        </div>
+                      )}
+                      {!isLoadingModels && !modelsError && (
+                        <Select value={formData.selectedModelId} onValueChange={handleUserModelSelect} key={`model-select-${formData.selectedModelId}`}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a model" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {models.map((model: any) => (
+                              <SelectItem key={model.id} value={model.id}>
+                                <div className="flex flex-col">
+                                  <span className="font-medium">{model.name}</span>
+                                  <span className="text-xs text-gray-500">{model.modelId}</span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
                     </div>
-
-                    {formData.selectedModelProvider && (
-                      <div className="space-y-4 pl-4 border-l-2 border-blue-200">
-                        <h5 className="font-medium text-gray-800">Model Settings</h5>
-                        {renderModelConfigFields()}
-                      </div>
-                    )}
                   </div>
 
                   {/* Tools Selection */}

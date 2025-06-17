@@ -62,6 +62,8 @@ export interface AgentCreate {
   name: string;
   description: string;
   component: AgentConfig;
+  model_id?: string;
+  tool_ids?: string[];
 }
 
 // Agent update payload
@@ -70,6 +72,8 @@ export interface AgentUpdate {
   description?: string;
   component?: AgentConfig;
   is_active?: boolean;
+  model_id?: string;
+  tool_ids?: string[];
 }
 
 // Response from agent API
