@@ -145,6 +145,12 @@ export interface Team extends TeamResponse {}
 export interface TeamCreate extends TeamCreateRequest {}
 export interface TeamUpdate {
   component: Partial<TeamComponent>;
+  organization_id?: string;
+  model_id?: string;
+  team_agent_ids?: string[];
+  team_input_ids?: string[];
+  team_output_ids?: string[];
+  team_termination_condition_ids?: string[];
 }
 export interface TeamList extends TeamListResponse {}
 

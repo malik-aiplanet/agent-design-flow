@@ -3,6 +3,9 @@ import { ArrowLeft, ArrowRight, Check, Sparkles, User, Users, Settings, Rocket, 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
+import { useTeam, useUpdateTeam } from "@/hooks/useTeams";
+import { TeamResponse, TeamUpdate, TeamComponent } from "@/types/team";
+import { useToast } from "@/hooks/use-toast";
 
 // Import all step components
 import { teamDetailsStep } from "@/components/steps/TeamDetailsStep";
@@ -19,7 +22,7 @@ const steps = [
   { id: 5, title: "Deploy", component: DeployStep, icon: Rocket },
 ];
 
-// Mock data for existing agent
+// Mock data for existing agent (fallback)
 const mockAgentData = {
   name: "Customer Support Agent",
   description: "Handles customer inquiries and support tickets with intelligent routing and escalation",
@@ -29,30 +32,230 @@ const mockAgentData = {
   systemPrompt: "You are a helpful customer support agent..."
 };
 
+// Transform workflow state back to TeamUpdate format for API
+const transformWorkflowStateToTeamUpdate = (workflowState: any, originalTeam: TeamResponse): TeamUpdate => {
+  const config = { ...originalTeam.component.config };
+
+  // Update basic team configuration
+  if (workflowState.teamConfig) {
+    Object.assign(config, workflowState.teamConfig);
+  }
+
+  // Update participants if custom agents are defined
+  if (workflowState.customAgents && workflowState.customAgents.length > 0) {
+    config.participants = workflowState.customAgents;
+  }
+
+  // Create the updated component
+  const updatedComponent: TeamComponent = {
+    ...originalTeam.component,
+    label: workflowState.name || originalTeam.component.label,
+    description: workflowState.description || originalTeam.component.description,
+    config: config
+  };
+
+  return {
+    component: updatedComponent,
+    organization_id: originalTeam.organization_id,
+    // Include related IDs if they exist in the workflow state
+    model_id: workflowState.selectedModelId || (originalTeam as any).model_id,
+    team_agent_ids: workflowState.selectedAgents || (originalTeam as any).team_agent_ids || [],
+    team_input_ids: workflowState.team_input_ids || (originalTeam as any).team_input_ids || [],
+    team_output_ids: workflowState.team_output_ids || (originalTeam as any).team_output_ids || [],
+    team_termination_condition_ids: workflowState.selectedTerminationIds || (originalTeam as any).team_termination_condition_ids || []
+  };
+};
+
+// Transform TeamResponse to workflow state format
+const transformTeamToWorkflowState = (teamResponse: TeamResponse) => {
+  const component = teamResponse.component;
+  const config = component.config;
+
+  // Extract team type from provider (e.g., "autogen_agentchat.teams.SelectorGroupChat" -> "SelectorGroupChat")
+  const teamType = component.provider?.split('.').pop() || '';
+
+  // Extract model client information for SelectorGroupChat
+  let selectedModelId = '';
+  let selectedModel = null;
+
+  // First check if there's a model_id at the team level (this is the ID we want)
+  if ((teamResponse as any).model_id) {
+    selectedModelId = (teamResponse as any).model_id;
+  } else if (config.model_client) {
+    // Fallback: try to extract from model_client config, but this might be the model name, not ID
+    selectedModelId = config.model_client.config?.model || '';
+  }
+
+  if (selectedModelId) {
+    selectedModel = {
+      modelId: selectedModelId,
+      // Add other model properties as needed
+    };
+  }
+
+  return {
+    // Step 1: Workflow Details
+    name: component.label,
+    description: component.description,
+    teamType: teamType,
+
+    // Step 2: Sub Agents
+    selectedAgents: (teamResponse as any).team_agent_ids || [],
+    customAgents: config.participants || [],
+
+        // Step 3: IO Configuration
+    selectedInputIds: (teamResponse as any).team_input_ids || [],
+    selectedOutputIds: (teamResponse as any).team_output_ids || [],
+    team_input_ids: (teamResponse as any).team_input_ids || [],
+    team_output_ids: (teamResponse as any).team_output_ids || [],
+    // Create inputComponents structure expected by IOStep
+    inputComponents: ((teamResponse as any).team_input_ids || []).length > 0
+      ? ((teamResponse as any).team_input_ids || []).map((inputId: string, index: number) => ({
+          id: `input-${index + 1}`,
+          inputId: inputId,
+          enabled: true
+        }))
+      : [{ id: "1", inputId: "", enabled: true }], // Default empty input component
+    // Single output selection for IOStep
+    selectedOutputId: ((teamResponse as any).team_output_ids || [])[0] || null,
+
+    // Step 4: Team Configuration
+    selectedTeamType: teamType,
+    teamConfig: {
+      ...config,
+      // Ensure all required fields are present
+      max_turns: config.max_turns || 10,
+      emit_team_events: config.emit_team_events || false,
+      participants: config.participants || [],
+      // SelectorGroupChat specific fields
+      ...(teamType === 'SelectorGroupChat' && {
+        selector_prompt: config.selector_prompt || "You are in a role play game...",
+        allow_repeated_speaker: config.allow_repeated_speaker || false,
+        max_selector_attempts: config.max_selector_attempts || 3,
+        model_client_streaming: config.model_client_streaming || false,
+        model_client: config.model_client
+      }),
+      // Add termination condition ID if present
+      ...(((teamResponse as any).team_termination_condition_ids?.length > 0) && {
+        termination_condition: ((teamResponse as any).team_termination_condition_ids)[0]
+      })
+    },
+    selectedTeamTemplate: {
+      provider: component.provider,
+      component_type: component.component_type,
+      version: component.version,
+      component_version: component.component_version,
+      description: component.description,
+      label: teamType,
+      config: config
+    },
+
+    // Model selection for SelectorGroupChat
+    ...(selectedModelId && {
+      selectedModelId,
+      selectedModel
+    }),
+
+    // Step 5: Deploy
+    teamId: teamResponse.id,
+    deploymentComplete: false,
+
+    // Additional metadata
+    organizationId: teamResponse.organization_id,
+    createdAt: teamResponse.created_at,
+    updatedAt: teamResponse.updated_at,
+    isDeleted: teamResponse.is_deleted,
+
+    // Include termination conditions if present
+    ...(((teamResponse as any).team_termination_condition_ids) && {
+      selectedTerminationIds: (teamResponse as any).team_termination_condition_ids
+    })
+  };
+};
+
 const EditTeam = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const [currentStep, setCurrentStep] = useState(1);
 
-  // Get team data from router state or use mock data as fallback
-  const teamData = location.state?.teamData;
-  const initialData = teamData ? {
-    name: teamData.name,
-    description: teamData.description,
-    teamType: teamData.teamType,
-    status: teamData.status,
-    participantsCount: teamData.participantsCount,
-    maxTurns: teamData.maxTurns,
-    lastModified: teamData.lastModified
-  } : mockAgentData;
+  // Fetch complete team data from backend
+  const { data: teamResponse, isLoading, error } = useTeam(id!);
 
-  const [agentData, setAgentData] = useState(initialData);
+  // Update team mutation
+  const updateTeamMutation = useUpdateTeam();
+
+  // Toast for notifications
+  const { toast } = useToast();
+
+  // Get team data from router state as fallback for display name
+  const routerTeamData = location.state?.teamData;
+
+  // Transform backend data to workflow state format
+  const [agentData, setAgentData] = useState<any>({});
+
+  useEffect(() => {
+    if (teamResponse) {
+      console.log("Full team data from backend:", teamResponse);
+      const transformedData = transformTeamToWorkflowState(teamResponse);
+      console.log("Transformed workflow data:", transformedData);
+      console.log("Input components structure:", transformedData.inputComponents);
+      console.log("Selected output ID:", transformedData.selectedOutputId);
+      console.log("Selected agents:", transformedData.selectedAgents);
+      setAgentData(transformedData);
+    } else if (routerTeamData && !isLoading) {
+      // Fallback to router data if backend fetch fails, but convert to expected format
+      const fallbackData = {
+        name: routerTeamData.name,
+        description: routerTeamData.description,
+        teamType: routerTeamData.teamType,
+        status: routerTeamData.status,
+        participantsCount: routerTeamData.participantsCount,
+        maxTurns: routerTeamData.maxTurns,
+        lastModified: routerTeamData.lastModified,
+        teamId: routerTeamData.id,
+        // Add default empty structures for fallback
+        inputComponents: [{ id: "1", inputId: "", enabled: true }],
+        selectedOutputId: null,
+        selectedAgents: []
+      };
+      console.log("Using fallback router data:", fallbackData);
+      setAgentData(fallbackData);
+    }
+  }, [teamResponse, routerTeamData, isLoading]);
 
   useEffect(() => {
     console.log("Editing team with ID:", id);
-    console.log("Team data:", teamData);
-  }, [id, teamData]);
+    console.log("Router team data:", routerTeamData);
+    console.log("Backend team response:", teamResponse);
+  }, [id, routerTeamData, teamResponse]);
+
+  // Show loading state while fetching data
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading team data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if team not found
+  if (error || (!teamResponse && !routerTeamData)) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">Failed to load team data</p>
+          <Button onClick={() => navigate("/")}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const nextStep = () => {
     if (currentStep < steps.length) {
@@ -70,10 +273,48 @@ const EditTeam = () => {
     setCurrentStep(stepId);
   };
 
-  const handleSave = () => {
-    console.log("Saving agent data:", agentData);
-    navigate("/");
+  const handleSave = async () => {
+    if (!teamResponse || !id) {
+      console.error("No team data available for update");
+      return;
+    }
+
+    try {
+      console.log("Saving agent data:", agentData);
+
+      // Transform the workflow state back to the API format
+      const updateData = transformWorkflowStateToTeamUpdate(agentData, teamResponse);
+      console.log("Update payload:", updateData);
+
+      // Make the API call to update the team
+      await updateTeamMutation.mutateAsync({
+        id: id,
+        data: updateData
+      });
+
+      console.log("Team updated successfully");
+
+      // Show success toast
+      toast({
+        title: "Team Updated",
+        description: "Your team has been successfully updated.",
+      });
+
+      navigate("/");
+    } catch (error) {
+      console.error("Failed to update team:", error);
+
+      // Show error toast
+      toast({
+        title: "Update Failed",
+        description: "There was an error updating your team. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
+
+  // Get display name from available data
+  const displayName = agentData.name || routerTeamData?.name || "Unknown Team";
 
   const CurrentStepComponent = steps[currentStep - 1].component;
 
@@ -95,9 +336,9 @@ const EditTeam = () => {
               </div>
               <div>
                 <h1 className="text-lg font-semibold text-gray-900">
-                  {teamData ? "Edit Team" : "Edit Agent"}
+                  Edit Team
                 </h1>
-                <p className="text-sm text-gray-500">{agentData.name}</p>
+                <p className="text-sm text-gray-500">{displayName}</p>
               </div>
             </div>
           </div>
@@ -199,10 +440,20 @@ const EditTeam = () => {
             {currentStep === steps.length ? (
               <Button
                 onClick={handleSave}
-                className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white h-10 text-sm"
+                disabled={updateTeamMutation.isPending}
+                className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white h-10 text-sm disabled:opacity-50"
               >
-                <Check className="h-4 w-4" />
-                Save Changes
+                {updateTeamMutation.isPending ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Check className="h-4 w-4" />
+                    Save Changes
+                  </>
+                )}
               </Button>
             ) : (
               <Button

@@ -29,6 +29,12 @@ export const TeamStep = ({
   onUpdate,
   isValid
 }: TeamStepProps) => {
+  // Debug logging
+  useEffect(() => {
+    console.log("TeamStep: data prop changed:", data);
+    console.log("TeamStep: selectedModelId:", data?.selectedModelId);
+    console.log("TeamStep: teamConfig:", data?.teamConfig);
+  }, [data]);
   const [teamConfigs, setTeamConfigs] = useState<TeamComponent[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTemplate, setSelectedTemplate] = useState<TeamComponent | null>(null);
@@ -68,6 +74,14 @@ export const TeamStep = ({
 
     fetchTeamConfigs();
   }, [data?.teamType]);
+
+  // Update selectedTemplate when data changes (for edit mode)
+  useEffect(() => {
+    if (data?.selectedTeamTemplate && teamConfigs.length > 0) {
+      console.log("TeamStep: Updating selectedTemplate from data prop:", data.selectedTeamTemplate);
+      setSelectedTemplate(data.selectedTeamTemplate);
+    }
+  }, [data?.selectedTeamTemplate, teamConfigs]);
 
   const handleUpdate = (newData: any) => {
     onUpdate?.({

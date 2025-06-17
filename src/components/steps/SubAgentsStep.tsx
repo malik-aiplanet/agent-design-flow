@@ -1,5 +1,5 @@
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Plus, X, Search, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,14 @@ export const SubAgentsStep = ({ data, onUpdate }: any) => {
   const agents = (agentsResponse as any)?.items || [];
 
   const filteredAgents = agents;
+
+  // Update local state when data prop changes (for edit mode)
+  useEffect(() => {
+    if (data?.selectedAgents) {
+      console.log("SubAgentsStep: Updating selectedAgents from data prop:", data.selectedAgents);
+      setSelectedAgents(data.selectedAgents);
+    }
+  }, [data?.selectedAgents]);
 
     const toggleAgent = (agentId: string) => {
     const updatedSelection = selectedAgents.includes(agentId)

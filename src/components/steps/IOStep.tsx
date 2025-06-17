@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowUpDown, ArrowDownRight, Plus, Settings, Loader2, Check, X, FileText, Upload, Link, Image } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -51,6 +51,24 @@ export const IOStep = ({ data, onUpdate, isValid }: IOStepProps) => {
 
   const inputs = inputsData?.items || [];
   const outputs = outputsData?.items || [];
+
+  // Update local state when data prop changes (for edit mode)
+  useEffect(() => {
+    if (data?.inputComponents) {
+      console.log("IOStep: Updating inputComponents from data prop:", data.inputComponents);
+      setInputComponents(data.inputComponents);
+    }
+  }, [data?.inputComponents]);
+
+  useEffect(() => {
+    if (data?.selectedOutputId !== undefined) {
+      console.log("IOStep: Updating selectedOutputId from data prop:", data.selectedOutputId);
+      setSelectedOutputId(data.selectedOutputId);
+    } else if (data?.selectedOutputIds?.[0]) {
+      console.log("IOStep: Updating selectedOutputId from selectedOutputIds:", data.selectedOutputIds[0]);
+      setSelectedOutputId(data.selectedOutputIds[0]);
+    }
+  }, [data?.selectedOutputId, data?.selectedOutputIds]);
 
   const handleInputComponentUpdate = (updatedInputComponents: InputComponent[]) => {
     setInputComponents(updatedInputComponents);
