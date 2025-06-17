@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
-import { ArrowLeft, ArrowRight, Check, Sparkles, User, Users, Settings, Rocket, ArrowUpDown } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { ArrowLeft, ArrowRight, Check, Sparkles, User, Users, Settings, Rocket, ArrowUpDown, Loader2, CheckCircle, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
-import { useTeam, useUpdateTeam } from "@/hooks/useTeams";
+import { useTeam, useUpdateTeam, useDeployTeam, useUndeployTeam, useTestTeam } from "@/hooks/useTeams";
 import { TeamResponse, TeamUpdate, TeamComponent } from "@/types/team";
 import { useToast } from "@/hooks/use-toast";
 
@@ -178,12 +178,19 @@ const EditTeam = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [currentStep, setCurrentStep] = useState(1);
+  const [isDeployed, setIsDeployed] = useState<boolean>(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // Fetch complete team data from backend
   const { data: teamResponse, isLoading, error } = useTeam(id!);
 
   // Update team mutation
   const updateTeamMutation = useUpdateTeam();
+
+  // Deploy mutations
+  const deployTeamMutation = useDeployTeam();
+  const undeployTeamMutation = useUndeployTeam();
+  const testTeamMutation = useTestTeam();
 
   // Toast for notifications
   const { toast } = useToast();
@@ -194,6 +201,105 @@ const EditTeam = () => {
   // Transform backend data to workflow state format
   const [agentData, setAgentData] = useState<any>({});
 
+  // Deploy step actions similar to CreateTeam.tsx
+  const handleDeploy = useCallback(async () => {
+    if (!id) return;
+
+    try {
+      await deployTeamMutation.mutateAsync(id);
+      setIsDeployed(true);
+
+      // Update agent data to indicate deployment is complete
+      setAgentData((prev: any) => ({
+        ...prev,
+        isDeployed: true,
+        deploymentComplete: true
+      }));
+
+      toast({
+        title: "Team Deployed",
+        description: "Your team has been successfully deployed.",
+      });
+    } catch (error) {
+      console.error("Failed to deploy team:", error);
+      toast({
+        title: "Deployment Failed",
+        description: "There was an error deploying your team. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [id, deployTeamMutation, toast]);
+
+  const handleUndeploy = useCallback(async () => {
+    if (!id) return;
+
+    try {
+      await undeployTeamMutation.mutateAsync(id);
+      setIsDeployed(false);
+
+      setAgentData((prev: any) => ({
+        ...prev,
+        isDeployed: false,
+        deploymentComplete: false
+      }));
+
+      toast({
+        title: "Team Undeployed",
+        description: "Your team has been undeployed.",
+      });
+    } catch (error) {
+      console.error("Failed to undeploy team:", error);
+      toast({
+        title: "Undeploy Failed",
+        description: "There was an error undeploying your team. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [id, undeployTeamMutation, toast]);
+
+  const handleTest = useCallback(async () => {
+    if (!id) return;
+
+    try {
+      const testData = {
+        test_input: agentData?.testInput || "Hello, test the workflow",
+        max_iterations: 5,
+        timeout: 30000
+      };
+
+      const result = await testTeamMutation.mutateAsync({ id: id, testData });
+
+      // Navigate to chat interface with test results
+      navigate(`/chat/${id}`, {
+        state: {
+          testMode: true,
+          testResult: result
+        }
+      });
+    } catch (error) {
+      console.error("Failed to test team:", error);
+      toast({
+        title: "Test Failed",
+        description: "There was an error testing your team. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [id, testTeamMutation, navigate, toast, agentData?.testInput]);
+
+  const deployStepActions = {
+    handleDeploy,
+    handleUndeploy,
+    handleTest,
+    // State getters
+    isCreating: false, // Not applicable in edit mode
+    isCreated: !!id, // Team already exists
+    isDeploying: deployTeamMutation.isPending,
+    isDeployed: isDeployed,
+    isUndeploying: undeployTeamMutation.isPending,
+    isTesting: testTeamMutation.isPending,
+    deploymentStatus: isDeployed ? 'deployed' : 'idle'
+  };
+
   useEffect(() => {
     if (teamResponse) {
       console.log("Full team data from backend:", teamResponse);
@@ -202,7 +308,17 @@ const EditTeam = () => {
       console.log("Input components structure:", transformedData.inputComponents);
       console.log("Selected output ID:", transformedData.selectedOutputId);
       console.log("Selected agents:", transformedData.selectedAgents);
-      setAgentData(transformedData);
+
+      // Set deployment status based on team data
+      const isTeamDeployed = (teamResponse as any).is_deployed || false;
+      setIsDeployed(isTeamDeployed);
+
+      // Add deployStepActions to the transformed data
+      setAgentData({
+        ...transformedData,
+        isDeployed: isTeamDeployed,
+        deployStepActions
+      });
     } else if (routerTeamData && !isLoading) {
       // Fallback to router data if backend fetch fails, but convert to expected format
       const fallbackData = {
@@ -217,12 +333,16 @@ const EditTeam = () => {
         // Add default empty structures for fallback
         inputComponents: [{ id: "1", inputId: "", enabled: true }],
         selectedOutputId: null,
-        selectedAgents: []
+        selectedAgents: [],
+        isDeployed: false,
+        deployStepActions
       };
       console.log("Using fallback router data:", fallbackData);
       setAgentData(fallbackData);
     }
   }, [teamResponse, routerTeamData, isLoading]);
+
+
 
   useEffect(() => {
     console.log("Editing team with ID:", id);
@@ -273,6 +393,17 @@ const EditTeam = () => {
     setCurrentStep(stepId);
   };
 
+  const updateAgentData = (newData: any, markUnsaved: boolean = true) => {
+    setAgentData((prev: any) => ({
+      ...prev,
+      ...newData,
+      deployStepActions
+    }));
+    if (markUnsaved) {
+      setHasUnsavedChanges(true);
+    }
+  };
+
   const handleSave = async () => {
     if (!teamResponse || !id) {
       console.error("No team data available for update");
@@ -300,7 +431,8 @@ const EditTeam = () => {
         description: "Your team has been successfully updated.",
       });
 
-      navigate("/");
+      // Reset unsaved changes
+      setHasUnsavedChanges(false);
     } catch (error) {
       console.error("Failed to update team:", error);
 
@@ -405,9 +537,11 @@ const EditTeam = () => {
             <CardContent className="p-8">
               <CurrentStepComponent
                 data={agentData}
-                onUpdate={setAgentData}
+                onUpdate={updateAgentData}
                 onNext={nextStep}
                 onPrev={prevStep}
+                onSave={handleSave}
+                hasUnsavedChanges={hasUnsavedChanges}
                 isEditMode={true}
               />
             </CardContent>
@@ -438,23 +572,87 @@ const EditTeam = () => {
             </Button>
 
             {currentStep === steps.length ? (
-              <Button
-                onClick={handleSave}
-                disabled={updateTeamMutation.isPending}
-                className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white h-10 text-sm disabled:opacity-50"
-              >
-                {updateTeamMutation.isPending ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    Saving...
-                  </>
+              <>
+                {/* Deploy Step - Button sequence: Save Changes → Deploy → Test */}
+
+                {/* Save Changes Button */}
+                {hasUnsavedChanges ? (
+                  <Button
+                    onClick={handleSave}
+                    disabled={updateTeamMutation.isPending}
+                    className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white h-10 text-sm disabled:opacity-50"
+                  >
+                    {updateTeamMutation.isPending ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Check className="h-4 w-4" />
+                        Save Changes
+                      </>
+                    )}
+                  </Button>
                 ) : (
-                  <>
-                    <Check className="h-4 w-4" />
-                    Save Changes
-                  </>
+                  <div className="flex items-center gap-2 px-6 py-2 h-10 text-sm text-green-700">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Changes saved
+                  </div>
                 )}
-              </Button>
+
+                {/* Deploy Button - Available after save */}
+                {!hasUnsavedChanges && !agentData?.deployStepActions?.isDeployed && (
+                  <Button
+                    onClick={() => agentData?.deployStepActions?.handleDeploy()}
+                    disabled={agentData?.deployStepActions?.isDeploying}
+                    className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white h-10 text-sm disabled:opacity-50"
+                  >
+                    {agentData?.deployStepActions?.isDeploying ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Deploying...
+                      </>
+                    ) : (
+                      <>
+                        <Rocket className="h-4 w-4" />
+                        Deploy
+                      </>
+                    )}
+                  </Button>
+                )}
+
+                {/* Deployed Status */}
+                {agentData?.deployStepActions?.isDeployed && (
+                  <div className="flex items-center gap-2 px-6 py-2 h-10 text-sm text-green-700">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Deployed
+                  </div>
+                )}
+
+                {/* Test Button - Available after deployment */}
+                {agentData?.deployStepActions?.isDeployed && (
+                  <Button
+                    variant="outline"
+                    onClick={() => agentData?.deployStepActions?.handleTest()}
+                    disabled={agentData?.deployStepActions?.isTesting}
+                    className="flex items-center gap-2 px-6 py-2 h-10 text-sm disabled:opacity-50"
+                  >
+                    {agentData?.deployStepActions?.isTesting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Testing...
+                      </>
+                    ) : (
+                      <>
+                        <Wrench className="h-4 w-4" />
+                        Run Test
+                      </>
+                    )}
+                  </Button>
+                )}
+
+              </>
             ) : (
               <Button
                 onClick={nextStep}
