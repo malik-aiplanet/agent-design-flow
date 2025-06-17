@@ -105,13 +105,13 @@ const Dashboard = () => {
       <div className="mb-8">
         <div className="flex justify-between items-start mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">Teams</h1>
-            <p className="text-slate-600 text-lg">Manage and deploy your intelligent teams</p>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">Workflows</h1>
+            <p className="text-slate-600 text-lg">Manage and deploy your intelligent workflows</p>
           </div>
           <Link to="/create">
             <Button className="bg-blue-600 hover:bg-blue-700 text-white h-auto flex items-center gap-3 font-semibold transition-colors rounded-lg py-[10px] px-[16px] text-sm">
               <Plus className="h-5 w-5" />
-              Create New Team
+              Create New Workflow
             </Button>
           </Link>
         </div>
@@ -152,7 +152,7 @@ const Dashboard = () => {
       <div className="flex gap-4 mb-8">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5" />
-          <Input placeholder="Search teams by name or description..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-12 h-14 border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-base" />
+          <Input placeholder="Search workflows by name or description..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-12 h-14 border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-base" />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-48 h-14 border-slate-300 text-base">

@@ -468,7 +468,7 @@ const EditTeam = () => {
               </div>
               <div>
                 <h1 className="text-lg font-semibold text-gray-900">
-                  Edit Team
+                  Edit Workflow
                 </h1>
                 <p className="text-sm text-gray-500">{displayName}</p>
               </div>
