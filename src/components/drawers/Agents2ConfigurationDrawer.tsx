@@ -71,8 +71,13 @@ export const Agents2ConfigurationDrawer = ({ isOpen, onClose, agent }: Agents2Co
       // Fallback to empty string if not present
       const existingModelId = (fullAgentData as any)?.model_id || "";
 
-      // Extract selected tool IDs from workbench config
-      const selectedToolIds = workbench?.config?.tools?.map((tool: any) => tool.id) || [];
+      // Extract selected tool IDs from agent relations (prefer backend-provided list)
+      const selectedToolIds =
+        // If the backend supplies an explicit list of tool_ids, use that
+        (fullAgentData as any)?.tool_ids?.length
+          ? (fullAgentData as any).tool_ids
+          // Otherwise fall back to reading ids from the workbench config
+          : (workbench?.config?.tools?.map((tool: any) => tool.id) || []);
 
       setFormData({
         name: config?.name || "", // name is in component.config.name
