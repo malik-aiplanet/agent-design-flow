@@ -88,4 +88,5 @@ export interface Agent2 {
   status: "Active" | "Inactive";
   lastModified: string;
   toolsCount: number;
+  agentType: string;
 }

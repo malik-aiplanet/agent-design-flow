@@ -9,6 +9,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { useAgents } from "@/hooks/useAgents";
 
+
+
 export const SubAgentsStep = ({ data, onUpdate }: any) => {
   const [selectedAgents, setSelectedAgents] = useState<string[]>(data?.selectedAgents || []);
   const [searchTerm, setSearchTerm] = useState("");
@@ -128,6 +130,9 @@ export const SubAgentsStep = ({ data, onUpdate }: any) => {
                       {agent.status}
                     </Badge>
                     <Badge variant="outline">{agent.modelClient}</Badge>
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                      {agent.agentType}
+                    </Badge>
                   </div>
                   <p className="text-sm text-gray-600">{agent.description}</p>
                                       <div className="flex gap-1 mt-2">
@@ -188,6 +193,9 @@ export const SubAgentsStep = ({ data, onUpdate }: any) => {
                           {agent.status}
                         </Badge>
                         <Badge variant="outline">{agent.modelClient}</Badge>
+                        <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                          {agent.agentType}
+                        </Badge>
                       </div>
                       <p className="text-sm text-gray-600 mb-2">{agent.description}</p>
                                               <div className="flex gap-1">

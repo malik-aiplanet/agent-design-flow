@@ -8,7 +8,18 @@ import { formatRelativeTime } from '../lib/datetime'
 const transformAgentToAgent2 = (agent: any): Agent2 => {
   const config = agent.component?.config;
 
-  // Check if this is a UserProxyAgent
+    // Extract agent type from provider string dynamically
+  const getAgentTypeFromProvider = (provider: string): string => {
+    if (!provider) return 'Unknown Agent';
+
+    // Extract the class name from the provider (e.g., "autogen_agentchat.agents.AssistantAgent" -> "AssistantAgent")
+    const className = provider.split('.').pop() || 'Unknown';
+
+    // Convert camelCase to readable format (e.g., "AssistantAgent" -> "Assistant Agent")
+    return className.replace(/([A-Z])/g, ' $1').trim();
+  };
+
+  const agentType = getAgentTypeFromProvider(agent.component?.provider);
   const isUserProxyAgent = agent.component?.provider === "autogen_agentchat.agents.UserProxyAgent";
 
   if (isUserProxyAgent) {
@@ -24,6 +35,7 @@ const transformAgentToAgent2 = (agent: any): Agent2 => {
       status: agent.is_active ? "Active" : "Inactive",
       lastModified,
       toolsCount: 0, // UserProxyAgent doesn't use tools
+      agentType,
     }
   } else {
     // AssistantAgent has full structure with model_client and workbench
@@ -42,6 +54,7 @@ const transformAgentToAgent2 = (agent: any): Agent2 => {
       status: agent.is_active ? "Active" : "Inactive",
       lastModified,
       toolsCount: workbench?.config?.tools?.length || 0,
+      agentType,
     }
   }
 }
