@@ -7,21 +7,42 @@ import { formatRelativeTime } from '../lib/datetime'
 // Utility function to transform backend Agent to frontend Agent2 format
 const transformAgentToAgent2 = (agent: any): Agent2 => {
   const config = agent.component?.config;
-  const modelClient = config?.model_client;
-  const workbench = config?.workbench;
 
-  // Select the most recent date (updated_at or created_at as fallback)
-  const dateToFormat = agent.updated_at || agent.created_at;
-  const lastModified = formatRelativeTime(dateToFormat);
+  // Check if this is a UserProxyAgent
+  const isUserProxyAgent = agent.component?.provider === "autogen_agentchat.agents.UserProxyAgent";
 
-  return {
-    id: agent.id,
-    name: config?.name || 'Unnamed Agent', // name is in component.config.name
-    description: config?.description || 'No description', // description is in component.config.description
-    modelClient: modelClient?.config?.model || modelClient?.label || 'Unknown',
-    status: agent.is_active ? "Active" : "Inactive",
-    lastModified,
-    toolsCount: workbench?.config?.tools?.length || 0,
+  if (isUserProxyAgent) {
+    // UserProxyAgent has simpler structure - no model_client or workbench
+    const dateToFormat = agent.updated_at || agent.created_at;
+    const lastModified = formatRelativeTime(dateToFormat);
+
+    return {
+      id: agent.id,
+      name: config?.name || 'Unnamed Agent',
+      description: config?.description || 'No description',
+      modelClient: 'N/A', // UserProxyAgent doesn't use a model
+      status: agent.is_active ? "Active" : "Inactive",
+      lastModified,
+      toolsCount: 0, // UserProxyAgent doesn't use tools
+    }
+  } else {
+    // AssistantAgent has full structure with model_client and workbench
+    const modelClient = config?.model_client;
+    const workbench = config?.workbench;
+
+    // Select the most recent date (updated_at or created_at as fallback)
+    const dateToFormat = agent.updated_at || agent.created_at;
+    const lastModified = formatRelativeTime(dateToFormat);
+
+    return {
+      id: agent.id,
+      name: config?.name || 'Unnamed Agent', // name is in component.config.name
+      description: config?.description || 'No description', // description is in component.config.description
+      modelClient: modelClient?.config?.model || modelClient?.label || 'Unknown',
+      status: agent.is_active ? "Active" : "Inactive",
+      lastModified,
+      toolsCount: workbench?.config?.tools?.length || 0,
+    }
   }
 }
 
