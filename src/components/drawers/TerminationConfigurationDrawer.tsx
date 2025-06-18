@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { X, Save, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -96,8 +95,7 @@ export const TerminationConfigurationDrawer = ({ isOpen, onClose, termination }:
 
     // Build config based on termination type
     let config: Record<string, any> = {
-      name: formData.name,
-      description: formData.description
+      name: formData.name, // Keep name in config as expected by transformation function
     };
 
     switch (selectedConfig.label) {
@@ -140,6 +138,7 @@ export const TerminationConfigurationDrawer = ({ isOpen, onClose, termination }:
     return {
       component: {
         ...selectedConfig,
+        description: formData.description, // Place description at component level
         config
       }
     };
