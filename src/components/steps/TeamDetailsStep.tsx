@@ -53,7 +53,19 @@ export const teamDetailsStep = ({ data, onUpdate, isEditMode }: any) => {
 
   const handleTeamTypeChange = (teamType: string) => {
     setSelectedTeamType(teamType);
-    onUpdate?.({ ...data, name, description, teamType });
+    // Reset all team configuration fields when team type changes
+    // This ensures step 4 (TeamStep) will load fresh configuration for the new team type
+    onUpdate?.({
+      ...data,
+      name,
+      description,
+      teamType,
+      // Clear team configuration fields to force refresh in step 4
+      teamConfig: undefined,
+      selectedTeamTemplate: undefined,
+      selectedModelId: undefined,
+      selectedModel: undefined
+    });
   };
 
   // Check if form is valid for navigation

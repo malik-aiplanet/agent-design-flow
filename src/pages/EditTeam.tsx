@@ -18,7 +18,7 @@ const steps = [
   { id: 1, title: "Workflow Details", component: teamDetailsStep, icon: User },
   { id: 2, title: "Sub Agents", component: SubAgentsStep, icon: Users },
   { id: 3, title: "IO", component: IOStep, icon: ArrowUpDown },
-  { id: 4, title: "Team", component: TeamStep, icon: Settings },
+  { id: 4, title: "Configuration", component: TeamStep, icon: Settings },
   { id: 5, title: "Deploy", component: DeployStep, icon: Rocket },
 ];
 

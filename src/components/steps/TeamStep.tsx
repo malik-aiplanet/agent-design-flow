@@ -56,8 +56,8 @@ export const TeamStep = ({
           const template = configs.find(config => config.label === data.teamType);
           if (template) {
             setSelectedTemplate(template);
-            // Initialize team config if not already set
-            if (!data?.teamConfig) {
+            // Initialize team config if not already set OR if selectedTeamTemplate was reset
+            if (!data?.teamConfig || !data?.selectedTeamTemplate) {
               handleUpdate({
                 selectedTeamTemplate: template,
                 teamConfig: { ...template.config }
@@ -73,7 +73,7 @@ export const TeamStep = ({
     };
 
     fetchTeamConfigs();
-  }, [data?.teamType]);
+  }, [data?.teamType, data?.selectedTeamTemplate]);
 
   // Update selectedTemplate when data changes (for edit mode)
   useEffect(() => {
@@ -415,12 +415,12 @@ export const TeamStep = ({
     return (
       <div className="space-y-8 max-w-4xl">
         <div className="space-y-3">
-          <h3 className="text-2xl font-bold text-gray-900">Team Configuration</h3>
-          <p className="text-gray-600 text-lg">Loading team configuration...</p>
+          <h3 className="text-2xl font-bold text-gray-900">Configuration</h3>
+          <p className="text-gray-600 text-lg">Loading workflow configuration...</p>
         </div>
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-          <span className="ml-3 text-gray-600">Setting up configuration for your selected team type...</span>
+          <span className="ml-3 text-gray-600">Setting up configuration for your selected workflow type...</span>
         </div>
       </div>
     );
@@ -430,15 +430,15 @@ export const TeamStep = ({
     return (
       <div className="space-y-8 max-w-4xl">
         <div className="space-y-3">
-          <h3 className="text-2xl font-bold text-gray-900">Team Configuration</h3>
-          <p className="text-gray-600 text-lg">Configure your team settings and parameters.</p>
+          <h3 className="text-2xl font-bold text-gray-900">Configuration</h3>
+          <p className="text-gray-600 text-lg">Configure your workflow settings and parameters.</p>
         </div>
         <Card className="border border-red-200 bg-red-50">
           <CardContent className="p-6 text-center">
             <AlertCircle className="h-12 w-12 text-red-600 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-red-900 mb-2">Team Type Not Selected</h3>
+            <h3 className="text-lg font-medium text-red-900 mb-2">Workflow Type Not Selected</h3>
             <p className="text-red-700">
-              Please go back to Step 1 and select a workflow type before configuring team settings.
+              Please go back to Step 1 and select a workflow type before configuring workflow settings.
             </p>
           </CardContent>
         </Card>
@@ -449,7 +449,7 @@ export const TeamStep = ({
   return (
     <div className="space-y-8 max-w-4xl">
       <div className="space-y-3">
-        <h3 className="text-2xl font-bold text-gray-900">Team Configuration</h3>
+        <h3 className="text-2xl font-bold text-gray-900">Configuration</h3>
         <p className="text-gray-600 text-lg">
           Configure settings and parameters for your {TEAM_TYPE_INFO[selectedTemplate.provider as keyof typeof TEAM_TYPE_INFO]?.name || selectedTemplate.label} workflow.
         </p>
