@@ -246,7 +246,7 @@ export const DeployStep = ({
             </div>
             <div>
               <span className="text-sm text-gray-500">Participants</span>
-              <p className="font-medium">{data?.teamConfig?.participants?.length || data?.selectedTeamTemplate?.config?.participants?.length || 0} agents</p>
+              <p className="font-medium">{data?.participantsData?.length || data?.selectedAgents?.length || data?.teamConfig?.participants?.length || data?.selectedTeamTemplate?.config?.participants?.length || 0} agents</p>
             </div>
             <div>
               <span className="text-sm text-gray-500">Max Turns</span>
