@@ -38,9 +38,8 @@ const transformAgentToAgent2 = (agent: any): Agent2 => {
       agentType,
     }
   } else {
-    // AssistantAgent has full structure with model_client and workbench
+    // AssistantAgent has full structure with model_client and tools
     const modelClient = config?.model_client;
-    const workbench = config?.workbench;
 
     // Select the most recent date (updated_at or created_at as fallback)
     const dateToFormat = agent.updated_at || agent.created_at;
@@ -53,7 +52,7 @@ const transformAgentToAgent2 = (agent: any): Agent2 => {
       modelClient: modelClient?.config?.model || modelClient?.label || 'Unknown',
       status: agent.is_active ? "Active" : "Inactive",
       lastModified,
-      toolsCount: workbench?.config?.tools?.length || 0,
+      toolsCount: config?.tools?.length || 0,
       agentType,
     }
   }

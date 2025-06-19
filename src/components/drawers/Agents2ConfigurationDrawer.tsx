@@ -82,7 +82,6 @@ export const Agents2ConfigurationDrawer = ({ isOpen, onClose, agent }: Agents2Co
       // Populate form with existing agent data from full backend response
       const component = fullAgentData.component;
       const config = component?.config;
-      const workbench = config?.workbench;
 
       // Determine agent type from the component provider
       const agentType = component?.provider === "autogen_agentchat.agents.UserProxyAgent"
@@ -98,8 +97,8 @@ export const Agents2ConfigurationDrawer = ({ isOpen, onClose, agent }: Agents2Co
         // If the backend supplies an explicit list of tool_ids, use that
         (fullAgentData as any)?.tool_ids?.length
           ? (fullAgentData as any).tool_ids
-          // Otherwise fall back to reading ids from the workbench config
-          : (workbench?.config?.tools?.map((tool: any) => tool.id) || []);
+          // Otherwise fall back to reading ids from component.config.tools
+          : (config?.tools?.map((tool: any) => tool.id) || []);
 
       setFormData({
         agentType,
@@ -234,13 +233,7 @@ export const Agents2ConfigurationDrawer = ({ isOpen, onClose, agent }: Agents2Co
           tool_call_summary_format: formData.toolCallSummaryFormat,
           metadata: formData.metadata,
           model_client: selectedModelComponent,
-          workbench: {
-            ...templateComponent.config.workbench,
-            config: {
-              ...templateComponent.config.workbench.config,
-              tools: selectedToolComponents
-            }
-          }
+          tools: selectedToolComponents
         }
       };
     }

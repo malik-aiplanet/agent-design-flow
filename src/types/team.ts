@@ -18,13 +18,7 @@ export interface ModelComponent extends BaseComponent {
   };
 }
 
-// Workbench component
-export interface WorkbenchComponent extends BaseComponent {
-  component_type: "workbench";
-  config: {
-    tools: any[];
-  };
-}
+
 
 // Model context component
 export interface ModelContextComponent extends BaseComponent {
@@ -48,7 +42,7 @@ export interface AgentComponent extends BaseComponent {
     description: string;
     system_message?: string;
     model_client?: ModelComponent;
-    workbench?: WorkbenchComponent;
+    tools?: any[];
     handoffs?: HandoffConfig[];
     model_context?: ModelContextComponent;
     model_client_stream?: boolean;

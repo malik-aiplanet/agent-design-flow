@@ -24,7 +24,6 @@ export interface AgentConfig extends Component {
   config: {
     name: string;
     model_client: ModelConfig;
-    workbench: Component;
     model_context: Component;
     description: string;
     system_message: string;
@@ -32,6 +31,7 @@ export interface AgentConfig extends Component {
     reflect_on_tool_use: boolean;
     tool_call_summary_format: string;
     metadata: Record<string, any>;
+    tools?: Component[];
   };
 }
 
