@@ -38,7 +38,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
         }
 
         const { websocket_url } = get_client_env();
-        const wsUrl = `${websocket_url}/ws/run/${run_id}`;
+        const wsUrl = `${websocket_url}/ws/${run_id}`;
         const newSocket = new WebSocket(wsUrl);
 
         newSocket.onopen = () => {

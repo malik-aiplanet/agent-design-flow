@@ -15,7 +15,7 @@ export default function ChatInterface({ app }: { app: AppData }) {
   useEffect(() => {
     if (store.task.length == 0) return;
 
-    const socket = getSocket();
+    const socket = getSocket(store.runId);
     // set the message handler
     socket.addEventListener("message", (event) => {
       console.log(JSON.parse(event.data));
