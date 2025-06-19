@@ -31,7 +31,7 @@ export const AgentBasicsCard = ({ data, onUpdate }: AgentBasicsCardProps) => {
   return (
     <Card className="border-2 border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50">
       <CardHeader>
-        <CardTitle className="flex items-center gap-3 text-lg">
+        <CardTitle className="text-lg flex items-center gap-3">
           <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
             <Bot className="h-4 w-4 text-blue-600" />
           </div>

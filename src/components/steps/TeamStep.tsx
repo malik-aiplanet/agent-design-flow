@@ -145,9 +145,18 @@ export const TeamStep = ({
             <Input
               id="maxTurns"
               type="number"
-              value={config?.max_turns || 10}
-              onChange={(e) => handleConfigUpdate('max_turns', parseInt(e.target.value) || 10)}
-              min={1}
+              value={config?.max_turns ?? ''}
+              onChange={(e) => {
+                const inputValue = e.target.value;
+                // Handle empty input as undefined/null
+                if (inputValue === '') {
+                  handleConfigUpdate('max_turns', undefined);
+                } else {
+                  const numValue = parseInt(inputValue, 10);
+                  handleConfigUpdate('max_turns', numValue);
+                }
+              }}
+              min={0}
               max={100}
               className="mt-1"
             />

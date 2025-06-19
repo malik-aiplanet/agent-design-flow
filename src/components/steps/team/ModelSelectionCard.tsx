@@ -30,8 +30,10 @@ export const ModelSelectionCard = ({ selectedModelId, onUpdate }: ModelSelection
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2">
-          <Brain className="h-5 w-5 text-blue-600" />
+        <CardTitle className="text-lg flex items-center gap-3">
+          <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+            <Brain className="h-4 w-4 text-blue-600" />
+          </div>
           Operator Model
         </CardTitle>
         <p className="text-sm text-gray-600">

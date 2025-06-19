@@ -26,8 +26,10 @@ export const ToolsSelectionCard = ({ selectedTools, onUpdate }: ToolsSelectionCa
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2">
-          <Wrench className="h-5 w-5 text-purple-600" />
+        <CardTitle className="text-lg flex items-center gap-3">
+          <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+            <Wrench className="h-4 w-4 text-purple-600" />
+          </div>
           Tools
         </CardTitle>
       </CardHeader>

@@ -112,7 +112,7 @@ export const ToolConfigurationDrawer = ({ isOpen, onClose, tool }: ToolConfigura
         hasCancellationSupport: false
       });
     }
-  }, [tool, isEditMode, fullToolData]);
+  }, [tool, isEditMode, fullToolData, isOpen]);
 
   const handleSave = async () => {
     try {

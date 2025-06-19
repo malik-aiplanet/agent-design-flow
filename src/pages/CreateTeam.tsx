@@ -139,7 +139,7 @@ const CreateTeam = () => {
           component_version: 1,
           config: {
             emit_team_events: teamData.teamConfig?.emit_team_events || false,
-            max_turns: teamData.teamConfig?.max_turns || 10,
+            max_turns: teamData.teamConfig?.max_turns ?? 10,
             // Use actual selected agents data instead of template participants
             participants: participants,
             // Include other config fields from teamConfig (like SelectorGroupChat specific fields)

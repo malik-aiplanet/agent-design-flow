@@ -38,8 +38,10 @@ export const MultiSelectTerminationCard = ({ terminationConditions, onUpdate }: 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2">
-          <Zap className="h-5 w-5 text-orange-600" />
+        <CardTitle className="text-lg flex items-center gap-3">
+          <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+            <Zap className="h-4 w-4 text-purple-600" />
+          </div>
           Termination Conditions
         </CardTitle>
       </CardHeader>

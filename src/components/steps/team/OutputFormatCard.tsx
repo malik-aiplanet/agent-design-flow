@@ -20,7 +20,7 @@ export const OutputFormatCard = ({ outputFormat, onUpdate }: OutputFormatCardPro
   return (
     <Card className="border-gray-200 shadow-sm">
       <CardHeader>
-        <CardTitle className="flex items-center gap-3 text-lg">
+        <CardTitle className="text-lg flex items-center gap-3">
           <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
             <FileType className="h-4 w-4 text-green-600" />
           </div>
