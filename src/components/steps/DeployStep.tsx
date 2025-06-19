@@ -70,8 +70,8 @@ export const DeployStep = ({
           config: {
             // Use the team configuration from Step 3
             ...data?.teamConfig,
-            // Ensure participants are included from the template
-            participants: data?.teamConfig?.participants || selectedTemplate?.config?.participants || [],
+            // Use actual selected agents data instead of template participants
+            participants: data?.participantsData || [],
           }
         },
         // Include model_id if available from the workflow configuration

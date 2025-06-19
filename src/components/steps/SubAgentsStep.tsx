@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { useAgents } from "@/hooks/useAgents";
+import { transformAgentsToParticipants } from "@/lib/teamUtils";
 
 
 
@@ -36,19 +37,45 @@ export const SubAgentsStep = ({ data, onUpdate }: any) => {
     }
   }, [data?.selectedAgents]);
 
-    const toggleAgent = (agentId: string) => {
+    const toggleAgent = async (agentId: string) => {
     const updatedSelection = selectedAgents.includes(agentId)
       ? selectedAgents.filter(id => id !== agentId)
       : [...selectedAgents, agentId];
 
     setSelectedAgents(updatedSelection);
-    onUpdate?.({ ...data, selectedAgents: updatedSelection });
+
+    // Also update the participants data with actual agent data
+    try {
+      const participants = await transformAgentsToParticipants(updatedSelection);
+      onUpdate?.({
+        ...data,
+        selectedAgents: updatedSelection,
+        participantsData: participants // Store actual agent data for use in save operations
+      });
+    } catch (error) {
+      console.error('Failed to update participants data:', error);
+      // Fallback to just updating the selection
+      onUpdate?.({ ...data, selectedAgents: updatedSelection });
+    }
   };
 
-  const removeAgent = (agentId: string) => {
+  const removeAgent = async (agentId: string) => {
     const updatedSelection = selectedAgents.filter(id => id !== agentId);
     setSelectedAgents(updatedSelection);
-    onUpdate?.({ ...data, selectedAgents: updatedSelection });
+
+    // Also update the participants data with actual agent data
+    try {
+      const participants = await transformAgentsToParticipants(updatedSelection);
+      onUpdate?.({
+        ...data,
+        selectedAgents: updatedSelection,
+        participantsData: participants // Store actual agent data for use in save operations
+      });
+    } catch (error) {
+      console.error('Failed to update participants data:', error);
+      // Fallback to just updating the selection
+      onUpdate?.({ ...data, selectedAgents: updatedSelection });
+    }
   };
 
   const selectedAgentsList = agents.filter(agent => selectedAgents.includes(agent.id));

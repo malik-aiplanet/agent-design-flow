@@ -6,6 +6,7 @@ import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
 import { useTeam, useUpdateTeam, useDeployTeam, useUndeployTeam, useTestTeam } from "@/hooks/useTeams";
 import { TeamResponse, TeamUpdate, TeamComponent } from "@/types/team";
 import { useToast } from "@/hooks/use-toast";
+import { transformAgentsToParticipants } from "@/lib/teamUtils";
 
 // Import all step components
 import { teamDetailsStep } from "@/components/steps/TeamDetailsStep";
@@ -33,7 +34,7 @@ const mockAgentData = {
 };
 
 // Transform workflow state back to TeamUpdate format for API
-const transformWorkflowStateToTeamUpdate = (workflowState: any, originalTeam: TeamResponse): TeamUpdate => {
+const transformWorkflowStateToTeamUpdate = async (workflowState: any, originalTeam: TeamResponse): Promise<TeamUpdate> => {
   const config = { ...originalTeam.component.config };
 
   // Update basic team configuration
@@ -41,9 +42,11 @@ const transformWorkflowStateToTeamUpdate = (workflowState: any, originalTeam: Te
     Object.assign(config, workflowState.teamConfig);
   }
 
-  // Update participants if custom agents are defined
-  if (workflowState.customAgents && workflowState.customAgents.length > 0) {
-    config.participants = workflowState.customAgents;
+  // Use actual selected agents instead of customAgents from template
+  if (workflowState.selectedAgents && workflowState.selectedAgents.length > 0) {
+    // Use cached participants data if available, otherwise fetch from API
+    const participants = workflowState.participantsData || await transformAgentsToParticipants(workflowState.selectedAgents);
+    config.participants = participants;
   }
 
   // Create the updated component
@@ -414,7 +417,7 @@ const EditTeam = () => {
       console.log("Saving agent data:", agentData);
 
       // Transform the workflow state back to the API format
-      const updateData = transformWorkflowStateToTeamUpdate(agentData, teamResponse);
+      const updateData = await transformWorkflowStateToTeamUpdate(agentData, teamResponse);
       console.log("Update payload:", updateData);
 
       // Make the API call to update the team

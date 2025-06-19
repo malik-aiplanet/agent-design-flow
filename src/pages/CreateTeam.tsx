@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { useCreateTeam } from "@/hooks/useTeams";
 import { toast } from "@/hooks/use-toast";
+import { transformAgentsToParticipants } from "@/lib/teamUtils";
 
 // Import all step components
 import { teamDetailsStep } from "@/components/steps/TeamDetailsStep";
@@ -128,6 +129,9 @@ const CreateTeam = () => {
 
   const saveChanges = async () => {
     try {
+      // Use cached participants data if available, otherwise fetch from API
+      const participants = teamData.participantsData || await transformAgentsToParticipants(teamData.selectedAgents || []);
+
       // Transform teamData into the required payload format
       const payload: any = {
         component: {
@@ -136,8 +140,14 @@ const CreateTeam = () => {
           config: {
             emit_team_events: teamData.teamConfig?.emit_team_events || false,
             max_turns: teamData.teamConfig?.max_turns || 10,
-            // Re-use the participants defined in the team configuration/template
-            participants: teamData.teamConfig?.participants || [],
+            // Use actual selected agents data instead of template participants
+            participants: participants,
+            // Include other config fields from teamConfig (like SelectorGroupChat specific fields)
+            ...(teamData.teamConfig && Object.fromEntries(
+              Object.entries(teamData.teamConfig).filter(([key]) =>
+                !['emit_team_events', 'max_turns', 'participants'].includes(key)
+              )
+            )),
           },
           description: teamData.description || teamData.selectedTeamTemplate?.description || "A team workflow",
           label: teamData.name || "Workflow Team",

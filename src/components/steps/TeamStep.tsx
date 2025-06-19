@@ -402,7 +402,7 @@ export const TeamStep = ({
               </div>
               <div>
                 <span className="font-medium">Participants:</span>
-                <span className="ml-2">{config?.participants?.length || 'To be added in Step 2'}</span>
+                <span className="ml-2">{data?.participantsData?.length || data?.selectedAgents?.length || 'To be added in Step 2'}</span>
               </div>
             </div>
           </div>
