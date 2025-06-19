@@ -1,7 +1,10 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { get_client_env } from './env';
+
+const env = get_client_env()
 
 // API configuration and base service
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+const API_BASE_URL = env.backend_url;
 
 export const API_ENDPOINTS = {
   // Public endpoints

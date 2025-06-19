@@ -1,9 +1,8 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -21,14 +20,21 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 
+import DeployedAppLayout from "@/components/app/pages/home.tsx";
+import DeployedAppInterface from "@/components/app/pages/interface.tsx";
+
 const queryClient = new QueryClient();
 
 const AppContent = () => {
   const location = useLocation();
-  const isAuthRoute = location.pathname === "/login" || location.pathname === "/register";
+  const isAuthRoute =
+    location.pathname === "/login" || location.pathname === "/register";
   const isCreateRoute = location.pathname === "/create";
-  const isEditRoute = location.pathname.startsWith("/agent/edit") || location.pathname.startsWith("/team/edit");
+  const isEditRoute =
+    location.pathname.startsWith("/agent/edit") ||
+    location.pathname.startsWith("/team/edit");
   const isChatRoute = location.pathname.startsWith("/chat");
+  const isApp = location.pathname.startsWith("/app");
 
   // Public routes (auth pages)
   if (isAuthRoute) {
@@ -43,7 +49,7 @@ const AppContent = () => {
   }
 
   // Protected full-screen routes (create, edit, chat)
-  if (isCreateRoute || isEditRoute || isChatRoute) {
+  if (isCreateRoute || isEditRoute) {
     return (
       <ProtectedRoute>
         <main className="w-full">
@@ -51,10 +57,25 @@ const AppContent = () => {
             <Route path="/create" element={<CreateTeam />} />
             <Route path="/agent/edit/:id" element={<EditTeam />} />
             <Route path="/team/edit/:id" element={<EditTeam />} />
-            <Route path="/chat/:agentId" element={<ChatInterface />} />
-            <Route path="/chat/:agentId/:conversationId" element={<ChatInterface />} />
           </Routes>
         </main>
+      </ProtectedRoute>
+    );
+  }
+
+  if (isChatRoute) {
+    return (
+      <ProtectedRoute>
+        <Routes>
+          <Route path="/chat" element={<DeployedAppLayout />}>
+            <Route path=":teamId" element={<DeployedAppInterface />}>
+              <Route
+                path=":conversationId"
+                element={<DeployedAppInterface />}
+              />
+            </Route>
+          </Route>
+        </Routes>
       </ProtectedRoute>
     );
   }
@@ -71,7 +92,10 @@ const AppContent = () => {
               <Route path="/agents-2" element={<Agents2Management />} />
               <Route path="/tools" element={<ToolsManagement />} />
               <Route path="/models" element={<ModelsManagement />} />
-              <Route path="/terminations" element={<TerminationsManagement />} />
+              <Route
+                path="/terminations"
+                element={<TerminationsManagement />}
+              />
               <Route path="/settings" element={<Settings />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
