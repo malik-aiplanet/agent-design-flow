@@ -37,8 +37,12 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
           socket.close();
         }
 
+        const token = localStorage.getItem("access_token");
+
         const { websocket_url } = get_client_env();
-        const wsUrl = `${websocket_url}/ws/${run_id}`;
+
+        const query = new URLSearchParams({ token });
+        const wsUrl = `${websocket_url}/websocket/ws/run/${run_id}/?${query.toString()}`;
         const newSocket = new WebSocket(wsUrl);
 
         newSocket.onopen = () => {

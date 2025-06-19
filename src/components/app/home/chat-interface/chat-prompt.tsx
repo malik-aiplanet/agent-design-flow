@@ -12,8 +12,9 @@ import GoogleDrive from "@/components/icons/gdrive";
 import axios from "axios";
 import { get_client_env } from "@/lib/env";
 import { useAppStore } from "@/lib/app-store";
-import team_config from "public/team_config.json";
 import { useSocket } from "@/contexts/SocketContext";
+import { UNSAFE_useRouteId } from "react-router-dom";
+import AuthService from "@/services/authService";
 
 export default function ChatPrompt() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -41,30 +42,27 @@ export default function ChatPrompt() {
     if (!message) return; // don't submit empty
 
     const formData = new FormData(e.currentTarget);
-    // const env = get_client_env();
+    const env = get_client_env();
 
     // create a run
-    // const token_type = localStorage.getItem("token_type");
-    // const token = localStorage.getItem("access_token");
+    const token_type = localStorage.getItem("token_type");
+    const token = localStorage.getItem("access_token");
 
-    // const bearer_token = `${token_type} ${token}`;
-    // const response = await axios.post<RunData>(
-    //   `${env.backend_url}/private/runs`,
-    //   {
-    //     task: {
-    //       task: formData.get("input"),
-    //     },
-    //     team_config: team_config,
-    //     session_id: store.selectedApp?.id,
-    //   },
-    //   {
-    //     headers: {
-    //       Authorization: bearer_token,
-    //     },
-    //   }
-    // );
+    const bearer_token = `${token_type} ${token}`;
+    const headers = { Authorization: bearer_token };
 
-    // store.setRunId(response.data.id);
+    const user = await AuthService.getCurrentUser();
+
+    const response = await axios.post<RunData>(
+      `${env.backend_url}/private/sessions/generate-run`,
+      {
+        session_id: store.selectedApp.id,
+        user_id: user.id,
+      },
+      { headers }
+    );
+
+    store.setRunId(response.data.id);
     store.setTask(formData.get("input") as string);
 
     textareaRef.current.value = "";
@@ -86,12 +84,13 @@ export default function ChatPrompt() {
   useEffect(() => {
     if (!isConnected) return;
 
+    console.log(store.team.component);
     // start stream
     sendMessage(
       JSON.stringify({
         type: "start_task",
         task: textareaRef.current?.value || "",
-        team_config: team_config,
+        team_config: store.team.component,
         session_id: store.selectedApp?.id,
       })
     );

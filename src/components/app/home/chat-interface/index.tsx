@@ -13,14 +13,14 @@ export default function ChatInterface({ app }: { app: AppData }) {
 
   // handle the incoming message
   useEffect(() => {
-    if (store.task.length == 0) return;
+    if (!store.runId) return;
 
     const socket = getSocket(store.runId);
     // set the message handler
     socket.addEventListener("message", (event) => {
       console.log(JSON.parse(event.data));
     });
-  }, [store.task]);
+  }, [store.runId]);
 
   return (
     <div className={cn("min-h-full flex", "px-[22%]")}>
