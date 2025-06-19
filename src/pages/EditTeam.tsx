@@ -469,11 +469,13 @@ const EditTeam = () => {
               <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
                 <Sparkles className="h-5 w-5 text-white" />
               </div>
-              <div>
-                <h1 className="text-lg font-semibold text-gray-900">
+              <div className="max-w-[160px]">
+                <h1 className="text-lg font-semibold text-gray-900 truncate">
                   Edit Workflow
                 </h1>
-                <p className="text-sm text-gray-500">{displayName}</p>
+                <p className="text-sm text-gray-500 truncate">
+                  {displayName}
+                </p>
               </div>
             </div>
           </div>

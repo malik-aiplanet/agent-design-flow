@@ -61,7 +61,7 @@ export const ModelConfigurationDrawer = ({ isOpen, onClose, model }: ModelConfig
         modelConfig: {},
       });
     }
-  }, [model, isEditMode, fullModelData]);
+  }, [model, isEditMode, fullModelData, isOpen]); // Add isOpen to dependencies
 
   // Update model config when provider changes
   useEffect(() => {

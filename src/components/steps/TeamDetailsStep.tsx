@@ -107,7 +107,8 @@ export const teamDetailsStep = ({ data, onUpdate, isEditMode }: any) => {
               placeholder="e.g., Customer Onboarding Flow, Content Publishing Pipeline, Data Processing Workflow..."
               value={name}
               onChange={(e) => handleNameChange(e.target.value)}
-              className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+              className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500 overflow-ellipsis"
+              maxLength={100}
             />
             <p className="text-xs text-gray-500">
               Give your workflow a descriptive and memorable name that reflects its purpose.

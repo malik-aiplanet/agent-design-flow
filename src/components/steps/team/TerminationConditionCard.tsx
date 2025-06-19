@@ -15,8 +15,10 @@ export const TerminationConditionCard = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2">
-          <Zap className="h-5 w-5 text-orange-600" />
+        <CardTitle className="text-lg flex items-center gap-3">
+          <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+            <Zap className="h-4 w-4 text-orange-600" />
+          </div>
           Termination Condition
         </CardTitle>
       </CardHeader>

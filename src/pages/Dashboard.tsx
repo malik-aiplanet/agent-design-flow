@@ -122,7 +122,7 @@ const Dashboard = () => {
             <CardContent className="p-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-blue-700 text-sm font-semibold mb-2">Total Teams</p>
+                  <p className="text-blue-700 text-sm font-semibold mb-2">Total Workflows</p>
                   <p className="text-4xl font-bold text-blue-900">{totalTeams}</p>
                 </div>
                 <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center border-2 border-blue-200">
@@ -136,7 +136,7 @@ const Dashboard = () => {
             <CardContent className="p-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-green-700 text-sm font-semibold mb-2">Active Teams</p>
+                  <p className="text-green-700 text-sm font-semibold mb-2">Active Workflows</p>
                   <p className="text-4xl font-bold text-green-900">{activeTeams}</p>
                 </div>
                 <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center border-2 border-green-200">
@@ -173,24 +173,24 @@ const Dashboard = () => {
         {filteredTeams.map(team => (
           <Card
             key={team.id}
-            className="hover:shadow-lg transition-all duration-300 bg-white border-slate-200 border-2 overflow-hidden cursor-pointer hover:border-blue-300 group"
+            className="hover:shadow-lg transition-all duration-300 bg-white border-slate-200 border-2 overflow-hidden cursor-pointer hover:border-blue-300 group h-[280px]"
             onClick={() => handleTeamCardClick(team)}
           >
             <CardContent className="p-0">
-              <div className="p-8">
+              <div className="p-8 flex flex-col h-full">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-4 mb-4">
-                      <h3 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+                      <h3 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors truncate max-w-[70%]">
                         {team.name}
                       </h3>
                       <Badge className={`${getStatusColor(team.status)} border-2 font-semibold px-3 py-1`}>
                         {team.status}
                       </Badge>
                     </div>
-                    <p className="text-slate-600 text-base mb-6 leading-relaxed">{team.description}</p>
+                    <p className="text-slate-600 text-base mb-6 leading-relaxed line-clamp-3">{team.description}</p>
 
-                    <div className="flex items-center gap-6 text-sm text-slate-500">
+                    <div className="flex items-center gap-6 text-sm text-slate-500 mt-auto">
                       <span className="flex items-center gap-1">
                         <span className="font-semibold">Type:</span> {team.teamType}
                       </span>
@@ -264,11 +264,11 @@ const Dashboard = () => {
             <Search className="h-12 w-12 text-slate-400" />
           </div>
           <div className="text-slate-500 text-xl font-semibold mb-3">No teams found</div>
-          <p className="text-slate-400 mb-8 text-base">Try adjusting your search terms or create your first team</p>
+          <p className="text-slate-400 mb-8 text-base">Try adjusting your search terms or create your first workflow</p>
           <Link to="/create">
             <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 h-auto rounded-lg font-semibold text-base">
               <Plus className="h-5 w-5 mr-2" />
-              Create Your First Team
+              Create Your First Workflow
             </Button>
           </Link>
         </div>
