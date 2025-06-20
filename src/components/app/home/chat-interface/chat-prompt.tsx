@@ -13,16 +13,30 @@ import axios from "axios";
 import { get_client_env } from "@/lib/env";
 import { useAppStore } from "@/lib/app-store";
 import { useSocket } from "@/contexts/SocketContext";
-import { UNSAFE_useRouteId } from "react-router-dom";
 import AuthService from "@/services/authService";
+import { useMutation } from "@tanstack/react-query";
+import { v4 as uuid4 } from "uuid";
 
 export default function ChatPrompt() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [hasContent, setHasContent] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
+  const env = get_client_env();
   const store = useAppStore();
-  const { getSocket, isConnected, sendMessage } = useSocket();
+
+  const promptMutation = useMutation({
+    mutationKey: ["prompt", store.selectedApp?.id],
+    mutationFn: (options: {
+      runId: string;
+      user_prompt: string;
+      inputs: TeamData["team_inputs"][number]["component"][];
+    }) =>
+      axios.post(`${env.backend_url}/chat/run/${options.runId}`, {
+        inputs: options.inputs,
+        user_prompt: options.user_prompt,
+      }),
+  });
 
   const handleInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
     const textarea = textareaRef.current;
@@ -62,6 +76,28 @@ export default function ChatPrompt() {
       { headers }
     );
 
+    // optimistically update the user input
+    store.addMessage({
+      id: uuid4(),
+      role: "user",
+      content: formData.get("input") as string,
+    });
+
+    promptMutation.mutate(
+      {
+        user_prompt: formData.get("input") as string,
+        runId: response.data.id,
+        inputs: store.team.team_inputs.map((i) => i.component),
+      },
+      {
+        onSuccess: (response) => {
+          // update the agent response
+          // TODO
+          store.addMessage(response.data);
+        },
+      }
+    );
+
     store.setRunId(response.data.id);
     store.setTask(formData.get("input") as string);
 
@@ -80,21 +116,6 @@ export default function ChatPrompt() {
       if (form) form.requestSubmit();
     }
   };
-
-  useEffect(() => {
-    if (!isConnected) return;
-
-    console.log(store.team.component);
-    // start stream
-    sendMessage(
-      JSON.stringify({
-        type: "start_task",
-        task: textareaRef.current?.value || "",
-        team_config: store.team.component,
-        session_id: store.selectedApp?.id,
-      })
-    );
-  }, [isConnected]);
 
   return (
     <form
