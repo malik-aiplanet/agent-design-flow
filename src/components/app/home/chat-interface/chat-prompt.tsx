@@ -29,12 +29,14 @@ export default function ChatPrompt() {
     mutationKey: ["prompt", store.selectedApp?.id],
     mutationFn: (options: {
       runId: string;
-      user_prompt: string;
-      inputs: TeamData["team_inputs"][number]["component"][];
+      data: {
+        source: string;
+        inputs: TeamData["team_inputs"][number]["component"][];
+      };
     }) =>
-      axios.post(`${env.backend_url}/chat/run/${options.runId}`, {
-        inputs: options.inputs,
-        user_prompt: options.user_prompt,
+      axios.post(`${env.backend_url}/private/sessions/chat/${options.runId}`, {
+        inputs: options.data.inputs,
+        source: options.data.source,
       }),
   });
 
@@ -85,9 +87,17 @@ export default function ChatPrompt() {
 
     promptMutation.mutate(
       {
-        user_prompt: formData.get("input") as string,
         runId: response.data.id,
-        inputs: store.team.team_inputs.map((i) => i.component),
+        data: {
+          source: "user",
+          // @ts-ignore
+          inputs: store.team.team_inputs.map((i) => ({
+            // @ts-ignore
+            content: i.component.config.content as string,
+            label: i.component.label,
+            type: i.component.component_type,
+          })),
+        },
       },
       {
         onSuccess: (response) => {
