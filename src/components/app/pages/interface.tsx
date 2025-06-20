@@ -81,11 +81,7 @@ export default function Interface() {
         </div>
         {/* Inputs sheet */}
         {store.team && (
-          <InputsSheet
-            inputs={store.team.team_inputs}
-            collapse={collapse}
-            setCollapse={setCollapse}
-          />
+          <InputsSheet collapse={collapse} setCollapse={setCollapse} />
         )}
       </div>
     </SocketProvider>

@@ -27,24 +27,7 @@ export default function ChatArea({ messages, title, description }: Props) {
       {messages.map(({ id, role, content }) => {
         const isUser = role === "user";
 
-        return (
-          <MessageBubble
-            key={id}
-            content={content}
-            role={role}
-            file={
-              isUser
-                ? {
-                    id: "file-1",
-                    name: "sldfkj",
-                    mimetype: "pdf",
-                    size: 1024,
-                    url: "https://example.com",
-                  }
-                : undefined
-            }
-          />
-        );
+        return <MessageBubble key={id} content={content} role={role} />;
       })}
     </div>
   );

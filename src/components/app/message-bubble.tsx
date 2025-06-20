@@ -69,7 +69,7 @@ export default function MessageBubble({
         </div>
         <div className="flex flex-col gap-2 min-w-md">
           {isUser ? (
-            <Markdown>{content}</Markdown>
+            <Markdown variant="inverted">{content}</Markdown>
           ) : (
             <>
               <h4 className="text-sm font-semibold">AI Agent</h4>

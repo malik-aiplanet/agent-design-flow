@@ -13,16 +13,43 @@ import axios from "axios";
 import { get_client_env } from "@/lib/env";
 import { useAppStore } from "@/lib/app-store";
 import { useSocket } from "@/contexts/SocketContext";
-import { UNSAFE_useRouteId } from "react-router-dom";
 import AuthService from "@/services/authService";
+import { useMutation } from "@tanstack/react-query";
+import { v4 as uuid4 } from "uuid";
 
 export default function ChatPrompt() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [hasContent, setHasContent] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
+  const env = get_client_env();
   const store = useAppStore();
-  const { getSocket, isConnected, sendMessage } = useSocket();
+
+  const promptMutation = useMutation({
+    mutationKey: ["prompt", store.selectedApp?.id],
+    mutationFn: (options: {
+      runId: string;
+      data: {
+        source: string;
+        inputs: any;
+      };
+    }) => {
+      const headers = {
+        Authorization: `${localStorage.getItem(
+          "token_type"
+        )} ${localStorage.getItem("access_token")}`,
+      };
+
+      return axios.post(
+        `${env.backend_url}/private/sessions/chat/${options.runId}`,
+        {
+          inputs: options.data.inputs,
+          source: options.data.source,
+        },
+        { headers }
+      );
+    },
+  });
 
   const handleInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
     const textarea = textareaRef.current;
@@ -62,6 +89,55 @@ export default function ChatPrompt() {
       { headers }
     );
 
+    // optimistically update the user input
+    store.addMessage({
+      id: uuid4(),
+      role: "user",
+      content: formData.get("input") as string,
+    });
+
+    console.log(store.team.team_inputs);
+    promptMutation.mutate(
+      {
+        runId: response.data.id,
+        data: {
+          source: "user",
+          inputs: store.team.team_inputs.map((i) => {
+            switch (i.component.label) {
+              case "TextInput":
+                return {
+                  content: i.component.config.content,
+                  type: i.component.label,
+                };
+              case "FileInput":
+                return {
+                  content: i.component.config.name,
+                  type: i.component.label,
+                };
+              case "URLInput":
+                return {
+                  content: i.component.config.url,
+                  type: i.component.label,
+                };
+
+              default:
+                return {
+                  content: "uknown",
+                  type: "Unknown type",
+                };
+            }
+          }),
+        },
+      },
+      {
+        onSuccess: (response) => {
+          // update the agent response
+          // TODO
+          store.addMessage(response.data);
+        },
+      }
+    );
+
     store.setRunId(response.data.id);
     store.setTask(formData.get("input") as string);
 
@@ -80,21 +156,6 @@ export default function ChatPrompt() {
       if (form) form.requestSubmit();
     }
   };
-
-  useEffect(() => {
-    if (!isConnected) return;
-
-    console.log(store.team.component);
-    // start stream
-    sendMessage(
-      JSON.stringify({
-        type: "start_task",
-        task: textareaRef.current?.value || "",
-        team_config: store.team.component,
-        session_id: store.selectedApp?.id,
-      })
-    );
-  }, [isConnected]);
 
   return (
     <form
