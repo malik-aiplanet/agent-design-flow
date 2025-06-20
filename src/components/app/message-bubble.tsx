@@ -69,12 +69,12 @@ export default function MessageBubble({
         </div>
         <div className="flex flex-col gap-2 min-w-md">
           {isUser ? (
-            <Markdown>{content}</Markdown>
+            <Markdown variant="inverted">{content}</Markdown>
           ) : (
             <>
               <h4 className="text-sm font-semibold">AI Agent</h4>
               <Markdown>{content}</Markdown>
-              <div className="flex text-current/60 -ml-3 gap-1">
+              <div className="flex -ml-3 gap-1">
                 <Button variant={"ghost"} className="cursor-pointer -mr-1">
                   <Retry className="h-3.5 w-3.5" />
                 </Button>

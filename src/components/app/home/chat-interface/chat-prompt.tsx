@@ -31,13 +31,24 @@ export default function ChatPrompt() {
       runId: string;
       data: {
         source: string;
-        inputs: TeamData["team_inputs"][number]["component"][];
+        inputs: any;
       };
-    }) =>
-      axios.post(`${env.backend_url}/private/sessions/chat/${options.runId}`, {
-        inputs: options.data.inputs,
-        source: options.data.source,
-      }),
+    }) => {
+      const headers = {
+        Authorization: `${localStorage.getItem(
+          "token_type"
+        )} ${localStorage.getItem("access_token")}`,
+      };
+
+      return axios.post(
+        `${env.backend_url}/private/sessions/chat/${options.runId}`,
+        {
+          inputs: options.data.inputs,
+          source: options.data.source,
+        },
+        { headers }
+      );
+    },
   });
 
   const handleInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
@@ -85,18 +96,37 @@ export default function ChatPrompt() {
       content: formData.get("input") as string,
     });
 
+    console.log(store.team.team_inputs);
     promptMutation.mutate(
       {
         runId: response.data.id,
         data: {
           source: "user",
-          // @ts-ignore
-          inputs: store.team.team_inputs.map((i) => ({
-            // @ts-ignore
-            content: i.component.config.content as string,
-            label: i.component.label,
-            type: i.component.component_type,
-          })),
+          inputs: store.team.team_inputs.map((i) => {
+            switch (i.component.label) {
+              case "TextInput":
+                return {
+                  content: i.component.config.content,
+                  type: i.component.label,
+                };
+              case "FileInput":
+                return {
+                  content: i.component.config.name,
+                  type: i.component.label,
+                };
+              case "URLInput":
+                return {
+                  content: i.component.config.url,
+                  type: i.component.label,
+                };
+
+              default:
+                return {
+                  content: "uknown",
+                  type: "Unknown type",
+                };
+            }
+          }),
         },
       },
       {
