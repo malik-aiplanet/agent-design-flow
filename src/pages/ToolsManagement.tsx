@@ -138,13 +138,13 @@ const ToolsManagement = () => {
         {filteredTools.map(tool => (
           <Card
             key={tool.id}
-            className="hover:shadow-lg transition-all duration-300 bg-white border-slate-200 border-2 overflow-hidden cursor-pointer hover:border-blue-300 group h-fit"
+            className="hover:shadow-lg transition-all duration-300 bg-white border-slate-200 border-2 overflow-hidden cursor-pointer hover:border-blue-300 group h-[280px]"
             onClick={() => handleCardClick(tool)}
           >
-            <CardContent className="p-6">
-              <div className="space-y-4">
+            <CardContent className="p-6 flex flex-col h-full">
+              <div className="space-y-4 flex flex-col h-full">
                 <div className="flex items-start justify-between">
-                  <h3 className="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors leading-tight">
+                  <h3 className="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors leading-tight truncate max-w-[70%]">
                     {tool.name}
                   </h3>
                   <Badge className={`${getStatusColor(tool.status)} border font-semibold px-2 py-1 text-xs ml-2 flex-shrink-0`}>
@@ -154,11 +154,11 @@ const ToolsManagement = () => {
 
                 <p className="text-slate-600 text-sm leading-relaxed line-clamp-3">{tool.description}</p>
 
-                <div className="text-xs text-slate-500">
+                <div className="text-xs text-slate-500 mt-auto">
                   <span>Last modified {tool.lastModified}</span>
                 </div>
 
-                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity pt-2" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
                   <Button
                     variant="outline"
                     size="sm"

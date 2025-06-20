@@ -43,7 +43,7 @@ export const TerminationConfigurationDrawer = ({ isOpen, onClose, termination }:
 
   const isEditing = !!termination;
 
-  // Initialize form data when termination changes
+  // Initialize form data when termination changes or drawer opens/closes
   useEffect(() => {
     if (termination) {
       const config = termination.config || {};
@@ -82,7 +82,7 @@ export const TerminationConfigurationDrawer = ({ isOpen, onClose, termination }:
       });
       setSelectedConfigType("");
     }
-  }, [termination]);
+  }, [termination, isOpen]); // Add isOpen to dependencies
 
   const getSelectedConfig = (): TerminationConditionComponent | null => {
     if (!terminationConfigs || !selectedConfigType) return null;
