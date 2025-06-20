@@ -121,11 +121,11 @@ const ModelsManagement = () => {
             {models.map(model => (
               <Card
                 key={model.id}
-                className="hover:shadow-lg transition-all duration-300 bg-white border-slate-200 border-2 overflow-hidden cursor-pointer hover:border-blue-300 group h-fit"
+                className="hover:shadow-lg transition-all duration-300 bg-white border-slate-200 border-2 overflow-hidden cursor-pointer hover:border-blue-300 group h-[280px]"
                 onClick={() => handleCardClick(model)}
               >
-                <CardContent className="p-6">
-                  <div className="space-y-4">
+                <CardContent className="p-6 flex flex-col h-full">
+                  <div className="space-y-4 flex flex-col h-full">
                     <div className="flex items-start justify-between">
                       <h3 className="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors leading-tight">
                         {model.name}
@@ -134,7 +134,7 @@ const ModelsManagement = () => {
 
                     <p className="text-slate-600 text-sm leading-relaxed line-clamp-3">{model.description}</p>
 
-                    <div className="space-y-2 text-xs text-slate-500">
+                    <div className="space-y-2 text-xs text-slate-500 mt-auto">
                       <div className="flex items-center gap-1">
                         <span className="font-semibold">Model ID:</span>
                         <span className="truncate">{model.modelId}</span>
