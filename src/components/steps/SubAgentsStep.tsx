@@ -149,30 +149,35 @@ export const SubAgentsStep = ({ data, onUpdate }: any) => {
           </CardHeader>
           <CardContent className="space-y-3">
             {selectedAgentsList.map(agent => (
-              <div key={agent.id} className="flex items-center justify-between p-4 bg-white rounded-lg border border-green-200">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h4 className="font-medium text-gray-900">{agent.name}</h4>
-                    <Badge variant={agent.status === "Active" ? "default" : "secondary"}>
-                      {agent.status}
-                    </Badge>
-                    <Badge variant="outline">{agent.modelClient}</Badge>
-                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                      {agent.agentType}
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-gray-600">{agent.description}</p>
-                                      <div className="flex gap-1 mt-2">
-                      <Badge variant="secondary" className="text-xs">
-                        {agent.toolsCount} tools
+              <div key={agent.id} className="flex items-start p-4 bg-white rounded-lg border border-green-200">
+                <div className="flex-1 min-w-0 overflow-hidden pr-3">
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <h4 className="font-medium text-gray-900 truncate max-w-full">{agent.name}</h4>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant={agent.status === "Active" ? "default" : "secondary"}>
+                        {agent.status}
+                      </Badge>
+                      <Badge variant="outline">{agent.modelClient}</Badge>
+                      <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                        {agent.agentType}
                       </Badge>
                     </div>
+                  </div>
+                  <p className="text-sm text-gray-600 line-clamp-2 break-words">{agent.description}</p>
+                  <div className="flex gap-1 mt-2">
+                    <Badge variant="secondary" className="text-xs">
+                      {agent.toolsCount} tools
+                    </Badge>
+                  </div>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => removeAgent(agent.id)}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeAgent(agent.id);
+                  }}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 flex-shrink-0 self-start"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -211,25 +216,27 @@ export const SubAgentsStep = ({ data, onUpdate }: any) => {
                       checked={selectedAgents.includes(agent.id)}
                       onCheckedChange={() => toggleAgent(agent.id)}
                       onClick={(e) => e.stopPropagation()}
-                      className="mt-1"
+                      className="mt-1 flex-shrink-0"
                     />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h4 className="font-medium text-gray-900">{agent.name}</h4>
-                        <Badge variant={agent.status === "Active" ? "default" : "secondary"}>
-                          {agent.status}
-                        </Badge>
-                        <Badge variant="outline">{agent.modelClient}</Badge>
-                        <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                          {agent.agentType}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-gray-600 mb-2">{agent.description}</p>
-                                              <div className="flex gap-1">
-                          <Badge variant="secondary" className="text-xs">
-                            {agent.toolsCount} tools
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <div className="flex items-center flex-wrap gap-2 mb-2">
+                        <h4 className="font-medium text-gray-900 truncate max-w-full">{agent.name}</h4>
+                        <div className="flex flex-wrap gap-2">
+                          <Badge variant={agent.status === "Active" ? "default" : "secondary"}>
+                            {agent.status}
+                          </Badge>
+                          <Badge variant="outline">{agent.modelClient}</Badge>
+                          <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                            {agent.agentType}
                           </Badge>
                         </div>
+                      </div>
+                      <p className="text-sm text-gray-600 line-clamp-2 break-words">{agent.description}</p>
+                      <div className="flex gap-1 mt-2">
+                        <Badge variant="secondary" className="text-xs">
+                          {agent.toolsCount} tools
+                        </Badge>
+                      </div>
                     </div>
                   </div>
                 </div>
